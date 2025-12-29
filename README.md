@@ -1,64 +1,43 @@
-# NextJS and NextUI Dashboard Sample
+ParentFully Admin Dashboard
+A modern admin dashboard built with Next.js and NextUI for managing ParentFully operations. Fully responsive, with dark/light mode support, charts, and account management features.
+Next.js | NextUI
 
-You can deploy here directly to vercel [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/import/project?template=https://github.com/chris-trapstar/nextui-dashboard)
+You can view the demo here: ''
+Features
+Dark Mode & Light Mode support
+Fully responsive design
+Home page with interactive charts
+Accounts management page
+More pages coming soon…
+Screenshots
+Dark Mode
 
-This is a sample for NextJS and NextUI. 
+Light Mode
 
-[NextJS](https://nextjs.org/) 
-[NextUI](https://nextui.org/)
-
-You can see the demo here: https://nextui-dashboard.vercel.app/
-
-### Dark Mode
-![Dashboard Dark Mode](./public/dark.png)
-
-### Light Mode
-![Dashboard Light Mode](./public/light.png)
-
-
-
-- Dark Mode Support
-- Full Responsive
-- Home Page with Charts
-- Accounts Page
-- More pages coming soon...
-
-```
+Project Structure
 ├── components
-│   ├── accounts            # Accounts components
-│   ├── charts              # Charts components
-│   ├── breadcrumb          # component
-|   ├── home                # Home components
-|   ├── layout              # Layout components
-|   ├── navbar              # Navbar components
-|   ├── sidebar             # Sidebar components
-|   ├── table               # Table components
-|   ├── styles              # Some reusable components
-|   ├── icons               # Icons
-|   ├── hooks               #  Hooks
-├── pages                   # Documentation files 
-│   ├──  _app.tsx           # Entry point for the app
-│   ├──  index.tsx          # Home page
-│   ├── accounts.tsx        # Accounts Page
-│   ├── more...             # Soon
+│   ├── accounts            # Components for managing accounts
+│   ├── charts              # Chart components
+│   ├── breadcrumb          # Breadcrumb component
+│   ├── home                # Home page components
+│   ├── layout              # Layout components
+│   ├── navbar              # Navbar components
+│   ├── sidebar             # Sidebar components
+│   ├── table               # Table components
+│   ├── styles              # Reusable styles/components
+│   ├── icons               # Icon components
+│   ├── hooks               # Custom hooks
+├── pages
+│   ├── _app.tsx            # App entry point
+│   ├── index.tsx           # Home page
+│   ├── accounts.tsx        # Accounts management page
+│   └── ...                 # More pages coming soon
 └──
-
-```
-## For Run
-
-Install dependencies
-
-    
-```bash
+Getting Started
+Install dependencies:
 npm install
-```
-
-Start the server
-
-    
-        
-```bash
+Start the development server:
 npm run dev
-```
-
-Now you can visit https://localhost:3000 in your browser.
+Open your browser and visit http://localhost:3000
+Deployment
+You can deploy this project directly to Vercel:
