@@ -1,10 +1,12 @@
-import {Dropdown, Text} from '@nextui-org/react';
-import React, {useState} from 'react';
-import {AcmeIcon} from '../icons/acme-icon';
-import {AcmeLogo} from '../icons/acmelogo';
-import {BottomIcon} from '../icons/sidebar/bottom-icon';
-import {Box} from '../styles/box';
-import {Flex} from '../styles/flex';
+import { Dropdown, Text } from '@nextui-org/react';
+import React, { useState } from 'react';
+import { AcmeIcon } from '../icons/acme-icon';
+import { AcmeLogo } from '../icons/acmelogo';
+
+import { ParentfullyIcon } from '../icons/parentfully-icon';
+import { BottomIcon } from '../icons/sidebar/bottom-icon';
+import { Box } from '../styles/box';
+import { Flex } from '../styles/flex';
 
 interface Company {
    name: string;
@@ -14,15 +16,15 @@ interface Company {
 
 export const CompaniesDropdown = () => {
    const [company, setCompany] = useState<Company>({
-      name: 'Acme Co.',
+      name: 'ParentFully',
       location: 'Palo Alto, CA',
-      logo: <AcmeIcon />,
+      logo: <ParentfullyIcon />,
    });
    return (
       <Dropdown placement="bottom-right" borderWeight={'extrabold'}>
-         <Dropdown.Trigger css={{cursor: 'pointer'}}>
+         <Dropdown.Trigger css={{ cursor: 'pointer' }}>
             <Box>
-               <Flex align={'center'} css={{gap: '$7'}}>
+               <Flex align={'center'} css={{ gap: '$7' }}>
                   {company.logo}
                   <Box>
                      <Text
@@ -42,7 +44,7 @@ export const CompaniesDropdown = () => {
                         span
                         weight={'medium'}
                         size={'$xs'}
-                        css={{color: '$accents8'}}
+                        css={{ color: '$accents8' }}
                      >
                         {company.location}
                      </Text>
@@ -55,14 +57,14 @@ export const CompaniesDropdown = () => {
             onAction={(e) => {
                if (e === '1') {
                   setCompany({
-                     name: 'Facebook',
+                     name: 'ParentFully',
                      location: 'San Fransico, CA',
                      logo: <AcmeIcon />,
                   });
                }
                if (e === '2') {
                   setCompany({
-                     name: 'Instagram',
+                     name: 'Memora',
                      location: 'Austin, Tx',
                      logo: <AcmeLogo />,
                   });
@@ -107,15 +109,17 @@ export const CompaniesDropdown = () => {
                   icon={<AcmeIcon />}
                   description="San Fransico, CA"
                >
-                  Facebook
+                  Memora
                </Dropdown.Item>
                <Dropdown.Item
                   key="2"
                   icon={<AcmeLogo />}
                   description="Austin, Tx"
                >
-                  Instagram
+                  Whispr
                </Dropdown.Item>
+
+               {/** 
                <Dropdown.Item
                   key="3"
                   icon={<AcmeIcon />}
@@ -130,6 +134,7 @@ export const CompaniesDropdown = () => {
                >
                   Acme Co.
                </Dropdown.Item>
+               */}
             </Dropdown.Section>
          </Dropdown.Menu>
       </Dropdown>

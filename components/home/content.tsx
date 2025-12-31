@@ -1,15 +1,15 @@
 import React from 'react';
-import {Text, Link} from '@nextui-org/react';
-import {Box} from '../styles/box';
+import { Text, Link } from '@nextui-org/react';
+import { Box } from '../styles/box';
 import dynamic from 'next/dynamic';
-import {Flex} from '../styles/flex';
-import {TableWrapper} from '../table/table';
+import { Flex } from '../styles/flex';
+import { TableWrapper } from '../table/table';
 import NextLink from 'next/link';
-import {CardBalance1} from './card-balance1';
-import {CardBalance2} from './card-balance2';
-import {CardBalance3} from './card-balance3';
-import {CardAgents} from './card-agents';
-import {CardTransactions} from './card-transactions';
+import { CardUsersOverview } from './card-balance1';
+import { CardNewUsers } from './card-balance2';
+import { CardPremium } from './card-balance3';
+import { CardAgents } from './card-agents';
+import { CardTransactions } from './card-transactions';
 
 const Chart = dynamic(
    () => import('../charts/steam').then((mod) => mod.Steam),
@@ -19,7 +19,7 @@ const Chart = dynamic(
 );
 
 export const Content = () => (
-   <Box css={{overflow: 'hidden', height: '100%'}}>
+   <Box css={{ overflow: 'hidden', height: '100%' }}>
       <Flex
          css={{
             'gap': '$8',
@@ -39,7 +39,7 @@ export const Content = () => (
             css={{
                'px': '$12',
                'mt': '$8',
-               '@xsMax': {px: '$10'},
+               '@xsMax': { px: '$10' },
                'gap': '$12',
             }}
             direction={'column'}
@@ -68,9 +68,9 @@ export const Content = () => (
                   }}
                   direction={'row'}
                >
-                  <CardBalance1 />
-                  <CardBalance2 />
-                  <CardBalance3 />
+                  <CardUsersOverview />
+                  <CardNewUsers />
+                  <CardPremium />
                </Flex>
             </Box>
 
@@ -108,7 +108,7 @@ export const Content = () => (
                'px': '$12',
                'mt': '$8',
                'height': 'fit-content',
-               '@xsMax': {px: '$10'},
+               '@xsMax': { px: '$10' },
                'gap': '$6',
                'overflow': 'hidden',
             }}
@@ -155,7 +155,7 @@ export const Content = () => (
             'py': '$10',
             'px': '$10',
             'mt': '$8',
-            '@sm': {px: '$20'},
+            '@sm': { px: '$20' },
          }}
       >
          <Flex justify={'between'} wrap={'wrap'}>

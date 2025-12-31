@@ -1,20 +1,21 @@
-import {Input, Link, Navbar, Text} from '@nextui-org/react';
+import { Input, Link, Navbar, Text } from '@nextui-org/react';
 import React from 'react';
-import {FeedbackIcon} from '../icons/navbar/feedback-icon';
-import {GithubIcon} from '../icons/navbar/github-icon';
-import {SupportIcon} from '../icons/navbar/support-icon';
-import {SearchIcon} from '../icons/searchicon';
-import {Box} from '../styles/box';
-import {Flex} from '../styles/flex';
-import {BurguerButton} from './burguer-button';
-import {NotificationsDropdown} from './notifications-dropdown';
-import {UserDropdown} from './user-dropdown';
+import { FeedbackIcon } from '../icons/navbar/feedback-icon';
+import { GithubIcon } from '../icons/navbar/github-icon';
+import { SupportIcon } from '../icons/navbar/support-icon';
+import { SearchIcon } from '../icons/searchicon';
+import { Box } from '../styles/box';
+import { Flex } from '../styles/flex';
+import { BurguerButton } from './burguer-button';
+import { NotificationsDropdown } from './notifications-dropdown';
+import { UserDropdown } from './user-dropdown';
+import { DarkModeSwitch } from './darkmodeswitch';
 
 interface Props {
    children: React.ReactNode;
 }
 
-export const NavbarWrapper = ({children}: Props) => {
+export const NavbarWrapper = ({ children }: Props) => {
    const collapseItems = [
       'Profile',
       'Dashboard',
@@ -62,6 +63,7 @@ export const NavbarWrapper = ({children}: Props) => {
             <Navbar.Content showIn="md">
                <BurguerButton />
             </Navbar.Content>
+
             <Navbar.Content
                hideIn={'md'}
                css={{
@@ -93,13 +95,16 @@ export const NavbarWrapper = ({children}: Props) => {
                   placeholder="Search..."
                />
             </Navbar.Content>
+
             <Navbar.Content>
                <Navbar.Content hideIn={'md'}>
-                  <Flex align={'center'} css={{gap: '$4'}}>
+                  <Flex align={'center'} css={{ gap: '$4' }}>
                      <FeedbackIcon />
                      <Text span>Feedback?</Text>
                   </Flex>
                </Navbar.Content>
+
+               <DarkModeSwitch />
 
                <Navbar.Content>
                   <NotificationsDropdown />
@@ -108,6 +113,8 @@ export const NavbarWrapper = ({children}: Props) => {
                <Navbar.Content hideIn={'md'}>
                   <SupportIcon />
                </Navbar.Content>
+
+               {/** 
                <Navbar.Content>
                   <Link
                      href="https://github.com/"
@@ -116,6 +123,8 @@ export const NavbarWrapper = ({children}: Props) => {
                      <GithubIcon />
                   </Link>
                </Navbar.Content>
+               */}
+
                <Navbar.Content>
                   <UserDropdown />
                </Navbar.Content>
