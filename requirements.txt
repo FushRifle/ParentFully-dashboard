@@ -1,0 +1,33 @@
+ParentFully admin dashboard, so let’s think about it strategically. You want pages that give admins control over users, children, subscriptions, reports, and maybe some analytics. Here’s a structured breakdown:
+
+1. User & Family Management
+Users List – overview of all users (parents, guardians). Includes search, filters, and actions (edit, delete, view).
+User Details – shows full profile, children linked, subscription plan, activity logs.
+Child Management – per user, manage children, profiles, and group memberships.
+Invite & Connections – see invites sent, accept/reject, QR codes, referral codes.
+
+2. Subscription & Payments
+Plans Overview – all subscription plans, limits, pricing.
+Change Plan – per user plan update.
+Payments History – payments made, outstanding, failed transactions.
+Credits & Balances – if users have credits (like in ParentFully), 
+show balances and adjustments.
+
+3. Analytics & Reports
+Usage Analytics – app sessions, login activity, active users.
+Child Engagement – tasks completed, messages sent, activity trends.
+Financial Reports – total revenue, active subscriptions, refunds, etc.
+
+4. Security & Logs
+Security Logs – per user, login history, password changes, API key usage.
+Admin Activity Logs – track who changed what on the dashboard.
+
+5. Settings & Config
+Dashboard Settings – global app settings, notification templates.
+Roles & Permissions – define admin roles, access levels.
+Templates & Messaging – email/SMS templates, default messages for invites.
+
+6. Optional / Advanced
+Support / Tickets – view parent support requests.
+Notifications – manage push/email notifications for users.
+System Health / Stats – server uptime, database status, analytics.

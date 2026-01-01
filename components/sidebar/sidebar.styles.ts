@@ -1,8 +1,8 @@
-import {styled} from '@nextui-org/react';
+import { styled } from '@nextui-org/react';
 
 export const SidebarWrapper = styled('div', {
    'backgroundColor': '$background',
-   'transition': 'transform 0.2s ease',
+   'transition': 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
    'height': '100%',
    'position': 'fixed',
    'transform': 'translateX(-100%)',
@@ -10,74 +10,72 @@ export const SidebarWrapper = styled('div', {
    'flexShrink': 0,
    'zIndex': '202',
    'overflowY': 'auto',
+   'borderRight': '1px solid $border',
+   'display': 'flex',
+   'flexDirection': 'column',
+   'boxShadow': '$md',
    '&::-webkit-scrollbar': {
       display: 'none',
    },
-   'borderRight': '1px solid $border',
-   'flexDirection': 'column',
-   'py': '$10',
-   'px': '$6',
    '@md': {
-      marginLeft: '0',
-      display: 'flex',
-      position: 'static',
-      height: '100vh',
-      transform: 'translateX(0)',
+      'boxShadow': 'none',
+      'marginLeft': '0',
+      'position': 'sticky',
+      'top': 0,
+      'height': '100vh',
+      'transform': 'translateX(0)',
    },
    'variants': {
       collapsed: {
          true: {
-            display: 'inherit',
-            marginLeft: '0 ',
             transform: 'translateX(0)',
+            display: 'flex',
          },
       },
    },
 });
 
 export const Overlay = styled('div', {
-   'backgroundColor': 'rgb(15 23 42 / 0.3)',
+   'backgroundColor': 'rgba(0, 0, 0, 0.15)',
+   'backdropFilter': 'blur(4px)',
    'position': 'fixed',
    'inset': 0,
    'zIndex': '201',
    'transition': 'opacity 0.3s ease',
-   'opacity': 0.8,
+   'opacity': 1,
    '@md': {
       display: 'none',
-      zIndex: 'auto',
-      opacity: 1,
    },
 });
 
 export const Header = styled('div', {
    display: 'flex',
-   gap: '$8',
+   gap: '$4',
    alignItems: 'center',
-   // 'justifyContent': 'center',
    px: '$10',
+   py: '$8',
+   height: '80px',
+   borderBottom: '1px solid transparent',
 });
 
 export const Body = styled('div', {
    display: 'flex',
    flexDirection: 'column',
    gap: '$10',
-   mt: '$13',
+   mt: '$4',
    px: '$4',
-   // pt: '$4',
+   flex: '1 1 auto',
 });
 
 export const Footer = styled('div', {
    'display': 'flex',
    'alignItems': 'center',
    'justifyContent': 'center',
-   'gap': '$12',
-   'pt': '$18',
-   'pb': '$8',
-   '@md': {
-      pt: 0,
-      pb: 0,
-   },
-   'px': '$8',
+   'gap': '$8',
+   'mt': 'auto',
+   'py': '$8',
+   'borderTop': '1px solid $border',
+   'mx': '$6',
 });
 
 export const Sidebar = Object.assign(SidebarWrapper, {

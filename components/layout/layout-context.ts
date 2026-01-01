@@ -1,13 +1,15 @@
-import {createContext, useContext} from 'react';
+import { createContext, useContext } from 'react';
 
 interface SidebarContext {
    collapsed: boolean;
    setCollapsed: () => void;
+   showToast: (message: string, type?: 'success' | 'error' | 'warning') => void;
 }
 
 export const SidebarContext = createContext<SidebarContext>({
    collapsed: false,
-   setCollapsed: () => {},
+   setCollapsed: () => { },
+   showToast: () => { },
 });
 
 export const useSidebarContext = () => {

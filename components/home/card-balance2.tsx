@@ -1,4 +1,4 @@
-import { Card, Text } from '@nextui-org/react';
+import { Badge, Card, Text } from '@nextui-org/react';
 import React from 'react';
 import { Community } from '../icons/community';
 import { Box } from '../styles/box';
@@ -12,11 +12,13 @@ export const CardNewUsers = () => {
             bg: '$accents0',
             borderRadius: '$xl',
             px: '$6',
+            position: 'relative',
+            overflow: 'hidden',
+            width: '100%', // Allows card to shrink
          }}
       >
-         <Card.Body css={{ py: '$10' }}>
-            <Flex css={{ gap: '$5' }}>
-               {/* Using accents9 for the icon to stand out against the light bg */}
+         <Card.Body css={{ py: '$10', zIndex: 1 } as any}>
+            <Flex css={{ gap: '$6', py: '$4' }} align="center">
                <Community color={'$accents9'} />
                <Flex direction={'column'}>
                   <Text span weight={'medium'}>
@@ -27,56 +29,86 @@ export const CardNewUsers = () => {
                   </Text>
                </Flex>
             </Flex>
-            <Flex css={{ gap: '$6', py: '$4' }} align={'center'}>
-               <Text span size={'$xl'} weight={'semibold'}>
+
+            <Flex
+               align="center"
+               css={{
+                  gap: '$6',
+                  py: '$6',
+                  px: '$6',
+                  borderRadius: '$xl',
+                  zIndex: 12,
+                  position: 'relative',
+                  background: `
+            linear-gradient(
+                90deg,
+                rgba(0,0,0,0.65) 0%,
+                rgba(0,0,0,0.45) 60%,
+                rgba(0,0,0,0.25) 85%,
+                rgba(0,0,0,0.0) 100%
+            )
+        `,
+                  backdropFilter: 'blur(14px)',
+                  boxShadow: `
+            inset 0 1px 0 rgba(255,255,255,0.06),
+            0 10px 28px rgba(0,0,0,0.45)
+        `,
+               }}
+            >
+               <Text
+                  span
+                  size="32px"
+                  weight="bold"
+                  css={{
+                     color: '$success',
+                     letterSpacing: '-0.02em',
+                  }}
+               >
                   3,562
                </Text>
-               <Text span css={{ color: '$green600' }} size={'$xs'}>
-                  + 8.2%
+
+               <Text
+                  span
+                  size="$sm"
+                  weight="bold"
+                  css={{
+                     color: '$white',
+                  }}
+               >
+                  + 12.5%
                </Text>
             </Flex>
-            <Flex css={{ gap: '$12' }} align={'center'}>
-               <Box>
-                  <Text
-                     span
-                     size={'$xs'}
-                     css={{ color: '$blue600' }}
-                     weight={'semibold'}
-                  >
-                     {'📱'}
-                  </Text>
-                  <Text span size={'$xs'}>
-                     1,230 iOS
-                  </Text>
-               </Box>
-               <Box>
-                  <Text
-                     span
-                     size={'$xs'}
-                     css={{ color: '$green600' }}
-                     weight={'semibold'}
-                  >
-                     {'🤖'}
-                  </Text>
-                  <Text span size={'$xs'}>
-                     2,332 Android
-                  </Text>
-               </Box>
-               <Box>
-                  <Text
-                     span
-                     size={'$xs'}
-                     css={{ color: '$purple600' }}
-                     weight={'semibold'}
-                  >
-                     {'🔗'}
-                  </Text>
-                  <Text span size={'$xs'}>
-                     450 Ref
-                  </Text>
-               </Box>
-            </Flex>
          </Card.Body>
+
+         {/* --- Responsive Community Illustration --- */}
+         <Box
+            css={{
+               position: 'absolute',
+               bottom: '-15px',
+               right: '-10px',
+               width: '35%',
+               minWidth: '100px',
+               maxWidth: '150px',
+               aspectRatio: '1 / 1',
+               zIndex: 10,
+               opacity: 0.8,
+               pointerEvents: 'none',
+               transition: 'width 0.3s ease',
+               '@md': {
+                  animation: 'subtleFloat 8s ease-in-out infinite',
+                  '@keyframes subtleFloat': {
+                     '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+                     '50%': { transform: 'translateY(-8px) rotate(2deg)' },
+                  },
+               }
+            }}
+         >
+            <img
+               src="https://png.pngtree.com/png-vector/20230728/ourmid/pngtree-community-service-vector-png-image_6991320.png"
+               alt="Community"
+               style={{ width: '100%', height: 'auto', objectFit: 'contain' }}
+            />
+         </Box>
       </Card>
    );
 };
