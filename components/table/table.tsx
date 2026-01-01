@@ -11,6 +11,15 @@ export const TableWrapper = () => {
             '& .nextui-table-container': {
                boxShadow: 'none',
             },
+            '& tr[data-selected="true"]': {
+               background: 'transparent',
+            },
+            '& tr:hover td': {
+               background: 'transparent',
+            },
+            '& td': {
+               cursor: 'default',
+            },
          }}
       >
          <Table
@@ -22,6 +31,7 @@ export const TableWrapper = () => {
                width: '100%',
                px: 0,
             }}
+
             selectionMode="multiple"
          >
             <Table.Header columns={columns}>
