@@ -1,6 +1,8 @@
-import {Avatar, Dropdown, Navbar, Text} from '@nextui-org/react';
+import { Avatar, Dropdown, Navbar, Text } from '@nextui-org/react';
 import React from 'react';
-import {DarkModeSwitch} from './darkmodeswitch';
+import { DarkModeSwitch } from './darkmodeswitch';
+import NextLink from 'next/link';
+import { Flex } from '../styles/flex';
 
 export const UserDropdown = () => {
    return (
@@ -13,38 +15,72 @@ export const UserDropdown = () => {
                   color="secondary"
                   size="md"
                   src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
+                  css={{ cursor: 'pointer' }}
                />
             </Dropdown.Trigger>
          </Navbar.Item>
          <Dropdown.Menu
             aria-label="User menu actions"
-            onAction={(actionKey) => console.log({actionKey})}
+            onAction={(actionKey) => {
+               if (actionKey === 'logout') console.log('Logging out...');
+            }}
          >
-            <Dropdown.Item key="profile" css={{height: '$18'}}>
-               <Text b color="inherit" css={{d: 'flex'}}>
+            <Dropdown.Item key="profile" css={{ height: '$18' }}>
+               <Text b color="inherit" css={{ d: 'flex' }}>
                   Signed in as
                </Text>
-               <Text b color="inherit" css={{d: 'flex'}}>
-                  zoey@example.com
+               <Text b color="inherit" css={{ d: 'flex' }}>
+                  admin@parentfully.com
                </Text>
             </Dropdown.Item>
+
             <Dropdown.Item key="settings" withDivider>
-               My Settings
+               <NextLink href="/settings">
+                  <div style={{ width: '100%' }}>My Settings</div>
+               </NextLink>
             </Dropdown.Item>
-            <Dropdown.Item key="team_settings">Team Settings</Dropdown.Item>
+
+            <Dropdown.Item key="team_settings">
+               <NextLink href="/team">
+                  <div style={{ width: '100%' }}>Team Settings</div>
+               </NextLink>
+            </Dropdown.Item>
+
             <Dropdown.Item key="analytics" withDivider>
-               Analytics
+               <NextLink href="/analytics">
+                  <div style={{ width: '100%' }}>Analytics</div>
+               </NextLink>
             </Dropdown.Item>
-            <Dropdown.Item key="system">System</Dropdown.Item>
-            <Dropdown.Item key="configurations">Configurations</Dropdown.Item>
+
+            <Dropdown.Item key="system">
+               <NextLink href="/system">
+                  <div style={{ width: '100%' }}>System</div>
+               </NextLink>
+            </Dropdown.Item>
+
+            <Dropdown.Item key="configurations">
+               <NextLink href="/config">
+                  <div style={{ width: '100%' }}>Configurations</div>
+               </NextLink>
+            </Dropdown.Item>
+
             <Dropdown.Item key="help_and_feedback" withDivider>
-               Help & Feedback
+               <NextLink href="/help">
+                  <div style={{ width: '100%' }}>Help & Feedback</div>
+               </NextLink>
             </Dropdown.Item>
+
             <Dropdown.Item key="logout" withDivider color="error">
-               Log Out
+               <NextLink href="auth/login">
+                  <div style={{ width: '100%' }}>Log Out</div>
+               </NextLink>
             </Dropdown.Item>
+
             <Dropdown.Item key="switch" withDivider>
-               <DarkModeSwitch />
+               <Flex align="center" justify="between" css={{ width: '100%' }}>
+                  <Text span>Dark Mode</Text>
+                  <DarkModeSwitch />
+               </Flex>
             </Dropdown.Item>
          </Dropdown.Menu>
       </Dropdown>

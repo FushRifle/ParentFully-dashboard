@@ -6,17 +6,15 @@ import { Flex } from '../styles/flex';
 import { TableWrapper } from '../table/table';
 import NextLink from 'next/link';
 
-// Branding-specific Card imports (assuming these exist or you'll restyle them)
-import { CardUsersOverview } from './card-balance1'; // Renamed to "Active Families"
-import { CardNewUsers } from './card-balance2';      // Renamed to "New Signups"
-import { CardPremium } from './card-balance3';       // Renamed to "Premium Subscriptions"
+import { CardUsersOverview } from './card-balance1';
+import { CardNewUsers } from './card-balance2';
+import { CardPremium } from './card-balance3';
 
 const Chart = dynamic(
    () => import('../charts/steam').then((mod) => mod.Steam),
    { ssr: false }
 );
 
-// --- NEW COMPONENT: CommunityNewsFeed ---
 const CommunityNewsFeed = () => (
    <Card variant="flat" css={{ bg: '$background', border: '1px solid $border', p: '$4' }}>
       <Card.Header css={{ pb: 0 } as any}>
@@ -79,7 +77,6 @@ export const Content = () => (
       bg: '$accents0'
    }}>
 
-      {/* --- 1. Header: Brand Focus with Illustration --- */}
       <Flex justify="between" align="end" css={{
          mt: '$12', mb: '$10',
          flexWrap: 'wrap', gap: '$6', position: 'relative'

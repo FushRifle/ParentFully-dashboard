@@ -56,7 +56,7 @@ export const SidebarWrapper = () => {
                      title="Home"
                      icon={<HomeIcon />}
                      isActive={activePath === '/'}
-                     href="/"
+                     href="/home"
                   />
 
                   {/* User & Family Management */}
@@ -66,12 +66,6 @@ export const SidebarWrapper = () => {
                         icon={<CustomersIcon />}
                         href="/accounts"
                         isActive={activePath.startsWith('/accounts')}
-                     />
-                     <SidebarItem
-                        title="Families"
-                        icon={<ChildrenIcon />}
-                        href="/children"
-                        isActive={activePath.startsWith('/children')}
                      />
                      <CollapseItems
                         title="Invites & Connections"
@@ -94,12 +88,6 @@ export const SidebarWrapper = () => {
                         href="/payments"
                         isActive={activePath.startsWith('/payments')}
                      />
-                     <SidebarItem
-                        title="Rewards & Points"
-                        icon={<BalanceIcon />}
-                        href="/balances"
-                        isActive={activePath.startsWith('/balances')}
-                     />
                   </SidebarMenu>
 
                   {/* Analytics & Reports */}
@@ -107,36 +95,14 @@ export const SidebarWrapper = () => {
                      <SidebarItem
                         title="Usage Analytics"
                         icon={<AnalyticsIcon />}
-                        href="/analytics/usage"
-                        isActive={activePath.startsWith('/analytics/usage')}
-                     />
-                     <SidebarItem
-                        title="Child Engagement"
-                        icon={<AnalyticsIcon />}
-                        href="/analytics/engagement"
-                        isActive={activePath.startsWith('/analytics/engagement')}
+                        href="/analytics/"
+                        isActive={activePath.startsWith('/analytics')}
                      />
                      <SidebarItem
                         title="Financial Reports"
                         icon={<ReportsIcon />}
                         href="/analytics/financial"
                         isActive={activePath.startsWith('/analytics/financial')}
-                     />
-                  </SidebarMenu>
-
-                  {/* Security & Logs */}
-                  <SidebarMenu title="SECURITY & LOGS">
-                     <SidebarItem
-                        title="Security Logs"
-                        icon={<SecurityIcon />}
-                        href="/security"
-                        isActive={activePath.startsWith('/security')}
-                     />
-                     <SidebarItem
-                        title="Admin Activity"
-                        icon={<ChangeLogIcon />}
-                        href="/admin-activity"
-                        isActive={activePath.startsWith('/admin-activity')}
                      />
                   </SidebarMenu>
 
@@ -157,14 +123,14 @@ export const SidebarWrapper = () => {
                      <SidebarItem
                         title="Roles & Permissions"
                         icon={<DevIcon />}
-                        href="/roles"
-                        isActive={activePath.startsWith('/roles')}
+                        href="/teams"
+                        isActive={activePath.startsWith('/teams')}
                      />
                      <SidebarItem
-                        title="Templates & Messaging"
-                        icon={<FilterIcon />}
-                        href="/templates"
-                        isActive={activePath.startsWith('/templates')}
+                        title="Security Logs"
+                        icon={<SecurityIcon />}
+                        href="/security"
+                        isActive={activePath.startsWith('/security')}
                      />
                   </SidebarMenu>
 
@@ -185,21 +151,6 @@ export const SidebarWrapper = () => {
                   </SidebarMenu>
                </Sidebar.Body>
 
-               {/* Footer
-               
-               <Tooltip content="Settings" rounded color="primary">
-                     <SettingsIcon />
-                  </Tooltip>
-                  <Tooltip content="Adjustments" rounded color="primary">
-                     <FilterIcon />
-                  </Tooltip>
-                  <Tooltip content="Profile" rounded color="primary">
-                     <Avatar
-                        src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
-                        size="sm"
-                     />
-                  </Tooltip>
-                  */}
                <Sidebar.Footer>
                   <Text size="$sm" css={{ color: '$accents6' }}>
                      © 2024 ParentFully
