@@ -71,7 +71,7 @@ export const UserDropdown = () => {
             </Dropdown.Item>
 
             <Dropdown.Item key="logout" withDivider color="error">
-               <NextLink href="auth/login">
+               <NextLink href="/">
                   <div style={{ width: '100%' }}>Log Out</div>
                </NextLink>
             </Dropdown.Item>
