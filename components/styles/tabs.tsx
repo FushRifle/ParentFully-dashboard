@@ -148,7 +148,6 @@ export const Tabs: React.FC<TabsProps> = ({
      );
 };
 
-// Tab.Item component for JSX syntax
 const TabItemComponent: React.FC<{
      key?: string;
      title?: ReactNode;

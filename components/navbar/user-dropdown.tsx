@@ -19,6 +19,7 @@ export const UserDropdown = () => {
                />
             </Dropdown.Trigger>
          </Navbar.Item>
+
          <Dropdown.Menu
             aria-label="User menu actions"
             onAction={(actionKey) => {
@@ -40,7 +41,7 @@ export const UserDropdown = () => {
                </NextLink>
             </Dropdown.Item>
 
-            <Dropdown.Item key="team_settings">
+            <Dropdown.Item key="teams">
                <NextLink href="/team">
                   <div style={{ width: '100%' }}>Team Settings</div>
                </NextLink>
@@ -49,24 +50,6 @@ export const UserDropdown = () => {
             <Dropdown.Item key="analytics" withDivider>
                <NextLink href="/analytics">
                   <div style={{ width: '100%' }}>Analytics</div>
-               </NextLink>
-            </Dropdown.Item>
-
-            <Dropdown.Item key="system">
-               <NextLink href="/system">
-                  <div style={{ width: '100%' }}>System</div>
-               </NextLink>
-            </Dropdown.Item>
-
-            <Dropdown.Item key="configurations">
-               <NextLink href="/config">
-                  <div style={{ width: '100%' }}>Configurations</div>
-               </NextLink>
-            </Dropdown.Item>
-
-            <Dropdown.Item key="help_and_feedback" withDivider>
-               <NextLink href="/help">
-                  <div style={{ width: '100%' }}>Help & Feedback</div>
                </NextLink>
             </Dropdown.Item>
 

@@ -27,6 +27,8 @@ import { AnalyticsIcon } from '../icons/sidebar/analytics-icon';
 import { useSidebarContext } from '../layout/layout-context';
 import { ChildrenIcon } from '../icons/sidebar/children-icon';
 
+import { BriefcaseBusiness, GroupIcon } from 'lucide-react';
+
 export const SidebarWrapper = () => {
    const router = useRouter();
    const { collapsed, setCollapsed } = useSidebarContext();
@@ -55,8 +57,8 @@ export const SidebarWrapper = () => {
                   <SidebarItem
                      title="Home"
                      icon={<HomeIcon />}
-                     isActive={activePath === '/'}
-                     href="/home"
+                     isActive={activePath === '/dashboard'}
+                     href="/dashboard"
                   />
 
                   {/* User & Family Management */}
@@ -72,16 +74,22 @@ export const SidebarWrapper = () => {
                         icon={<AccountsIcon />}
                         items={['Referals', 'Invites']}
                      />
+                     <SidebarItem
+                        title="Community"
+                        icon={<GroupIcon />}
+                        href="/community"
+                        isActive={activePath.startsWith('/community')}
+                     />
+                     <SidebarItem
+                        title="Experts"
+                        icon={<BriefcaseBusiness />}
+                        href="/experts"
+                        isActive={activePath.startsWith('/experts')}
+                     />
                   </SidebarMenu>
 
                   {/* Subscription & Payments */}
                   <SidebarMenu title="SUBSCRIPTION & PAYMENTS">
-                     <SidebarItem
-                        title="Plans Overview"
-                        icon={<BalanceIcon />}
-                        href="/plans"
-                        isActive={activePath.startsWith('/plans')}
-                     />
                      <SidebarItem
                         title="Payments History"
                         icon={<PaymentsIcon />}
@@ -95,14 +103,8 @@ export const SidebarWrapper = () => {
                      <SidebarItem
                         title="Usage Analytics"
                         icon={<AnalyticsIcon />}
-                        href="/analytics/"
+                        href="/analytics"
                         isActive={activePath.startsWith('/analytics')}
-                     />
-                     <SidebarItem
-                        title="Financial Reports"
-                        icon={<ReportsIcon />}
-                        href="/analytics/financial"
-                        isActive={activePath.startsWith('/analytics/financial')}
                      />
                   </SidebarMenu>
 
@@ -126,12 +128,6 @@ export const SidebarWrapper = () => {
                         href="/teams"
                         isActive={activePath.startsWith('/teams')}
                      />
-                     <SidebarItem
-                        title="Security Logs"
-                        icon={<SecurityIcon />}
-                        href="/security"
-                        isActive={activePath.startsWith('/security')}
-                     />
                   </SidebarMenu>
 
                   {/* Optional / Advanced */}
@@ -145,8 +141,8 @@ export const SidebarWrapper = () => {
                      <SidebarItem
                         title="System Health"
                         icon={<AnalyticsIcon />}
-                        href="/system-health"
-                        isActive={activePath.startsWith('/system-health')}
+                        href="/system"
+                        isActive={activePath.startsWith('/system')}
                      />
                   </SidebarMenu>
                </Sidebar.Body>

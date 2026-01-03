@@ -4,6 +4,7 @@ import React, {
   useEffect,
   ReactNode,
   KeyboardEvent,
+  useMemo,
 } from 'react'
 import { Text } from '@nextui-org/react'
 import { Box } from './box'
@@ -21,14 +22,10 @@ interface SelectProps {
   fullWidth?: boolean
   disabled?: boolean
   css?: any
-  children?: ReactNode
   'aria-label'?: string
 }
 
-/* 👇 allow static Option */
-interface SelectComponent extends React.FC<SelectProps> {
-  Option: React.FC<{ value?: string; children?: ReactNode }>
-}
+interface SelectComponent extends React.FC<SelectProps> { }
 
 export const Select: SelectComponent = ({
   value,
@@ -38,50 +35,47 @@ export const Select: SelectComponent = ({
   fullWidth = false,
   disabled = false,
   css,
-  children,
   'aria-label': ariaLabel = 'Select',
 }) => {
   const [isOpen, setIsOpen] = useState(false)
-  const [selectedLabel, setSelectedLabel] =
-    useState<ReactNode>(placeholder)
-
   const selectRef = useRef<HTMLDivElement>(null)
 
-  /* Sync label with value */
-  useEffect(() => {
-    const selected = options.find(o => o.value === value)
-    setSelectedLabel(selected?.label ?? placeholder)
-  }, [value, options, placeholder])
+  // Memoized label for selected value
+  const selectedLabel = useMemo(
+    () => options.find(o => o.value === value)?.label ?? placeholder,
+    [value, options, placeholder]
+  )
 
-  /* Close on outside click */
+  // Close dropdown when clicking outside
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (
-        selectRef.current &&
-        !selectRef.current.contains(e.target as Node)
-      ) {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (selectRef.current && !selectRef.current.contains(e.target as Node)) {
         setIsOpen(false)
       }
     }
-
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
   const handleSelect = (val: string) => {
-    onChange?.(val)
-    setIsOpen(false)
+    if (!disabled) {
+      onChange?.(val)
+      setIsOpen(false)
+    }
   }
 
   const handleTriggerKey = (e: KeyboardEvent) => {
     if (disabled) return
 
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      setIsOpen(o => !o)
-    }
-    if (e.key === 'Escape') {
-      setIsOpen(false)
+    switch (e.key) {
+      case 'Enter':
+      case ' ':
+        e.preventDefault()
+        setIsOpen(prev => !prev)
+        break
+      case 'Escape':
+        setIsOpen(false)
+        break
     }
   }
 
@@ -103,7 +97,7 @@ export const Select: SelectComponent = ({
         aria-label={ariaLabel}
         tabIndex={disabled ? -1 : 0}
         onKeyDown={handleTriggerKey}
-        onClick={() => !disabled && setIsOpen(o => !o)}
+        onClick={() => !disabled && setIsOpen(prev => !prev)}
         css={{
           p: '$4 $6',
           bg: '$accents0',
@@ -115,23 +109,11 @@ export const Select: SelectComponent = ({
           alignItems: 'center',
           justifyContent: 'space-between',
           transition: 'all 0.2s ease',
-
-          '&:hover': !disabled
-            ? { bg: '$accents1', borderColor: '$primary' }
-            : {},
-
-          '&:focus-visible': {
-            outline: '2px solid $primary',
-            outlineOffset: '2px',
-          },
+          '&:hover': !disabled ? { bg: '$accents1', borderColor: '$primary' } : {},
+          '&:focus-visible': { outline: '2px solid $primary', outlineOffset: '2px' },
         }}
       >
-        <Text
-          size="$sm"
-          css={{
-            color: value ? '$text' : '$accents6',
-          }}
-        >
+        <Text size="$sm" css={{ color: value ? '$text' : '$accents6' }}>
           {selectedLabel}
         </Text>
 
@@ -184,19 +166,9 @@ export const Select: SelectComponent = ({
               css={{
                 p: '$4 $6',
                 cursor: 'pointer',
-                bg:
-                  option.value === value
-                    ? '$accents0'
-                    : 'transparent',
-
-                '&:hover': {
-                  bg: '$accents0',
-                },
-
-                '&:focus-visible': {
-                  outline: 'none',
-                  bg: '$accents0',
-                },
+                bg: option.value === value ? '$accents0' : 'transparent',
+                '&:hover': { bg: '$accents0' },
+                '&:focus-visible': { outline: 'none', bg: '$accents0' },
               }}
             >
               <Text size="$sm">{option.label}</Text>
@@ -204,11 +176,6 @@ export const Select: SelectComponent = ({
           ))}
         </Box>
       )}
-
-      {children}
     </Box>
   )
 }
-
-/* Static Option (for API parity) */
-Select.Option = ({ children }) => <>{children}</>

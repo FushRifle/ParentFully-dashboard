@@ -91,7 +91,7 @@ export const AccountDetails = ({ user }: Props) => {
                <Breadcrumbs>
                     <Crumb>
                          <HouseIcon />
-                         <Link href="/"><CrumbLink>Home</CrumbLink></Link>
+                         <Link href="/dashboard"><CrumbLink>Home</CrumbLink></Link>
                          <Text>/</Text>
                     </Crumb>
                     <Crumb>

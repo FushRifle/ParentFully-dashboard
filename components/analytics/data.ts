@@ -4,7 +4,6 @@ export interface AnalyticsMetric {
      value: number | string;
      change: number;
      changeType: 'increase' | 'decrease' | 'neutral';
-     icon: string;
      color: string;
 }
 
@@ -62,7 +61,6 @@ export const analyticsMetrics: AnalyticsMetric[] = [
           value: '12,847',
           change: 12.5,
           changeType: 'increase',
-          icon: '👥',
           color: '#3f3bef'
      },
      {
@@ -71,7 +69,6 @@ export const analyticsMetrics: AnalyticsMetric[] = [
           value: '48,920',
           change: 8.2,
           changeType: 'increase',
-          icon: '📈',
           color: '#10b981'
      },
      {
@@ -80,7 +77,6 @@ export const analyticsMetrics: AnalyticsMetric[] = [
           value: '124,580',
           change: -3.4,
           changeType: 'decrease',
-          icon: '👁️',
           color: '#f59e0b'
      },
      {
@@ -89,7 +85,6 @@ export const analyticsMetrics: AnalyticsMetric[] = [
           value: '4m 32s',
           change: 15.7,
           changeType: 'increase',
-          icon: '⏱️',
           color: '#8b5cf6'
      },
      {
@@ -98,7 +93,6 @@ export const analyticsMetrics: AnalyticsMetric[] = [
           value: '32.4%',
           change: -2.1,
           changeType: 'decrease',
-          icon: '🎯',
           color: '#ef4444'
      },
      {
@@ -107,7 +101,6 @@ export const analyticsMetrics: AnalyticsMetric[] = [
           value: '4.8%',
           change: 5.3,
           changeType: 'increase',
-          icon: '💰',
           color: '#06b6d4'
      }
 ];

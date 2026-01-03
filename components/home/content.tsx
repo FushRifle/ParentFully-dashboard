@@ -28,7 +28,7 @@ const CommunityNewsFeed = () => (
                <Box>
                   <Text b size="$sm">The Smiths</Text>
                   <Text size="$xs" css={{ color: '$accents7' }}>
-                     Just completed their "Potty Training Masterclass"! 🎉
+                     Just completed their "Potty Training Masterclass"!
                   </Text>
                   <Text size="$xs" css={{ color: '$accents6', mt: '$1' }}>2 hours ago</Text>
                </Box>
@@ -40,7 +40,7 @@ const CommunityNewsFeed = () => (
                <Box>
                   <Text b size="$sm">The Johnsons</Text>
                   <Text size="$xs" css={{ color: '$accents7' }}>
-                     Shared their first "Family Meal Planning" template. 🥕
+                     Shared their first "Family Meal Planning" template.
                   </Text>
                   <Text size="$xs" css={{ color: '$accents6', mt: '$1' }}>Yesterday</Text>
                </Box>
@@ -52,7 +52,7 @@ const CommunityNewsFeed = () => (
                <Box>
                   <Text b size="$sm">User @ParentPro</Text>
                   <Text size="$xs" css={{ color: '$accents7' }}>
-                     Reached Level 5 in "Productive Parenthood" challenge! 🚀
+                     Reached Level 5 in "Productive Parenthood" challenge!
                   </Text>
                   <Text size="$xs" css={{ color: '$accents6', mt: '$1' }}>2 days ago</Text>
                </Box>
@@ -60,7 +60,9 @@ const CommunityNewsFeed = () => (
          </Flex>
       </Card.Body>
       <Card.Footer>
-         <Button flat size="sm" css={{ borderRadius: '$pill' }}>View All Feed</Button>
+         <Link href="/community">
+            <Button flat size="sm" css={{ borderRadius: '$pill' }}>View All Feed</Button>
+         </Link>
       </Card.Footer>
    </Card>
 );
@@ -208,7 +210,7 @@ export const Content = () => (
             {/* New: Community News Feed */}
             <CommunityNewsFeed />
 
-            {/* Parenting Experts / Support Team */}
+            {/* Parenting Experts */}
             <Card variant="flat" css={{ bg: '$background', border: '1px solid $border', p: '$4' }}>
                <Card.Header css={{ pb: 0 } as any}>
                   <Text b size="$md">On-Call Parenting Experts</Text>
@@ -239,7 +241,16 @@ export const Content = () => (
                   </Flex>
                </Card.Body>
                <Card.Footer>
-                  <Button flat size="sm" css={{ borderRadius: '$pill' }}>Manage Experts</Button>
+                  <Link href="/experts">
+                     <Button
+                        as="a"
+                        flat
+                        size="sm"
+                        css={{ borderRadius: '$pill' }}
+                     >
+                        Manage Experts
+                     </Button>
+                  </Link>
                </Card.Footer>
             </Card>
 
@@ -282,41 +293,42 @@ export const Content = () => (
                         Monitor, investigate, and resolve support requests and reports submitted by users.
                      </Text>
 
-                     <Button
-                        size="sm"
-                        auto
-                        css={{
-                           bg: 'white',
-                           color: '#3f3bef',
-                           fontWeight: '$bold',
-                           borderRadius: '$pill',
-                           px: '$10',
-                           zIndex: 2,
-                           '&:hover': {
-                              opacity: 0.9,
-                              transform: 'translateY(-2px)',
-                           },
-                        }}
-                     >
-                        View Tickets
-                     </Button>
+                     <Link href="/support">
+                        <Button
+                           size="sm"
+                           auto
+                           css={{
+                              bg: 'white',
+                              color: '#3f3bef',
+                              fontWeight: '$bold',
+                              borderRadius: '$pill',
+                              px: '$10',
+                              zIndex: 2,
+                              '&:hover': {
+                                 opacity: 0.9,
+                                 transform: 'translateY(-2px)',
+                              },
+                           }}
+                        >
+                           View Tickets
+                        </Button>
+                     </Link>
                   </Flex>
                </Card.Body>
 
-               {/* --- Responsive Support Illustration --- */}
+               {/* --- Support Illustration --- */}
                <Box
                   css={{
                      position: 'absolute',
                      bottom: '-10px',
                      right: '-15px',
-                     // Responsive scaling: 45% of card width
                      width: '45%',
                      minWidth: '120px',
                      maxWidth: '200px',
                      aspectRatio: '1 / 1',
                      zIndex: 0,
                      pointerEvents: 'none',
-                     transition: 'width 0.3s ease', // Matches sidebar toggle speed
+                     transition: 'width 0.3s ease',
                      '@md': {
                         animation: 'float 6s ease-in-out infinite',
                         '@keyframes float': {
