@@ -1,32 +1,69 @@
-import React, { useState } from 'react'
-import { Input, Button, Text, Link, Spacer } from '@nextui-org/react'
-import { useRouter } from 'next/router'
+import React, { useState, useEffect } from 'react';
+import { Input, Button, Text, Link, Spacer, Loading } from '@nextui-org/react';
+import { useRouter } from 'next/router';
 
-import { Mail } from '../components/icons/auth/mail'
-import { Password } from '../components/icons/auth/password'
-import { Box } from '../components/styles/box'
-import { Flex } from '../components/styles/flex'
+import { Mail } from '../components/icons/auth/mail';
+import { Password } from '../components/icons/auth/password';
+import { Box } from '../components/styles/box';
+import { Flex } from '../components/styles/flex';
+import { useLogin } from '../hooks/auth/useLogin';
 
-const DEFAULT_EMAIL = 'admin@parentfully.app'
-const DEFAULT_PASSWORD = 'Admin231!'
+const DEFAULT_EMAIL = 'admin@parentfully.app';
+const DEFAULT_PASSWORD = 'Admin231!';
 
 const LoginPage = () => {
-     const router = useRouter()
+     const router = useRouter();
+     const { isLoading, error, login, clearError } = useLogin();
+     const [email, setEmail] = useState(DEFAULT_EMAIL);
+     const [password, setPassword] = useState(DEFAULT_PASSWORD);
+     const [showDemoCredentials, setShowDemoCredentials] = useState(true);
 
-     const [email, setEmail] = useState(DEFAULT_EMAIL)
-     const [password, setPassword] = useState(DEFAULT_PASSWORD)
-     const [error, setError] = useState('')
-
-     const handleSubmit = (e: React.FormEvent) => {
-          e.preventDefault()
-          setError('')
-
-          if (email === DEFAULT_EMAIL && password === DEFAULT_PASSWORD) {
-               router.push('/dashboard')
-          } else {
-               setError('Invalid email or password')
+     useEffect(() => {
+          if (error) {
+               clearError();
           }
-     }
+     }, [email, password]);
+
+     const handleSubmit = async (e: React.FormEvent) => {
+          e.preventDefault();
+
+          // Attempt login with the provided credentials
+          const success = await login({ email, password });
+
+          // If login is successful, the hook should handle the redirect
+          if (success) {
+               // Optional: Add a small delay for better UX
+               // await new Promise(resolve => setTimeout(resolve, 500));
+               router.push('/dashboard');
+          }
+     };
+
+     const handleDemoLogin = () => {
+          setEmail(DEFAULT_EMAIL);
+          setPassword(DEFAULT_PASSWORD);
+          setShowDemoCredentials(true);
+          clearError(); // Clear any existing errors when using demo credentials
+     };
+
+     const handleClearCredentials = () => {
+          setEmail('');
+          setPassword('');
+          setShowDemoCredentials(false);
+          clearError();
+     };
+
+     // Optional: Add keyboard shortcut for demo login
+     useEffect(() => {
+          const handleKeyDown = (e: KeyboardEvent) => {
+               if (e.ctrlKey && e.key === 'd') {
+                    e.preventDefault();
+                    handleDemoLogin();
+               }
+          };
+
+          window.addEventListener('keydown', handleKeyDown);
+          return () => window.removeEventListener('keydown', handleKeyDown);
+     }, []);
 
      return (
           <Flex
@@ -107,9 +144,11 @@ const LoginPage = () => {
                                    contentLeft={<Mail fill="currentColor" />}
                                    value={email}
                                    onChange={(e) => setEmail(e.target.value)}
+                                   disabled={isLoading}
+                                   css={{ mb: '$8' }}
+                                   aria-label="Email address"
+                                   autoComplete="email"
                               />
-
-                              <Spacer y={1.25} />
 
                               <Input.Password
                                    fullWidth
@@ -119,7 +158,19 @@ const LoginPage = () => {
                                    contentLeft={<Password fill="currentColor" />}
                                    value={password}
                                    onChange={(e) => setPassword(e.target.value)}
+                                   disabled={isLoading}
+                                   aria-label="Password"
+                                   autoComplete="current-password"
                               />
+
+                              {showDemoCredentials && (
+                                   <>
+                                        <Spacer y={0.75} />
+                                        <Text size="$sm" color="success">
+                                             ✓ Demo credentials loaded (Ctrl+D to reload)
+                                        </Text>
+                                   </>
+                              )}
 
                               {error && (
                                    <>
@@ -134,27 +185,81 @@ const LoginPage = () => {
                                    type="submit"
                                    shadow
                                    size="lg"
+                                   disabled={isLoading}
                                    css={{
                                         mt: '$10',
                                         width: '100%',
                                         borderRadius: '$pill',
                                         fontWeight: '$bold',
                                         bg: '#3f3bef',
+                                        '&:hover': {
+                                             bg: '#2b2aa0',
+                                        },
+                                        '&:disabled': {
+                                             bg: '$accents4',
+                                        },
                                    }}
                               >
-                                   Sign in
+                                   {isLoading ? (
+                                        <Loading type="points" color="white" size="sm" />
+                                   ) : (
+                                        'Sign in'
+                                   )}
                               </Button>
                          </form>
+
+                         <Spacer y={1.5} />
+
+                         <Flex direction="column" align="center">
+                              {showDemoCredentials ? (
+                                   <Button
+                                        light
+                                        size="sm"
+                                        onClick={handleClearCredentials}
+                                        css={{ color: '$accents6' }}
+                                        disabled={isLoading}
+                                   >
+                                        Use my own credentials
+                                   </Button>
+                              ) : (
+                                   <Button
+                                        light
+                                        size="sm"
+                                        onClick={handleDemoLogin}
+                                        css={{ color: '$accents6' }}
+                                        disabled={isLoading}
+                                   >
+                                        Use demo credentials
+                                   </Button>
+                              )}
+
+                              <Link href="/forgot-password" css={{ fontSize: '$sm' }}>
+                                   Forgot your password?
+                              </Link>
+                         </Flex>
 
                          <Spacer y={2} />
 
                          <Text size="$sm" css={{ color: '$accents7', textAlign: 'center' }}>
-                              Demo credentials are pre-filled
+                              Don't have an account?{' '}
+                              <Link href="/signup" css={{ fontSize: '$sm' }}>
+                                   Sign up
+                              </Link>
                          </Text>
+
+                         {/* Optional: Quick login hint for development */}
+                         {process.env.NODE_ENV === 'development' && (
+                              <>
+                                   <Spacer y={1} />
+                                   <Text size="$xs" css={{ color: '$accents6', textAlign: 'center', opacity: 0.7 }}>
+                                        Dev mode: Click "Sign in" to redirect to dashboard
+                                   </Text>
+                              </>
+                         )}
                     </Box>
                </Flex>
           </Flex>
-     )
-}
+     );
+};
 
-export default LoginPage
+export default LoginPage;

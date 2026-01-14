@@ -1,24 +1,38 @@
-import { Avatar, Dropdown, Navbar, Text } from '@nextui-org/react';
-import React from 'react';
+import { Avatar, Dropdown, Text } from '@nextui-org/react';
+import React, { useEffect, useState } from 'react';
 import { DarkModeSwitch } from './darkmodeswitch';
 import NextLink from 'next/link';
 import { Flex } from '../styles/flex';
+import { useUser } from '../../hooks/user/useUser';
 
 export const UserDropdown = () => {
+   const { user, isLoading } = useUser();
+   const [mounted, setMounted] = useState(false);
+
+   // ensure we only render client-side
+   useEffect(() => {
+      setMounted(true);
+   }, []);
+
+   if (!mounted || isLoading) return null;
+
+   const avatarUrl =
+      'https://png.pngtree.com/png-clipart/20240917/original/pngtree-administrator-admin-avatar-png-image_16031562.png';
+
+   const displayEmail = user?.email || 'admin@parentfully.com';
+
    return (
       <Dropdown placement="bottom-right">
-         <Navbar.Item>
-            <Dropdown.Trigger>
-               <Avatar
-                  bordered
-                  as="button"
-                  color="secondary"
-                  size="md"
-                  src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
-                  css={{ cursor: 'pointer' }}
-               />
-            </Dropdown.Trigger>
-         </Navbar.Item>
+         <Dropdown.Trigger>
+            <Avatar
+               bordered
+               as="button"
+               color="secondary"
+               size="md"
+               src={avatarUrl}
+               css={{ cursor: 'pointer' }}
+            />
+         </Dropdown.Trigger>
 
          <Dropdown.Menu
             aria-label="User menu actions"
@@ -31,30 +45,30 @@ export const UserDropdown = () => {
                   Signed in as
                </Text>
                <Text b color="inherit" css={{ d: 'flex' }}>
-                  admin@parentfully.com
+                  {displayEmail}
                </Text>
             </Dropdown.Item>
 
             <Dropdown.Item key="settings" withDivider>
-               <NextLink href="/settings">
+               <NextLink href="/settings" passHref>
                   <div style={{ width: '100%' }}>My Settings</div>
                </NextLink>
             </Dropdown.Item>
 
             <Dropdown.Item key="teams">
-               <NextLink href="/team">
+               <NextLink href="/team" passHref>
                   <div style={{ width: '100%' }}>Team Settings</div>
                </NextLink>
             </Dropdown.Item>
 
             <Dropdown.Item key="analytics" withDivider>
-               <NextLink href="/analytics">
+               <NextLink href="/analytics" passHref>
                   <div style={{ width: '100%' }}>Analytics</div>
                </NextLink>
             </Dropdown.Item>
 
             <Dropdown.Item key="logout" withDivider color="error">
-               <NextLink href="/">
+               <NextLink href="/" passHref>
                   <div style={{ width: '100%' }}>Log Out</div>
                </NextLink>
             </Dropdown.Item>

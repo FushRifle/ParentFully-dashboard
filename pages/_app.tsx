@@ -4,6 +4,8 @@ import { createTheme, NextUIProvider } from '@nextui-org/react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import { Layout } from '../components/layout/layout'
 import { GoalBackground } from '../constants/GoalBackground'
+import { AuthProvider } from '../lib/context/authContext'
+
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 
@@ -28,14 +30,12 @@ const darkTheme = createTheme({
 export default function MyApp({ Component, pageProps }: AppProps) {
    const router = useRouter()
 
-   // Redirect root → login
    useEffect(() => {
       if (router.pathname === '/') {
          router.replace('/login')
       }
    }, [router.pathname])
 
-   // Any auth-related page
    const isAuthPage = router.pathname.startsWith('/login')
 
    return (
@@ -48,15 +48,17 @@ export default function MyApp({ Component, pageProps }: AppProps) {
          }}
       >
          <NextUIProvider>
-            {isAuthPage ? (
-               <Component {...pageProps} />
-            ) : (
-               <GoalBackground>
-                  <Layout>
-                     <Component {...pageProps} />
-                  </Layout>
-               </GoalBackground>
-            )}
+            <AuthProvider>
+               {isAuthPage ? (
+                  <Component {...pageProps} />
+               ) : (
+                  <GoalBackground>
+                     <Layout>
+                        <Component {...pageProps} />
+                     </Layout>
+                  </GoalBackground>
+               )}
+            </AuthProvider>
          </NextUIProvider>
       </NextThemesProvider>
    )
