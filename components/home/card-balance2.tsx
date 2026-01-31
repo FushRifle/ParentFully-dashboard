@@ -66,17 +66,6 @@ export const CardNewUsers = () => {
                >
                   3,562
                </Text>
-
-               <Text
-                  span
-                  size="$sm"
-                  weight="bold"
-                  css={{
-                     color: '$white',
-                  }}
-               >
-                  + 12.5%
-               </Text>
             </Flex>
          </Card.Body>
 

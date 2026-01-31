@@ -1,16 +1,20 @@
+// components/TableWrapper.tsx
 import React, { useMemo, useState, useCallback } from 'react';
-import {
-   Table, Loading, Text, Button,
-   Grid, Spacer
-} from '@nextui-org/react';
 import { Box } from '../styles/box';
 import { RenderCell } from './render-cell';
-import { useSequentialUsers } from '../../hooks/accounts/useAccounts';
+import { usePagedUsers } from '../../hooks/accounts/useAccounts';
 import type { User } from '../../types/api';
+import {
+   Table,
+   Loading,
+   Text,
+   Button,
+   Grid,
+   Spacer,
+} from '@nextui-org/react';
 
-const ITEMS_PER_PAGE = 20;
-
-const COLUMNS = [
+const ITEMS_PER_PAGE = 10;
+const COLUMNS: { name: string; uid: string }[] = [
    { name: 'AVATAR', uid: 'avatar' },
    { name: 'NAME', uid: 'name' },
    { name: 'EMAIL', uid: 'email' },
@@ -20,51 +24,67 @@ const COLUMNS = [
    { name: 'ACTIONS', uid: 'actions' },
 ];
 
-const prepareTableItems = (users: { user: User }[]) => {
-   return users.map(({ user }) => ({
+const prepareTableItems = (users: { user: User }[]) =>
+   users.map(({ user }) => ({
       ...user,
-      key: user.id?.toString() || Math.random().toString(),
+      key: String(user.id),
       avatar: typeof user.profile_image === 'string' ? user.profile_image : '',
       role: user.has_child ? 'Parent' : 'User',
       status: user.has_completed_onboarding ? 'Active' : 'Pending',
    }));
-};
 
 export const TableWrapper = () => {
    const [currentPage, setCurrentPage] = useState(1);
-   const { users: rawUsers = [], loading, error, refresh, hasMore, loadMore } = useSequentialUsers();
+   const {
+      users: rawUsers = [],
+      loading,
+      error,
+      refresh,
+      loadPage,
+   } = usePagedUsers();
 
-   const tableUsers = useMemo(() => prepareTableItems(Array.isArray(rawUsers) ? rawUsers : []), [rawUsers]);
+   const tableUsers = useMemo(() => prepareTableItems(rawUsers as any), [rawUsers]);
 
    const paginatedUsers = useMemo(() => {
       const start = (currentPage - 1) * ITEMS_PER_PAGE;
       return tableUsers.slice(start, start + ITEMS_PER_PAGE);
    }, [tableUsers, currentPage]);
 
-   const totalPages = Math.max(1, Math.ceil(tableUsers.length / ITEMS_PER_PAGE));
+   const loadedPages = Math.max(
+      1,
+      Math.ceil(tableUsers.length / ITEMS_PER_PAGE)
+   );
 
-   const handlePageChange = useCallback((page: number) => {
-      setCurrentPage(page);
-   }, []);
+   const handlePageChange = useCallback(
+      (page: number) => {
+         setCurrentPage(page);
+         loadPage(page);
+      },
+      [loadPage]
+   );
 
    const handleRefresh = useCallback(() => {
-      refresh();
       setCurrentPage(1);
+      refresh();
    }, [refresh]);
 
    return (
       <Box css={{ p: '$8', width: '100%', display: 'flex', flexDirection: 'column', gap: '$4' }}>
-         {/* Header */}
          <Grid.Container justify="space-between" alignItems="center">
             <Grid>
                <Text h3 css={{ m: 0 }}>User Management</Text>
-               <Text size="$xs" color="$accents7">Manage your organization's members and roles</Text>
+               <Text size="$xs" color="$accents7">
+                  Manage your organization's members and roles
+               </Text>
             </Grid>
             <Grid>
                <Button
-                  auto flat color="primary"
-                  onClick={handleRefresh} disabled={loading}
-                  icon={loading && <Loading color="currentColor" size="xs" />}
+                  auto
+                  flat
+                  color="primary"
+                  onClick={handleRefresh}
+                  disabled={loading}
+                  icon={loading && <Loading size="xs" />}
                >
                   {!loading && 'Refresh Data'}
                </Button>
@@ -81,31 +101,30 @@ export const TableWrapper = () => {
             <Box css={{ py: '$20', textAlign: 'center' }}>
                <Text color="error" b>System Error</Text>
                <Text color="$accents8">{error}</Text>
-               <Spacer y={0.5} />
-               <Button auto light color="error" onClick={handleRefresh} css={{ margin: '0 auto' }}>Retry Connection</Button>
-            </Box>
-         ) : tableUsers.length === 0 ? (
-            <Box css={{ py: '$20', textAlign: 'center', border: '1px dashed $accents3', borderRadius: '$lg' }}>
-               <Text color="$accents6">No user records found in the database.</Text>
             </Box>
          ) : (
             <>
                <Table
                   aria-label="User directory table"
-                  containerCss={{ height: 'auto', minWidth: '100%' }}
                   selectionMode="none"
                   shadow={false}
                   bordered
                >
                   <Table.Header columns={COLUMNS}>
                      {(column) => (
-                        <Table.Column key={column.uid} align={column.uid === 'actions' ? 'center' : 'start'}>
+                        <Table.Column
+                           key={column.uid}
+                           align={column.uid === 'actions' ? 'center' : 'start'}
+                        >
                            {column.name}
                         </Table.Column>
                      )}
                   </Table.Header>
 
-                  <Table.Body items={paginatedUsers}>
+                  <Table.Body
+                     items={paginatedUsers}
+                     loadingState={loading ? 'loading' : 'idle'}
+                  >
                      {(item) => (
                         <Table.Row key={item.key}>
                            {(columnKey) => (
@@ -118,10 +137,13 @@ export const TableWrapper = () => {
                   </Table.Body>
 
                   <Table.Pagination
-                     shadow noMargin align="center"
+                     shadow
+                     noMargin
+                     align="center"
                      rowsPerPage={ITEMS_PER_PAGE}
+                     total={loadedPages}
+                     page={currentPage}
                      onPageChange={handlePageChange}
-                     total={totalPages}
                   />
                </Table>
 
@@ -130,13 +152,6 @@ export const TableWrapper = () => {
                      <Text size="$sm" color="$accents6">
                         Showing <b>{paginatedUsers.length}</b> of <b>{tableUsers.length}</b> users
                      </Text>
-                  </Grid>
-                  <Grid>
-                     {hasMore && (
-                        <Button light size="sm" onClick={loadMore} disabled={loading}>
-                           {loading ? <Loading size="xs" /> : 'Fetch More Results'}
-                        </Button>
-                     )}
                   </Grid>
                </Grid.Container>
             </>

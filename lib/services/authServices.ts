@@ -1,5 +1,5 @@
 import { AuthResponse, User } from "../../types/api";
-import axios, { AxiosError, AxiosRequestConfig } from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import { api } from "..";
 
 const STORAGE_TOKEN = 'auth_token';

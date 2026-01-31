@@ -21,7 +21,7 @@ export const SidebarItem = ({ icon, title, isActive, href = '' }: Props) => {
    };
 
    return (
-      <NextLink href={href}>
+      <NextLink href={href} passHref legacyBehavior>
          <Link
             css={{
                color: '$accents9',
@@ -30,9 +30,9 @@ export const SidebarItem = ({ icon, title, isActive, href = '' }: Props) => {
                textDecoration: 'none',
                display: 'flex',
             }}
+            onClick={handleClick}
          >
             <Flex
-               onClick={handleClick}
                css={{
                   'gap': '$6',
                   'width': '100%',
@@ -43,15 +43,12 @@ export const SidebarItem = ({ icon, title, isActive, href = '' }: Props) => {
                   'cursor': 'pointer',
                   'position': 'relative',
                   'transition': 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-
-                  // Active State Styling
                   ...(isActive
                      ? {
-                        'bg': '$blue100', // Subtle light blue background
+                        'bg': '$blue100',
                         '& svg path': {
                            fill: '$blue600',
                         },
-                        // Vertical indicator bar
                         '&:before': {
                            content: '""',
                            position: 'absolute',
@@ -75,7 +72,6 @@ export const SidebarItem = ({ icon, title, isActive, href = '' }: Props) => {
                }}
                align={'center'}
             >
-               {/* Icon Container to handle alignment and scaling */}
                <Flex
                   css={{
                      'display': 'flex',

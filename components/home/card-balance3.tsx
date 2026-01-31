@@ -67,16 +67,6 @@ export const CardPremium = () => {
                >
                   $15,300
                </Text>
-               <Text
-                  span
-                  size="$sm"
-                  weight="bold"
-                  css={{
-                     color: '$success',
-                  }}
-               >
-                  + 12.5%
-               </Text>
             </Flex>
          </Card.Body>
 

@@ -1,88 +1,95 @@
-import { useState, useEffect, useCallback } from 'react';
+// hooks/usePagedUsers.ts
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { getUserByID } from '../../lib/services/authServices';
 
-interface UseAllUsersReturn {
-     users: User[];
-     loading: boolean;
-     error: string | null;
-     refresh: () => void;
-     hasMore: boolean;
-     loadMore: () => void;
-}
-
-interface User {
+export interface User {
      id: number;
      name: string;
      email: string;
      avatar?: string;
      role?: string;
      status?: string;
-     phone?: string;
-     createdAt?: string;
-     updatedAt?: string;
-
      rawData?: any;
 }
 
-const BATCH_SIZE = 20;
-const MAX_CONSECUTIVE_FAILURES = 10;
+interface UsePagedUsersReturn {
+     users: User[];
+     loading: boolean;
+     error: string | null;
+     loadPage: (page: number) => void;
+     refresh: () => void;
+}
 
-export const useSequentialUsers = (startId = 1): UseAllUsersReturn => {
+const ITEMS_PER_PAGE = 10;
+const MAX_LOOKAHEAD = 50; // max IDs to try to fill a page
+
+export const usePagedUsers = (): UsePagedUsersReturn => {
      const [users, setUsers] = useState<User[]>([]);
-     const [loading, setLoading] = useState(true);
+     const [loading, setLoading] = useState(false);
      const [error, setError] = useState<string | null>(null);
-     const [nextId, setNextId] = useState(startId);
-     const [hasMore, setHasMore] = useState(true);
 
-     const fetchBatch = useCallback(async (startingId: number) => {
-          setLoading(true);
-          setError(null);
-          const batchUsers: User[] = [];
-          let failures = 0;
+     const fetchedPages = useRef<Set<number>>(new Set());
 
-          try {
-               for (let id = startingId; id < startingId + BATCH_SIZE; id++) {
-                    try {
-                         const user = await getUserByID(id);
-                         if (user) {
-                              batchUsers.push(user);
-                              failures = 0;
-                         } else {
-                              failures++;
-                              if (failures >= MAX_CONSECUTIVE_FAILURES) break;
-                         }
-                    } catch {
-                         failures++;
-                         if (failures >= MAX_CONSECUTIVE_FAILURES) break;
+     // Fetch pageSize users starting from startId, in parallel
+     const getUsersForPage = useCallback(async (startId: number, pageSize: number) => {
+          const pageUsers: User[] = [];
+          let id = startId;
+
+          while (pageUsers.length < pageSize && id < startId + MAX_LOOKAHEAD) {
+               const batch = Array.from({ length: pageSize * 2 }, (_, i) => id + i);
+               const results = await Promise.allSettled(batch.map(getUserByID));
+
+               for (const result of results) {
+                    if (pageUsers.length >= pageSize) break;
+
+                    if (result.status === 'fulfilled' && result.value) {
+                         pageUsers.push(result.value);
                     }
                }
 
-               if (batchUsers.length === 0) setHasMore(false);
-
-               setUsers(prev => [...prev, ...batchUsers]);
-               setNextId(startingId + BATCH_SIZE);
-          } catch (err) {
-               setError(err instanceof Error ? err.message : 'Failed to fetch users');
-               setHasMore(false);
-          } finally {
-               setLoading(false);
+               id += pageSize * 2;
           }
+
+          return pageUsers;
      }, []);
 
-     const loadMore = useCallback(() => {
-          if (!loading && hasMore) fetchBatch(nextId);
-     }, [loading, hasMore, nextId, fetchBatch]);
+     const fetchPage = useCallback(
+          async (page: number) => {
+               if (fetchedPages.current.has(page)) return;
+
+               setLoading(true);
+               setError(null);
+
+               const startId = (page - 1) * ITEMS_PER_PAGE + 1;
+
+               try {
+                    const pageUsers = await getUsersForPage(startId, ITEMS_PER_PAGE);
+                    fetchedPages.current.add(page);
+                    setUsers((prev) => [...prev, ...pageUsers]);
+               } catch (err: any) {
+                    setError(err instanceof Error ? err.message : 'Failed to fetch users');
+               } finally {
+                    setLoading(false);
+               }
+          },
+          [getUsersForPage]
+     );
 
      const refresh = useCallback(() => {
+          fetchedPages.current.clear();
           setUsers([]);
-          setNextId(startId);
-          setHasMore(true);
-          fetchBatch(startId);
-     }, [startId, fetchBatch]);
+          fetchPage(1);
+     }, [fetchPage]);
 
      useEffect(() => {
-          fetchBatch(startId);
-     }, [startId, fetchBatch]);
+          fetchPage(1);
+     }, [fetchPage]);
 
-     return { users, loading, error, refresh, hasMore, loadMore };
+     return {
+          users,
+          loading,
+          error,
+          loadPage: fetchPage,
+          refresh,
+     };
 };

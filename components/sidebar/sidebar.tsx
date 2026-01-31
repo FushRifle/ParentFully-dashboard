@@ -70,7 +70,7 @@ export const SidebarWrapper = () => {
                         isActive={activePath.startsWith('/accounts')}
                      />
                      <CollapseItems
-                        title="Invites & Connections"
+                        title="Invites & Referrals"
                         icon={<AccountsIcon />}
                         items={['Referals', 'Invites']}
                      />

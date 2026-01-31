@@ -16,7 +16,6 @@ export const CardUsersOverview = () => {
             overflow: 'hidden',
             border: 'none',
             boxShadow: '0 10px 20px -5px rgba(0, 114, 245, 0.3)',
-            // Ensure the card can shrink gracefully
             width: '100%',
          }}
       >
@@ -42,9 +41,9 @@ export const CardUsersOverview = () => {
                   py: '$6',
                   px: '$6',
                   borderRadius: '$xl',
-                  zIndex: 2, // Keeps text above the shrinking image
+                  zIndex: 2,
                   position: 'relative',
-                  background: 'linear-gradient(90deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.75) 60%, rgba(255,255,255,0.35) 85%, rgba(255,255,255,0.0) 100%)',
+                  background: 'linear-gradient(90deg,rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.75) 60%, rgba(255,255,255,0.35) 85%, rgba(255,255,255,0.0) 100%)',
                   backdropFilter: 'blur(12px)',
                   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.55), 0 8px 24px rgba(0,0,0,0.08)',
                }}
@@ -56,10 +55,6 @@ export const CardUsersOverview = () => {
                   css={{ color: '$black', letterSpacing: '-0.02em' }}
                >
                   45,910
-               </Text>
-
-               <Text span size="$sm" weight="bold" css={{ color: '$black' }}>
-                  + 12.5%
                </Text>
             </Flex>
          </Card.Body>
