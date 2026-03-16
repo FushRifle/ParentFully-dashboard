@@ -7,7 +7,7 @@ import { Box } from '../styles/box';
 import { DeleteUserModal } from './modals/delete';
 import { SidebarContext } from '../layout/layout-context';
 import type { User } from '../../types/api';
-import ChatAvatarWrapper from '@/components/avatar/ChatAvatarWrapper';
+import ChatAvatarWrapper from '@/components/Avatar/ChatAvatarWrapper';
 import React, { useCallback, useMemo, useState, useContext } from 'react';
 import { Breadcrumbs, Crumb, CrumbLink } from '../breadcrumb/breadcrumb.styled';
 import {
@@ -25,11 +25,9 @@ export const AccountDetails = ({ user }: Props) => {
      const [deleteVisible, setDeleteVisible] = useState(false);
 
      const profile = useMemo(() => {
-          const u = user.user ?? user;
-          const profile_image = u.profile_image;
-          const userPhoto = user.user?.profile_image || u.photo;
           const fullName = user.user.name || 'Unknown User';
           const [firstName = '', ...lastNameParts] = fullName.split(' ');
+
           return {
                id: user.user.id,
                firstName,
@@ -41,6 +39,9 @@ export const AccountDetails = ({ user }: Props) => {
                isPremium: user.user.is_premium ?? false,
           };
      }, [user]);
+     const u = user.user ?? user;
+     const profile_image = u.profile_image;
+     const userPhoto = user.user?.profile_image || u.photo;
 
      const [formData, setFormData] = useState({
           firstName: profile.firstName,
@@ -101,10 +102,10 @@ export const AccountDetails = ({ user }: Props) => {
                                    <ChatAvatarWrapper
                                         photo={userPhoto}
                                         profile_image={profile_image}
-                                        contactName={fullName}
-                                        size={40}
-                                        variant={is_premium ? 'primary' : 'secondary'}
-                                        borderWidth={is_premium ? 2 : 1}
+                                        contactName={profile.fullName}
+                                        size={100}
+                                        variant={'primary'}
+                                        borderWidth={1}
                                    />
 
                                    <Badge
