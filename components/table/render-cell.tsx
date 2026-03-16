@@ -1,19 +1,17 @@
 import React, { memo, useCallback } from 'react';
+import { Box } from '../styles/box';
 import { useRouter } from 'next/router';
 import { IconButton } from './table.styled';
 import { EyeIcon } from '../icons/table/eye-icon';
 import { EditIcon } from '../icons/table/edit-icon';
 import { DeleteIcon } from '../icons/table/delete-icon';
-import { Box } from '../styles/box';
+import ChatAvatarWrapper from '../Avatar/ChatAvatarWrapper';
 import {
    User as NextUser,
    Tooltip,
    Badge,
    Text,
 } from '@nextui-org/react';
-
-const getAvatarFallback = (name: string) =>
-   name ? name.charAt(0).toUpperCase() : 'U';
 
 const getStatusColor = (
    status: string
@@ -34,8 +32,9 @@ interface RenderCellProps {
 
 const RenderCellComponent = ({ user, columnKey }: RenderCellProps) => {
    const router = useRouter();
-
    const u = user.user ?? user;
+   const profile_image = u.profile_image;
+   const userPhoto = user.user?.profile_image || u.photo;
 
    const {
       avatar = '',
@@ -61,32 +60,25 @@ const RenderCellComponent = ({ user, columnKey }: RenderCellProps) => {
    switch (columnKey) {
       case 'avatar':
          return (
-            <NextUser
-               src={avatar || undefined}
-               name={undefined}
-               size="sm"
-               css={{ cursor: 'pointer' }}
+            <Box
+               css={{
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+               }}
                onClick={handleDetails}
             >
-               {!avatar && (
-                  <Box
-                     css={{
-                        size: 32,
-                        borderRadius: '$full',
-                        bg: '$accents2',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: 'bold',
-                        fontSize: '$sm',
-                        color: '$foreground',
-                        userSelect: 'none',
-                     }}
-                  >
-                     {getAvatarFallback(name)}
-                  </Box>
-               )}
-            </NextUser>
+               <ChatAvatarWrapper
+                  photo={userPhoto}
+                  profile_image={profile_image}
+                  contactName={name}
+                  phoneNumber={u.phoneNumber || u.phone}
+                  size={40}
+                  variant={is_premium ? 'primary' : 'secondary'}
+                  borderWidth={is_premium ? 2 : 1}
+               />
+            </Box>
          );
 
       case 'name':
@@ -96,6 +88,9 @@ const RenderCellComponent = ({ user, columnKey }: RenderCellProps) => {
                   cursor: 'pointer',
                   fontWeight: 600,
                   '&:hover': { textDecoration: 'underline' },
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '$2',
                }}
                onClick={handleDetails}
             >
@@ -104,7 +99,7 @@ const RenderCellComponent = ({ user, columnKey }: RenderCellProps) => {
                   <Badge
                      color="success"
                      variant="flat"
-                     css={{ ml: '$2' }}
+                     size="sm"
                   >
                      Premium
                   </Badge>

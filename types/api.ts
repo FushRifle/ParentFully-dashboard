@@ -17,6 +17,7 @@ export interface AuthUser {
      name: string;
      email: string;
      phone_number: string;
+     country?: string;
      profile_image?: | {
           uri: string;
           type: string;
@@ -35,28 +36,37 @@ export interface AuthUser {
 }
 
 export interface User {
+     contact_id: number;
      id: number;
+     access_token?: string;
+     token?: string
+     user: AuthUser;
      name: string;
      email: string;
-     avatar?: string;
+     role?: string;
+     phone_number: string;
+     country?: string;
+     updated_at?: string;
+     has_seen_intro: boolean;
+     has_child: boolean;
+     has_completed_onboarding: boolean;
+     has_sent_invite: boolean;
+     has_seen_success: boolean;
+     children: any[];
      profile_image?: | {
           uri: string;
           type: string;
           fileName?: string | undefined;
      } | undefined;
-     role?: string;
-     status?: string;
-     phone?: string;
-     createdAt?: string;
-     updatedAt?: string;
+     photo?: | {
+          uri: string;
+          type: string;
+          fileName?: string | undefined;
+     } | undefined;
 
-     points?: number
-     is_premium?: boolean
-
-     has_child: boolean;
-     has_completed_onboarding: boolean;
-
-     rawData?: any;
+     two_factor_enabled?: boolean;
+     created_at?: string;
+     is_premium?: boolean;
 }
 
 export interface AuthContextType {
@@ -83,6 +93,20 @@ export interface OnboardingState {
      hasSeenSuccess: boolean
      isLoading: boolean
 }
+
+export interface GoogleSignInPayload {
+     id_token: string;
+     referral_code?: string;
+}
+
+export interface AppleSignInPayload {
+     identity_token: string;
+     user_identifier: string;
+     email?: string;
+     full_name?: string;
+     referral_code?: string;
+}
+
 
 //----Child------//
 export interface Child {
@@ -116,6 +140,7 @@ export interface ChildData {
 
 //---Contact---//
 export interface Contact {
+     phone_number: string;
      user_id: number
      id: number
      category: 'co-parent' | 'third-party' | 'child'
@@ -135,6 +160,7 @@ export interface Contact {
      notify_contact: boolean
      children?: ChildData[]
      registered_user_id: number;
+     updated_at: string;
 }
 
 export interface Referrals {
@@ -177,7 +203,6 @@ export interface Reminder {
      time: string;
      repeat: string;
      enabled: boolean;
-
      reminder_time: string;
      repeat_type: string;
 }
@@ -270,7 +295,6 @@ export interface Payment {
      receipt?: string
      status: 'pending' | 'approved' | 'rejected'
 }
-
 
 // Messages (chat)
 export type Chat = {
@@ -394,8 +418,10 @@ export interface Goal {
      notes?: string;
      timeframe?: string;
      target_date?: string;
+
      reward_name: string;
      reward_notes: string;
+
      is_default?: boolean;
      is_active?: boolean;
      is_edited?: boolean;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Input, Link, Navbar, Text, Button } from '@nextui-org/react';
+import { Input, Link, Navbar, Text } from '@nextui-org/react';
 import { Box } from '../styles/box';
 import { Flex } from '../styles/flex';
 import { BurguerButton } from './burguer-button';
@@ -66,7 +66,7 @@ export const NavbarWrapper = ({ children }: Props) => {
                <Navbar.Content hideIn={'md'}>
                   <Flex align="center" css={{ gap: '$2', cursor: 'pointer', '&:hover': { opacity: 0.7 } }}>
                      <FeedbackIcon />
-                     <Text span size="$sm" b>Feedback</Text>
+                     <Text span size="$sm" b>Feedbacks</Text>
                   </Flex>
                </Navbar.Content>
 

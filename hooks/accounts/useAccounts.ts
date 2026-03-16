@@ -21,7 +21,7 @@ interface UsePagedUsersReturn {
 }
 
 const ITEMS_PER_PAGE = 10;
-const MAX_LOOKAHEAD = 50; // max IDs to try to fill a page
+const MAX_LOOKAHEAD = 50;
 
 export const usePagedUsers = (): UsePagedUsersReturn => {
      const [users, setUsers] = useState<User[]>([]);

@@ -13,18 +13,21 @@ export interface SelectedFile extends FileObject {
 }
 
 export interface Attachment {
-     id?: number;
+     [x: string]: any;
+     id: string;
+     type: 'image' | 'video' | 'audio' | 'document';
      uri: string;
+     localUri: string;
      name: string;
-     type: string;
      size?: number;
-     uploaded?: boolean;
-     caption?: string;
-     file_path?: string;
-     file_name?: string;
-     file_type?: string;
-     file_size?: number;
-     file_extension?: string;
+     duration?: number;
+     thumbnail?: string;
+     mimeType?: string;
+     uploadStatus: 'pending' | 'uploading' | 'completed' | 'failed';
+     progress?: number;
+     messageId?: string;
+     timestamp: number;
+     caption?: string; // <-- added caption
 }
 
 export interface MessageSender {
@@ -40,10 +43,12 @@ export interface Message {
      message_text?: string;
      message?: string;
      sender_id: number;
+     updated_at?: string;
      created_at: string | undefined;
      sent_at?: string;
      read: boolean;
      is_read?: boolean;
+     isRead?: boolean;
      read_at?: string;
      attachments: Attachment[];
      reply_to?: number | null;
@@ -56,6 +61,7 @@ export interface Message {
 export interface SelectedFile {
      uri: string;
      name: string;
+     mimeType?: string;
      type: string;
      caption: string;
      size?: number;
@@ -92,31 +98,45 @@ export interface ApiResponse<T> {
 }
 
 export interface ConversationParticipant {
+     phone: string;
+     email: string;
+     phone_number: string;
      id: number;
      name: string;
-     profile_picture?: string;
+     profile_image?: string;
      photo?: string;
 }
 
 export interface Chat {
      id: number;
-     user1_id: number;
-     user2_id: number;
-     name?: string;
-     avatar?: string;
-     last_message?: string;
+     user_id?: number;
+     participant_user_id?: number;
+     last_message: LastMessage;
      last_message_at?: string;
-     updatedAt?: string;
-     created_at?: string;
      unread_count: number;
      other_participant?: ConversationParticipant;
      participants?: ConversationParticipant[];
+     created_at?: string;
+     updated_at?: string;
+     user1_id?: number;
+     user2_id?: number;
      contact_id?: number;
-     user_id?: number;
      isGroup?: boolean;
      type?: string;
-     lastMessage: string
-     unreadCount: number
+}
+
+export interface LastMessage {
+     id: number;
+     conversation_id: number;
+     message: string;
+     attachments?: any[];
+     sender_id: number;
+     receiver_id: number;
+     is_read: boolean;
+     read_at?: string | null;
+     created_at: string;
+     updated_at: string;
+     deleted_at?: string | null;
 }
 
 export interface Contact {
@@ -124,6 +144,7 @@ export interface Contact {
      user_id: number;
      registered_user_id?: number;
      name: string;
+     updated_at: string;
      profile_picture?: string;
      photo?: {
           uri: string;

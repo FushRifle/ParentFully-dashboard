@@ -11,8 +11,13 @@ export const updateRoutineReminder = async (
      data: UpdateReminderData
 ): Promise<void> => {
      try {
+          console.log("Updating routine reminder:", { routineId, data });
+
           const res = await api.put(`/v1/routines/${routineId}/reminder`, data);
+
+          console.log("Reminder update response:", res.data);
      } catch (error: any) {
+          console.error("Reminder update error:", error?.response?.data || error.message);
           throw error;
      }
 };

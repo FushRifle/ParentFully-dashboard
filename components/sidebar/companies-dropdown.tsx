@@ -17,7 +17,7 @@ interface Company {
 export const CompaniesDropdown = () => {
    const [company, setCompany] = useState<Company>({
       name: 'ParentFully',
-      location: 'Palo Alto, CA',
+      location: 'Pilandres Solutions Inc.',
       logo: <ParentfullyIcon />,
    });
    return (
@@ -53,6 +53,7 @@ export const CompaniesDropdown = () => {
                </Flex>
             </Box>
          </Dropdown.Trigger>
+
          <Dropdown.Menu
             onAction={(e) => {
                if (e === '1') {
@@ -65,22 +66,8 @@ export const CompaniesDropdown = () => {
                if (e === '2') {
                   setCompany({
                      name: 'Memora',
-                     location: 'Austin, Tx',
+                     location: 'Fush Inc.',
                      logo: <AcmeLogo />,
-                  });
-               }
-               if (e === '3') {
-                  setCompany({
-                     name: 'Twitter',
-                     location: 'Brooklyn, NY',
-                     logo: <AcmeIcon />,
-                  });
-               }
-               if (e === '4') {
-                  setCompany({
-                     name: 'Acme Co.',
-                     location: 'Palo Alto, CA',
-                     logo: <AcmeIcon />,
                   });
                }
             }}

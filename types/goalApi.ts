@@ -30,6 +30,7 @@ export type ChildGoal = {
      total_target: number
      target_count: number
      target_period: string
+
      reward_name: string | null
      notes: string | null
 

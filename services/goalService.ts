@@ -3,7 +3,7 @@ import { AxiosError, AxiosResponse } from 'axios';
 import type { AgeGroupKey } from '@/hooks/goals/useAgeGroupComment'
 import { Reminder, Goal, ApiResponse, CoreValue } from '@/types/api'
 import { ChildGoal, ChildGoalsResponse } from '@/types/goalApi'
-import { GoalPayload } from '@/types/updateGoal';
+import { GoalPayload, UpdateGoalPayload } from '@/types/updateGoal';
 
 const DEFAULT_PAGINATION = {
      type: 'active',
@@ -12,27 +12,29 @@ const DEFAULT_PAGINATION = {
      per_page: 10
 } as const
 
-
 const handleApiCall = async <T>(
      apiCall: Promise<AxiosResponse<ApiResponse<T>>>,
-     operation: string
+     endpoint: string
 ): Promise<T> => {
      try {
-          const response = await apiCall
-          return response.data.data
+          const response = await apiCall;
+          return response.data.data;
      } catch (error) {
-          const axiosError = error as AxiosError<ApiResponse<T>>
-          console.error(`API Call Failed: ${operation}`, {
-               error: axiosError,
-               errorMessage: axiosError.message,
-               response: axiosError.response ? {
-                    status: axiosError.response.status,
-                    data: axiosError.response.data
-               } : 'No response'
-          })
-          throw error
+          console.error(`API Error for ${endpoint}:`, error);
+
+          if (error instanceof AxiosError && error.response) {
+               console.error('Full error response:',
+                    JSON.stringify(error.response.data, null, 2));
+
+               if (error.response.data?.trace) {
+                    console.error('Trace array:',
+                         JSON.stringify(error.response.data.trace, null, 2));
+               }
+          }
+
+          throw error;
      }
-}
+};
 
 /* -------------------- Goal Category (Core Values) -------------------- */
 export const goalCategoryApi = {
@@ -101,9 +103,6 @@ export const goalApi = {
                )
                return response.data.data
           } catch (err: any) {
-               console.error('[createCustom] ERROR message:', err?.message)
-               console.error('[createCustom] ERROR status:', err?.response?.status)
-               console.error('[createCustom] ERROR data:', err?.response?.data)
                console.error(
                     '[createCustom] ERROR data stringified:',
                     JSON.stringify(err?.response?.data, null, 2)
@@ -121,12 +120,10 @@ export const goalApi = {
                     params: { category_id },
                });
 
-               return response.data.data
-                    .slice(0, 2)
-                    .map(goal => ({
-                         ...goal,
-                         categoryDescription: goal.category?.description || '',
-                    }));
+               return response.data.data.map(goal => ({
+                    ...goal,
+                    categoryDescription: goal.category?.description || '',
+               }));
           } catch (err: any) {
                if (err.response) {
                     console.error('[GoalApi] getAll backend error:', {
@@ -144,7 +141,8 @@ export const goalApi = {
      getOne: async (id: number): Promise<Goal> => {
           try {
                const response = await api.get<ApiResponse<Goal>>(`/v1/goals/${id}`);
-               return response.data.data;
+               const goal = response.data.data;
+               return goal;
           } catch (err: any) {
                console.error('[GoalApi] getOne error', {
                     message: err.message,
@@ -163,20 +161,29 @@ export const goalApi = {
           )
      },
 
-     assignGoalsToChild: (goalId: number, data: {
-          child_ids: number[];
-          user_id?: number;
-          core_value_id?: number;
-          category_id?: number;
-          time_bound_count?: number;
-          time_bound_value?: number;
-          time_bound_period?: string;
-          reward_name?: string;
-          notes?: string;
-          target_date?: string;
-          reminder_time?: string;
-          reminder_repeat_type?: string;
-     }): Promise<Goal> => {
+     assignGoalsToChild: (
+          goalId: number,
+          data: {
+               child_ids: number[];
+               user_id?: number;
+               core_value_id?: number;
+               category_id?: number;
+               time_bound_count?: number;
+               time_bound_value?: number;
+               time_bound_period?: string;
+               reward_name?: string;
+               notes?: string;
+               target_date?: string;
+               reminder_time?: string;
+               reminder_repeat_type?: string;
+          }
+     ): Promise<Goal> => {
+
+          console.log('[GoalApi] POST /v1/goals/assign-children', {
+               goalId,
+               payload: data
+          });
+
           return handleApiCall(
                api.post<ApiResponse<Goal>>(
                     `/v1/goals/${goalId}/assign-children`,
@@ -186,7 +193,24 @@ export const goalApi = {
                     }
                ),
                `POST /v1/goals/${goalId}/assign-children`
-          );
+          ).then((response) => {
+
+               console.log('[GoalApi] assignGoalsToChild success', {
+                    goalId,
+                    response
+               });
+
+               return response;
+          }).catch((error) => {
+
+               console.error('[GoalApi] assignGoalsToChild failed', {
+                    goalId,
+                    payload: data,
+                    error: error?.response?.data || error.message
+               });
+
+               throw error;
+          });
      },
 
      update: (id: number, data: Partial<GoalPayload>): Promise<Goal> => {
@@ -240,9 +264,8 @@ export const childGoalApi = {
           });
      },
 
-     updateChildGoal: async (id: number, data: GoalPayload): Promise<Goal> => {
+     updateChildGoal: async (id: number, data: UpdateGoalPayload): Promise<Goal> => {
           const url = `/v1/goal-children/${id}`;
-
           const payload = {
                ...data,
                reminder_time: data.reminder_time || null,
@@ -250,38 +273,24 @@ export const childGoalApi = {
           };
 
           try {
+               console.log(JSON.stringify({
+                    event: 'updateChildGoal_request',
+                    id,
+                    payload,
+                    timestamp: new Date().toISOString()
+               }));
+
                const res = await api.put<ApiResponse<Goal>>(url, payload);
+
                return res.data.data;
           } catch (error: any) {
-
-               if (error.response) {
-                    console.log("Error Response Details:");
-                    console.log(`   Status: ${error.response.status}`);
-                    console.log("   Data:", JSON.stringify(error.response.data, null, 2));
-                    console.log("   Headers:", JSON.stringify(error.response.headers, null, 2));
-
-                    if (error.response.data) {
-                         console.log("Error Analysis:");
-                         console.log(`   - Message: ${error.response.data.message || 'No message'}`);
-                         console.log(`   - Code: ${error.response.data.code || 'No code'}`);
-                         if (error.response.data.errors) {
-                              console.log("   - Validation Errors:", JSON.stringify(error.response.data.errors, null, 2));
-                         }
-                    }
-               } else if (error.request) {
-                    console.log("Network Error:");
-                    console.log("   No response received - possible network issue");
-                    console.log("   Request:", JSON.stringify(error.request, null, 2));
-               } else {
-                    console.log("Setup Error:");
-                    console.log("   Error message:", error.message);
-                    console.log("   Stack:", error.stack);
-               }
-
-               console.log('Full Error Object:', JSON.stringify(error, null, 2));
                throw error;
           } finally {
-               console.log('updateChildGoal - COMPLETED');
+               console.log(JSON.stringify({
+                    event: 'updateChildGoal_completed',
+                    id,
+                    timestamp: new Date().toISOString()
+               }));
           }
      },
 
@@ -303,7 +312,7 @@ export const childGoalApi = {
           return handleApiCall(
                api.put<ApiResponse<ChildGoal>>(`/v1/goal-children/${goalChildId}/progress`),
                `PUT /v1/goal-children/${goalChildId}/progress`
-          )
+          );
      },
 
      updateReminder: (goalChildId: number): Promise<Reminder> => {

@@ -2,7 +2,6 @@ import React, { useContext, useState, useEffect } from 'react';
 import { Box } from '../components/styles/box';
 import { Flex } from '../components/styles/flex';
 import {
-     Avatar,
      Button,
      Input,
      Card,
@@ -11,15 +10,29 @@ import {
      Badge,
      Switch,
      Spacer,
+     Loading,
 } from '@nextui-org/react';
-
+import ChatAvatarWrapper from '@/components/Avatar/ChatAvatarWrapper';
 import { SidebarContext } from '../components/layout/layout-context';
 import { User } from '../types/api';
-import { useUser } from '../hooks/user/useUser';
+import { useProfileData } from '@/hooks/auth/useProfileData';
 
 export const ProfileDetails = () => {
      const { showToast } = useContext(SidebarContext);
-     const { user, updateProfile, isLoading } = useUser();
+     const {
+          user,
+          loading,
+          handleUpdateProfile,
+          pickUserPhoto,
+          photoUploading
+     } = useProfileData();
+
+     const profile = user?.user
+          ? {
+               ...user,
+               ...user.user
+          }
+          : user;
 
      const [formData, setFormData] = useState<Partial<User>>({});
 
@@ -35,10 +48,10 @@ export const ProfileDetails = () => {
      };
 
      useEffect(() => {
-          if (user) {
-               setFormData(user);
+          if (profile) {
+               setFormData(profile);
           }
-     }, [user]);
+     }, [profile]);
 
      const updateField = (key: keyof User, value: string) => {
           setFormData((prev) => ({ ...prev, [key]: value }));
@@ -46,29 +59,27 @@ export const ProfileDetails = () => {
 
      const handleSave = async () => {
           if (!formData) return;
-          const updated = await updateProfile(formData);
-          if (updated) {
-               showToast('Profile updated successfully');
-               setFormData(updated);
-          }
+          await handleUpdateProfile(formData);
+          showToast('Profile updated successfully');
      };
 
-     if (isLoading) return <Text>Loading profile...</Text>;
-     if (!user) return <Text>No user data found.</Text>;
+     const handlePhotoUpload = async () => {
+          await pickUserPhoto();
+     };
+
+     if (loading) return <Text>Loading profile...</Text>;
+     if (!profile) return <Text>No user data found.</Text>;
 
      return (
           <Box css={{ px: '$12', py: '$10', '@xsMax': { px: '$6' } }}>
                {/* Page Header */}
-               <Flex
-                    justify="between" align="center"
-                    css={{ mb: '$10', width: '100%' }}
-               >
+               <Flex justify="between" align="center" css={{ mb: '$10', width: '100%' }}>
                     <Box>
                          <Text h2 css={{ m: 0, fontWeight: '$bold', ls: '-1px' }}>
                               Account Settings
                          </Text>
                          <Badge color="primary" variant="flat" css={{ mt: '$2', border: 'none' }}>
-                              ADMIN
+                              {profile.role || 'ADMIN'}
                          </Badge>
                     </Box>
                     <Button
@@ -76,17 +87,15 @@ export const ProfileDetails = () => {
                          shadow
                          color="primary"
                          onClick={handleSave}
+                         disabled={loading}
                          css={{ px: '$12', borderRadius: '$pill' }}
                     >
-                         Save Changes
+                         {loading ? <Loading size="sm" /> : 'Save Changes'}
                     </Button>
                </Flex>
 
                {/* Profile Card */}
-               <Card
-                    variant="flat"
-                    css={{ p: '$4', bg: '$accents0', border: '1px solid $border', minHeight: '500px' }}
-               >
+               <Card variant="flat" css={{ p: '$4', bg: '$accents0', border: '1px solid $border', minHeight: '500px' }}>
                     <Card.Body css={{ p: '$8' } as any}>
                          <Flex
                               direction="row"
@@ -94,24 +103,30 @@ export const ProfileDetails = () => {
                               align="stretch"
                               css={{ width: '100%', gap: '$4', '@xsMax': { flexDirection: 'column' } }}
                          >
-                              <Flex
-                                   direction="column"
-                                   align="center"
-                                   css={{ width: '250px', flexShrink: 0, pt: '$8' }}
-                              >
+                              {/* Left Column - Avatar */}
+                              <Flex direction="column" align="center" css={{ width: '250px', flexShrink: 0, pt: '$8' }}>
                                    <Box css={{ position: 'relative', mb: '$8' }}>
-                                        <Avatar
-                                             src={
-                                                  'https://img.freepik.com/premium-vector/man-avatar-profile-picture-isolated-background-avatar-profile-picture-man_1293239-4855.jpg'
-                                             }
-                                             css={{ size: '$40', borderRadius: '35%', border: '4px solid $background' }}
+                                        <ChatAvatarWrapper
+                                             profile_image={profile.profile_image as any}
+                                             contactName={profile.name}
+                                             phoneNumber={profile.phone_number}
+                                             size={160}
+                                             variant='secondary'
+                                             borderWidth={2}
+                                             borderColor='#F5A623'
                                         />
                                         <Badge
                                              color="success"
                                              content=""
                                              placement="bottom-right"
                                              shape="circle"
-                                             css={{ p: '$3', border: '3px solid $white' }}
+                                             css={{
+                                                  p: '$3',
+                                                  border: '3px solid $white',
+                                                  position: 'absolute',
+                                                  bottom: '10px',
+                                                  right: '10px',
+                                             }}
                                         />
                                    </Box>
                                    <Button
@@ -119,20 +134,16 @@ export const ProfileDetails = () => {
                                         light
                                         color="primary"
                                         css={{ borderRadius: '$pill' }}
-                                        onClick={() => alert('Upload new avatar')}
+                                        onClick={handlePhotoUpload}
+                                        disabled={photoUploading}
                                    >
-                                        Update Photo
+                                        {photoUploading ? <Loading size="xs" /> : 'Update Photo'}
                                    </Button>
-                                   <Text size="$xs" css={{ color: '$accents6', mt: '$4', textAlign: 'center' }}>
-                                        Member since Dec 2023
-                                   </Text>
                               </Flex>
 
-                              <Box
-                                   css={{ width: '1px', bg: '$border', mx: '$10', '@xsMax': { display: 'none', my: '$8' } }}
-                              />
+                              <Box css={{ width: '1px', bg: '$border', mx: '$10', '@xsMax': { display: 'none', my: '$8' } }} />
 
-                              {/* --- Middle Column: Form Section --- */}
+                              {/* Middle Column: Form Section */}
                               <Flex direction="column" css={{ flex: 1, gap: '$8' }}>
                                    <Text b size="$lg" css={{ mb: '$2' }}>
                                         Personal Details
@@ -153,7 +164,6 @@ export const ProfileDetails = () => {
                                              fullWidth
                                              bordered
                                         />
-
                                    </Flex>
 
                                    <Input
@@ -163,6 +173,15 @@ export const ProfileDetails = () => {
                                         fullWidth
                                         bordered
                                         type="email"
+                                   />
+
+                                   <Input
+                                        label="Phone Number"
+                                        value={formData.phone_number || ''}
+                                        onChange={(e) => updateField('phone_number', e.target.value)}
+                                        fullWidth
+                                        bordered
+                                        type="tel"
                                    />
 
                                    <Box css={{ mt: '$4' }}>
@@ -177,12 +196,10 @@ export const ProfileDetails = () => {
                                    </Box>
                               </Flex>
 
-                              {/* --- Second Vertical Divider --- */}
-                              <Box
-                                   css={{ width: '1px', bg: '$border', mx: '$10', '@xsMax': { display: 'none', my: '$8' } }}
-                              />
+                              {/* Second Vertical Divider */}
+                              <Box css={{ width: '1px', bg: '$border', mx: '$10', '@xsMax': { display: 'none', my: '$8' } }} />
 
-                              {/* --- Right Column: Settings --- */}
+                              {/* Right Column: Settings */}
                               <Flex direction="column" css={{ width: '280px', flexShrink: 0, gap: '$8' }}>
                                    <Text b size="$lg" css={{ mb: '$2' }}>
                                         Preferences
@@ -197,19 +214,11 @@ export const ProfileDetails = () => {
                                                   Secure your account
                                              </Text>
                                         </Box>
-                                        <Switch initialChecked size="sm" />
-                                   </Flex>
-
-                                   <Flex justify="between" align="center">
-                                        <Box>
-                                             <Text b size="$sm">
-                                                  Public Profile
-                                             </Text>
-                                             <Text size="$xs" css={{ color: '$accents7' }}>
-                                                  Visible to everyone
-                                             </Text>
-                                        </Box>
-                                        <Switch size="sm" />
+                                        <Switch
+                                             initialChecked={profile.two_factor_enabled}
+                                             size="sm"
+                                             onChange={(e) => updateField('two_factor_enabled', String(e.target.checked))}
+                                        />
                                    </Flex>
 
                                    <Divider css={{ my: '$2' }} />
@@ -224,6 +233,7 @@ export const ProfileDetails = () => {
                                              color="error"
                                              size="sm"
                                              css={{ width: '100%', justifyContent: 'start', p: 0 }}
+                                             onClick={() => alert('Deactivate account')}
                                         >
                                              Deactivate Account
                                         </Button>

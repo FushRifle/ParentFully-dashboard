@@ -28,6 +28,7 @@ export interface ContactMethod {
 export interface ChatMessage {
     text: string;
     sender: 'user' | 'support';
+    createdAt?: string;
     id: string;
 }
 

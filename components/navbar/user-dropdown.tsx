@@ -1,12 +1,13 @@
-import { Avatar, Dropdown, Text } from '@nextui-org/react';
+import { Dropdown, Text } from '@nextui-org/react';
 import React, { useEffect, useState } from 'react';
 import { DarkModeSwitch } from './darkmodeswitch';
 import NextLink from 'next/link';
 import { Flex } from '../styles/flex';
-import { useUser } from '../../hooks/user/useUser';
+import { useProfileData } from '@/hooks/auth/useProfileData';
+import ChatAvatarWrapper from '../Avatar/ChatAvatarWrapper';
 
 export const UserDropdown = () => {
-   const { user, isLoading } = useUser();
+   const { user, loading } = useProfileData();
    const [mounted, setMounted] = useState(false);
 
    // ensure we only render client-side
@@ -14,24 +15,29 @@ export const UserDropdown = () => {
       setMounted(true);
    }, []);
 
-   if (!mounted || isLoading) return null;
+   if (!mounted || loading) return null;
 
-   const avatarUrl =
-      'https://png.pngtree.com/png-clipart/20240917/original/pngtree-administrator-admin-avatar-png-image_16031562.png';
+   const profile = user?.user
+      ? { ...user, ...user.user }
+      : user;
 
-   const displayEmail = user?.email || 'admin@parentfully.com';
+   const displayEmail = profile?.email || 'admin@parentfully.com';
+   const avatar = profile?.profile_image;
 
    return (
       <Dropdown placement="bottom-right">
          <Dropdown.Trigger>
-            <Avatar
-               bordered
-               as="button"
-               color="secondary"
-               size="md"
-               src={avatarUrl}
-               css={{ cursor: 'pointer' }}
-            />
+            {/* Wrap the avatar in a button/div to make it clickable */}
+            <div style={{ cursor: 'pointer', display: 'inline-block' }}>
+               <ChatAvatarWrapper
+                  profile_image={avatar as any}
+                  contactName={profile?.name}
+                  size={45}
+                  variant='secondary'
+                  borderWidth={2}
+                  borderColor='#F5A623'
+               />
+            </div>
          </Dropdown.Trigger>
 
          <Dropdown.Menu

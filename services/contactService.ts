@@ -1,10 +1,17 @@
-import { api } from '@/lib/api'
+import { api } from '@/lib'
 import axios, { AxiosRequestConfig } from 'axios';
 import { Contact } from '@/types/api'
 
 export const getContacts = async (): Promise<Contact[]> => {
      const res = await api.get<{ success: boolean; data: Contact[] }>('/v1/contacts');
      return res.data.data;
+};
+
+export const getConnectedUsers = async (): Promise<Contact[]> => {
+     const res = await api.get<{ success: boolean; data: Contact[] }>(
+          '/v1/users/connected'
+     );
+     return res.data?.data ?? [];
 };
 
 export const getAllContacts = async (): Promise<Contact[]> => {
@@ -75,7 +82,6 @@ export const getContactInviteCode = async (data: { contact_id: number }): Promis
           };
           message: string;
      }>(`/v1/contacts/${data.contact_id}/invitation-code`)
-     console.log('getContactInviteCode response:', res.data);
      return { code: res.data.data.referral_code };
 }
 

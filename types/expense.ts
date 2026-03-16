@@ -143,7 +143,12 @@ export interface CreateExpenseData {
      amount: number;
      currency: string;
      date: string;
-     receipt?: File;
+     receipt?: {
+          uri: string
+          type: string
+          name: string
+          mimeType: string
+     }
      cat_icon?: string;
      cat_name?: string;
      percentage?: string;

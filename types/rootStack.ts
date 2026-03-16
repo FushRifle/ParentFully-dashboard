@@ -1,7 +1,7 @@
 import { Goal, CoreValue, Task, Rule, Routine } from "./api";
 import { Expense, Payment, PaymentRequest } from "./expense";
 import { IMessage } from 'react-native-gifted-chat';
-
+import type { NavigatorScreenParams } from '@react-navigation/native';
 
 interface ExtendedIMessage extends IMessage {
      video?: string;
@@ -15,9 +15,12 @@ interface ExtendedIMessage extends IMessage {
 
 export type RootStackParamList = {
      MainTabs: undefined;
+     Feedbacks: undefined;
+     ChatStack: NavigatorScreenParams<ChatStackParamList> | undefined;
      AddChild: undefined;
      Settings: undefined;
      Support: undefined;
+     SetLock: undefined;
      Community: undefined;
      ComingSoon: undefined;
      Milestones: undefined;
@@ -28,7 +31,6 @@ export type RootStackParamList = {
 
      Journal: undefined;
      JournalDetails: { entryId: string };
-
      RecycleBin: undefined;
 
      Messaging: undefined;
@@ -112,9 +114,9 @@ export type RootStackParamList = {
      WelcomeRoutine: undefined;
      ActiveRoutine: { childId: string };
      RoutineReminder: {
-          routine?: Routine | null;
+          routine?: Pick<Routine, 'id' | 'title' | 'reminder_time' | 'description'> | null;
           reminderId?: number;
-          onSave?: (updatedRoutine?: Routine) => void;
+          onSave?: (updatedRoutine?: Pick<Routine, 'id' | 'title' | 'reminder_time' | 'reminder_repeat_type' | 'reminder_enabled'>) => void;
      };
      CustomTask: {
           task?: Task;
@@ -184,7 +186,7 @@ export type RootStackParamList = {
      ExpenseRecords: undefined;
      ExpenseApproval: undefined;
      ExpenseDetail: {
-          expense: Expense; // Use the actual Expense type
+          expense: Expense;
           title?: string;
           amount?: number;
           currency?: string;
@@ -269,6 +271,8 @@ export type RootStackParamList = {
      NotisSettings: undefined;
 
      Premium: undefined;
+     Paywall: undefined;
+     ManualPaywall: undefined;
      ActivePlans: undefined;
      SelectPlan: { planType: 'monthly' | 'yearly' };
      Subscribe: { planType: 'monthly' | 'yearly' };
@@ -276,6 +280,34 @@ export type RootStackParamList = {
      GiftRefer: undefined;
      ForgotPassword: undefined;
      TermsPrivacy: { page: 'terms' | 'privacy' };
+};
+
+export type ChatStackParamList = {
+     Chat: undefined;
+     Conversation: {
+          contactId: number;
+          contactEmail: string;
+          contactName: string;
+          contactPhoto?: string;
+     };
+     ContactDetails: {
+          contactId: number;
+          conversationId: number;
+          contactEmail: string;
+          displayName: string;
+          contactPhoto?: string;
+          formattedLastSeen: string;
+     }
+     AddContact: undefined;
+     Report: undefined;
+     Block: {
+          displayName: string;
+     };
+     DocumentViewer: {
+          uri: string;
+          mime?: string;
+          filename?: string;
+     };
 };
 
 export type AddPaymentExpenseData = {

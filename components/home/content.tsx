@@ -85,8 +85,8 @@ export const Content = () => (
       }}>
          <Box css={{ zIndex: 1 }}>
             <Flex align="center" css={{ gap: '$3', mb: '$2' }}>
-               <Badge color="secondary" variant="flat" css={{ border: 'none', px: '$4' }}>ParentFully Admin</Badge>
-               <Text span css={{ color: '$accents6', size: '$xs' }}>v1.0.0</Text>
+               <Badge color="secondary" variant="flat" css={{ border: 'none', px: '$4' }}>ParentFully Admin
+               </Badge>
             </Flex>
             <Text h2 css={{ m: 0, fontWeight: '$bold', letterSpacing: '-0.03em' }}>
                ParentFully Insights Dashboard

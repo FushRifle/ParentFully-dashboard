@@ -1,12 +1,5 @@
-import React, { useCallback, useMemo, useState, useContext } from 'react';
-import {
-     Button, Card, Divider, Input, Text,
-     Badge, User as NextUser, Grid, Spacer
-} from '@nextui-org/react';
-
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { Breadcrumbs, Crumb, CrumbLink } from '../breadcrumb/breadcrumb.styled';
 import { HouseIcon } from '../icons/breadcrumb/house-icon';
 import { UsersIcon } from '../icons/breadcrumb/users-icon';
 import { Flex } from '../styles/flex';
@@ -14,16 +7,17 @@ import { Box } from '../styles/box';
 import { DeleteUserModal } from './modals/delete';
 import { SidebarContext } from '../layout/layout-context';
 import type { User } from '../../types/api';
+import ChatAvatarWrapper from '@/components/avatar/ChatAvatarWrapper';
+import React, { useCallback, useMemo, useState, useContext } from 'react';
+import { Breadcrumbs, Crumb, CrumbLink } from '../breadcrumb/breadcrumb.styled';
+import {
+     Button, Card, Divider, Input, Text,
+     Badge, User as NextUser, Grid, Spacer
+} from '@nextui-org/react';
 
 type Props = {
      user: User;
 };
-
-const SECURITY_LOGS = [
-     { event: 'New Login', device: 'iPhone 15 Pro', time: '14:20 PM' },
-     { event: 'Password Change', device: 'Desktop Chrome', time: 'Yesterday' },
-     { event: 'API Key Created', device: 'Internal', time: 'Oct 12' },
-];
 
 export const AccountDetails = ({ user }: Props) => {
      const router = useRouter();
@@ -31,6 +25,9 @@ export const AccountDetails = ({ user }: Props) => {
      const [deleteVisible, setDeleteVisible] = useState(false);
 
      const profile = useMemo(() => {
+          const u = user.user ?? user;
+          const profile_image = u.profile_image;
+          const userPhoto = user.user?.profile_image || u.photo;
           const fullName = user.user.name || 'Unknown User';
           const [firstName = '', ...lastNameParts] = fullName.split(' ');
           return {
@@ -50,6 +47,10 @@ export const AccountDetails = ({ user }: Props) => {
           lastName: profile.lastName,
           email: profile.email,
      });
+
+     const SECURITY_LOGS = [
+          { event: 'Last Activity', time: user.user.updated_at },
+     ];
 
      const updateField = useCallback((key: keyof typeof formData, value: string) => {
           setFormData((prev) => ({ ...prev, [key]: value }));
@@ -97,13 +98,15 @@ export const AccountDetails = ({ user }: Props) => {
                     <Grid.Container justify="space-between" alignItems="center">
                          <Grid>
                               <Flex align="center" css={{ gap: '$10' }}>
-                                   <NextUser
-                                        src={profile.avatar}
-                                        name={<Text h2 css={{ m: 0, lineHeight: '$xs' }}>{profile.fullName}</Text>}
-                                        description={profile.email}
-                                        size="xl"
-                                        css={{ p: 0 }}
+                                   <ChatAvatarWrapper
+                                        photo={userPhoto}
+                                        profile_image={profile_image}
+                                        contactName={fullName}
+                                        size={40}
+                                        variant={is_premium ? 'primary' : 'secondary'}
+                                        borderWidth={is_premium ? 2 : 1}
                                    />
+
                                    <Badge
                                         color={profile.isPremium ? 'warning' : 'success'}
                                         variant="flat"
@@ -224,7 +227,7 @@ export const AccountDetails = ({ user }: Props) => {
                               {/* Security Card */}
                               <Card variant="bordered" css={{ borderRadius: '$xl', bg: '$backgroundContrast' }}>
                                    <Card.Header css={{ px: '$8', pt: '$8' }}>
-                                        <Text b size="$md" transform="uppercase" color="$accents7">Recent Security Logs</Text>
+                                        <Text b size="$md" transform="uppercase" color="$accents7">Recent Logs</Text>
                                    </Card.Header>
                                    <Divider css={{ opacity: 0.5 }} />
                                    <Card.Body css={{ px: '$8', py: '$8' }}>
@@ -241,7 +244,7 @@ export const AccountDetails = ({ user }: Props) => {
                                         </Flex>
                                         <Spacer y={1.5} />
                                         <Button light color="primary" auto size="sm" css={{ width: '100%', borderRadius: '$md' }}>
-                                             View Audit History
+                                             View History
                                         </Button>
                                    </Card.Body>
                               </Card>
@@ -249,8 +252,8 @@ export const AccountDetails = ({ user }: Props) => {
                               {/* Quick Stats Card */}
                               <Card variant="flat" css={{ borderRadius: '$xl', bg: '$primaryLight' }}>
                                    <Card.Body css={{ py: '$8' }}>
-                                        <Text b color="$primary" size="$sm">Account Status</Text>
-                                        <Text size="$xs" color="$primary">This account is currently in good standing with no active reports.</Text>
+                                        <Text b color="white" size="$sm">Account Status</Text>
+                                        <Text size="$xs" color="white">This account is currently in good standing with no active reports.</Text>
                                    </Card.Body>
                               </Card>
                          </Flex>
