@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Input, Button, Text, Link, Spacer, Loading, Card } from '@nextui-org/react';
+import { Input, Button, Text, Link, Spacer, Loading, Card, Checkbox } from '@nextui-org/react';
 import { useRouter } from 'next/router';
 
 import { Mail } from '../components/icons/auth/mail';
@@ -14,6 +14,16 @@ const LoginPage = () => {
      const { isLoading, error, login, clearError } = useLogin();
      const [email, setEmail] = useState('');
      const [password, setPassword] = useState('');
+     const [rememberMe, setRememberMe] = useState(false);
+
+     // Check for saved email on component mount
+     useEffect(() => {
+          const savedEmail = localStorage.getItem('rememberedEmail');
+          if (savedEmail) {
+               setEmail(savedEmail);
+               setRememberMe(true);
+          }
+     }, []);
 
      useEffect(() => {
           if (error) clearError();
@@ -21,8 +31,23 @@ const LoginPage = () => {
 
      const handleSubmit = async (e: React.FormEvent) => {
           e.preventDefault();
+
+          // Handle remember me functionality
+          if (rememberMe) {
+               localStorage.setItem('rememberedEmail', email);
+          } else {
+               localStorage.removeItem('rememberedEmail');
+          }
+
           const success = await login({ email, password });
-          if (success) router.push('/dashboard');
+
+          // If login successful and remember me is checked, you might also want to
+          // set a longer session expiry or store a refresh token
+          if (success) {
+               // You could also store a session token here if your auth system supports it
+               // For example: localStorage.setItem('sessionToken', response.token);
+               router.push('/dashboard');
+          }
      };
 
      return (
@@ -132,8 +157,8 @@ const LoginPage = () => {
                                         labelPlaceholder="Email"
                                         contentLeft={<Mail fill="#A1A1AA" />}
                                         value={email}
+                                        color='primary'
                                         onChange={(e) => setEmail(e.target.value)}
-                                        disabled={isLoading}
                                         css={{
                                              mb: '$12',
                                              '& .nextui-input-wrapper': {
@@ -148,16 +173,58 @@ const LoginPage = () => {
                                         fullWidth
                                         size="xl"
                                         labelPlaceholder="Password"
+                                        color='primary'
                                         contentLeft={<Password fill="#A1A1AA" />}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        disabled={isLoading}
                                         css={{
                                              '& .nextui-input-wrapper': {
                                                   borderRadius: '12px',
                                              }
                                         }}
                                    />
+
+                                   {/* Remember Me Checkbox */}
+                                   <Flex justify="between" align="center" css={{ mt: '$8' }}>
+                                        <Flex
+                                             align="center"
+                                             onClick={() => setRememberMe(!rememberMe)}
+                                             css={{
+                                                  cursor: 'pointer',
+                                                  userSelect: 'none',
+                                                  gap: '$2'
+                                             }}
+                                        >
+                                             <Box css={{
+                                                  display: 'flex',
+                                                  alignItems: 'center',
+                                                  justifyContent: 'center',
+                                                  width: '25px',
+                                                  height: '25px',
+                                             }}>
+                                                  {rememberMe ? <CheckedIcon /> : <UncheckedIcon />}
+                                             </Box>
+                                             <Text
+                                                  css={{
+                                                       color: '$black',
+                                                       fontSize: '$sm',
+                                                  }}
+                                             >
+                                                  Remember me
+                                             </Text>
+                                        </Flex>
+
+                                        <Link
+                                             href="/forgot-password"
+                                             css={{
+                                                  color: '#FF8C01',
+                                                  fontSize: '$sm',
+                                                  '&:hover': { color: '$accents7' }
+                                             }}
+                                        >
+                                             Forgot password?
+                                        </Link>
+                                   </Flex>
 
                                    {error && (
                                         <Text color="error" size="$sm" css={{ mt: '$5', textAlign: 'center' }}>
@@ -170,9 +237,9 @@ const LoginPage = () => {
                                         size="xl"
                                         disabled={isLoading}
                                         css={{
-                                             mt: '$12',
+                                             mt: '$8',
                                              width: '100%',
-                                             height: '64px', // Slightly taller button for better scale
+                                             height: '64px',
                                              borderRadius: '18px',
                                              fontSize: '$md',
                                              fontWeight: '$bold',
@@ -190,20 +257,7 @@ const LoginPage = () => {
                                    </Button>
                               </form>
 
-                              <Spacer y={2} />
-
-                              <Flex justify="center">
-                                   <Link
-                                        href="/forgot-password"
-                                        css={{
-                                             color: '$accents7',
-                                             fontSize: '$sm',
-                                             '&:hover': { color: '#FF8C01' }
-                                        }}
-                                   >
-                                        Forgot your password?
-                                   </Link>
-                              </Flex>
+                              <Spacer y={1} />
                          </Box>
                     </Flex>
                </Card>
@@ -212,3 +266,16 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+
+const CheckedIcon = () => (
+     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="3" width="18" height="18" rx="4" fill="#FF8C01" stroke="#FF8C01" strokeWidth="2" />
+          <path d="M8 12L11 15L16 9" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+     </svg>
+);
+
+const UncheckedIcon = () => (
+     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="3" width="18" height="18" rx="4" fill="white" stroke="#000000" strokeWidth="2" />
+     </svg>
+);

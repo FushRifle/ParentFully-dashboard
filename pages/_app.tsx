@@ -7,7 +7,7 @@ import { GoalBackground } from '../constants/GoalBackground';
 import { AuthProvider } from '../lib/context/authContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useRouter } from 'next/router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 // Create light and dark NextUI themes
 const lightTheme = createTheme({
@@ -39,14 +39,22 @@ const queryClient = new QueryClient({
 
 export default function MyApp({ Component, pageProps }: AppProps) {
    const router = useRouter();
+   const [isInitialized, setIsInitialized] = useState(false);
 
    useEffect(() => {
-      if (router.pathname === '/') {
-         router.replace('/login');
+      if (!isInitialized) {
+         if (router.pathname === '/') {
+            router.replace('/login');
+         }
+         setIsInitialized(true);
       }
-   }, [router]);
+   }, [router, isInitialized]);
 
-   const isAuthPage = ['/login', '/register'].some((path) =>
+   if (!isInitialized && router.pathname === '/') {
+      return null;
+   }
+
+   const isAuthPage = ['/login', '/signup', '/forgot-password'].some((path) =>
       router.pathname.startsWith(path)
    );
 
