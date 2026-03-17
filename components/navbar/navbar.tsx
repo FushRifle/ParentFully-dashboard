@@ -65,8 +65,10 @@ export const NavbarWrapper = ({ children }: Props) => {
                {/* Feedback */}
                <Navbar.Content>
                   <Flex align="center" css={{ gap: '$2', cursor: 'pointer', '&:hover': { opacity: 0.7 } }}>
-                     <FeedbackIcon />
-                     <Text span size="$sm" b>Feedbacks</Text>
+                     <Link href="/feedbacks">
+                        <FeedbackIcon />
+                        <Text span size="$sm" b>Feedbacks</Text>
+                     </Link>
                   </Flex>
                </Navbar.Content>
 
@@ -81,7 +83,7 @@ export const NavbarWrapper = ({ children }: Props) => {
                </Navbar.Content>
 
                {/* User */}
-               <Navbar.Content>
+               <Navbar.Content css={{ cursor: 'pointer', '&:hover': { opacity: 0.7 } }}>
                   <UserDropdown />
                </Navbar.Content>
             </Navbar.Content>

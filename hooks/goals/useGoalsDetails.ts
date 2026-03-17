@@ -28,7 +28,6 @@ export const useGoalDetails = ({ goalId, goal: initialGoal }: UseGoalDetailsProp
      const [editedFields, setEditedFields] = useState<Partial<GoalPayload>>({});
 
      const fetchReminders = async (goalId: number) => {
-          // Implement your reminders fetch logic here
           return [];
      };
 
@@ -85,7 +84,6 @@ export const useGoalDetails = ({ goalId, goal: initialGoal }: UseGoalDetailsProp
      const handleSave = async () => {
           if (!fetchedGoal) {
                console.error('No goal data found');
-               // You might want to use a toast notification here instead of Alert
                alert('Error: No goal data found');
                return;
           }

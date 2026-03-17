@@ -12,13 +12,100 @@ import {
      Grid,
      Input,
      Textarea,
-     Select,
-     Checkbox,
      Row,
      Col,
      Spacer,
      Badge
 } from '@nextui-org/react';
+
+interface SmartFieldProps {
+     label: string;
+     value?: string | null;
+     isEditing: boolean;
+     onChange: (value: string) => void;
+     placeholder?: string;
+}
+
+interface SectionHeaderProps {
+     children: React.ReactNode;
+     icon?: React.ReactNode;
+     css?: React.CSSProperties;
+}
+
+const SmartField: React.FC<SmartFieldProps> = ({
+     label,
+     value,
+     isEditing,
+     onChange,
+     placeholder
+}) => (
+     <Grid xs={12} sm={6}>
+          <Card
+               variant="flat"
+               css={{
+                    p: '$6',
+                    h: '100%',
+                    bg: '$accents0',
+                    transition: 'transform 0.2s ease',
+                    '&:hover': { transform: isEditing ? 'none' : 'translateY(-2px)' }
+               }}
+          >
+               <Text
+                    h5
+                    size={12}
+                    transform="uppercase"
+                    css={{ color: '$primary', mb: '$2', ls: '1px', fontWeight: '$bold' }}
+               >
+                    {label}
+               </Text>
+
+               {isEditing ? (
+                    <Textarea
+                         fullWidth
+                         bordered
+                         color="primary"
+                         size="sm"
+                         placeholder={placeholder || `Describe how this is ${label.toLowerCase()}...`}
+                         value={value || ''}
+                         onChange={(e) => onChange(e.target.value)}
+                         rows={3}
+                         css={{ mt: '$2' }}
+                    />
+               ) : (
+                    <Text
+                         color={value ? "$accents9" : "$accents5"}
+                         css={{ lineHeight: '$base' }}
+                    >
+                         {value || 'Not specified'}
+                    </Text>
+               )}
+          </Card>
+     </Grid>
+);
+
+const SectionHeader: React.FC<SectionHeaderProps> = ({ children, icon, css = {} }) => (
+     <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          marginBottom: '24px',
+          marginTop: '16px',
+          ...css
+     }}>
+          {icon && <span style={{ fontSize: '1.5rem' }}>{icon}</span>}
+          <Text
+               h3
+               css={{
+                    m: 0,
+                    fontWeight: '$semibold',
+                    letterSpacing: '-0.02em'
+               }}
+          >
+               {children}
+          </Text>
+          <div style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, #eaeaea, transparent)', marginLeft: '8px' }} />
+     </div>
+);
 
 const GoalDetailsPage: NextPage = () => {
      const router = useRouter();
@@ -92,266 +179,216 @@ const GoalDetailsPage: NextPage = () => {
           );
      }
 
-     const statusColors = {
+     const statusColors: Record<string, 'warning' | 'success' | 'error'> = {
           'Working on': 'warning',
           'Mastered': 'success',
           'Expired': 'error'
-     } as const;
+     };
 
      return (
-          <Container css={{ py: '$10', maxWidth: '1200px' }}>
-               {/* Header */}
-               <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '1rem',
-                    marginBottom: '2rem',
-                    flexWrap: 'wrap'
-               }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                         <Button auto light css={{ minWidth: 'auto', px: '$2' }} onClick={goBack}>
-                              ← Back
-                         </Button>
-                         <Text h1 css={{ m: 0, fontSize: '2rem' }}>
-                              {isEditing ? 'Edit Goal' : goal.title}
-                         </Text>
-                         <Badge color={statusColors[goal.status as keyof typeof statusColors] || 'primary'} size="lg">
-                              {goal.status || 'Draft'}
-                         </Badge>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                         {isEditing ? (
-                              <>
-                                   <Button color="primary" onPress={handleSave}>
-                                        Save Changes
-                                   </Button>
-                                   <Button color="error" flat onPress={handleCancelEdit}>
-                                        Cancel
-                                   </Button>
-                              </>
-                         ) : (
-                              <Button color="primary" onPress={() => setIsEditing(true)}>
-                                   Edit Goal
+          <Container md css={{ py: '$15' }}>
+               {/* 1. TOP NAVIGATION & ACTIONS */}
+               <Row justify="space-between" align="center" wrap="wrap" css={{ mb: '$10', gap: '$8' }}>
+                    <Col>
+                         <Row align="center" css={{ gap: '$4' }}>
+                              <Button auto light color="primary" onClick={goBack}>
+                                   ← Back
                               </Button>
+                         </Row>
+                         <Spacer y={0.5} />
+                         {isEditing ? (
+                              <Input
+                                   fullWidth
+                                   size="xl"
+                                   aria-label="Goal Title"
+                                   value={editedGoal.title || ''}
+                                   onChange={(e) => handleInputChange('title', e.target.value)}
+                                   css={{
+                                        '& .nextui-input': {
+                                             fontSize: '2rem',
+                                             fontWeight: '$bold'
+                                        }
+                                   }}
+                              />
+                         ) : (
+                              <>
+                                   <Row>
+                                        <Text h1 css={{ m: 0 }}>{goal.title}</Text>
+
+                                        <Badge variant="flat" color={statusColors[goal.status] || 'primary'} size="lg">
+                                             {goal.status || 'Draft'}
+                                        </Badge>
+                                   </Row>
+                              </>
+
                          )}
-                    </div>
-               </div>
+                    </Col>
 
-               {/* Main Content */}
+                    <Col css={{ width: 'auto' }}>
+                         <Row css={{ gap: '$4' }}>
+                              {isEditing ? (
+                                   <>
+                                        <Button shadow color="primary" onClick={handleSave}>Save Changes</Button>
+
+                                        <Button shadow color="error" onClick={handleCancelEdit}>Cancel</Button>
+                                   </>
+                              ) : (
+                                   <Button shadow onClick={() => setIsEditing(true)}>
+                                        Edit Goal</Button>
+                              )}
+                         </Row>
+                    </Col>
+               </Row>
+
                <Grid.Container gap={2}>
-                    {/* Left Column - Main Goal Info */}
+                    {/* 2. MAIN CONTENT COLUMN */}
                     <Grid xs={12} md={8}>
-                         <Card css={{ width: '100%', p: '$6' }}>
-                              <Card.Body>
-                                   {/* Goal Title */}
-                                   <div style={{ marginBottom: '2rem' }}>
-                                        <Text h3 css={{ mb: '$2' }}>Goal</Text>
-                                        {isEditing ? (
-                                             <Input
-                                                  fullWidth
-                                                  labelPlaceholder="Goal Title"
-                                                  value={editedGoal.title || ''}
-                                                  onChange={(e) => handleInputChange('title', e.target.value)}
-                                                  css={{ mb: '$4' }}
-                                             />
-                                        ) : (
-                                             <Text css={{ fontSize: '1.2rem', color: '$gray' }}>
-                                                  {goal.title}
-                                             </Text>
-                                        )}
+                         <Col>
+                              {/* Description Section */}
+                              <Card css={{ p: '$8', mb: '$10' }}>
+                                   <SectionHeader>Description</SectionHeader>
+                                   {isEditing ? (
+                                        <Textarea
+                                             fullWidth
+                                             bordered
+                                             color="primary"
+                                             label="Context & Description"
+                                             value={editedGoal.description || ''}
+                                             onChange={(e) => handleInputChange('description', e.target.value)}
+                                             rows={4}
+                                        />
+                                   ) : (
+                                        <Text size="$lg" color="$accents9">{goal.description || "No description provided."}</Text>
+                                   )}
+                              </Card>
 
-                                        {isEditing ? (
-                                             <Textarea
-                                                  fullWidth
-                                                  labelPlaceholder="Description"
-                                                  value={editedGoal.description || ''}
-                                                  onChange={(e) => handleInputChange('description', e.target.value)}
-                                                  rows={3}
-                                             />
-                                        ) : (
-                                             goal.description && (
-                                                  <Text css={{ color: '$gray', mt: '$2' }}>
-                                                       {goal.description}
-                                                  </Text>
-                                             )
-                                        )}
-                                   </div>
-
-                                   {/* SMART Criteria */}
-                                   <Text h3 css={{ mb: '$4' }}>SMART Criteria</Text>
-                                   <Grid.Container gap={1}>
-                                        <Grid xs={12} md={6}>
-                                             <Card variant="flat" css={{ p: '$4', width: '100%' }}>
-                                                  <Text h5 css={{ color: '$primary' }}>Specific</Text>
-                                                  {isEditing ? (
-                                                       <Textarea
-                                                            fullWidth
-                                                            value={editedGoal.smart_specific || ''}
-                                                            onChange={(e) => handleInputChange('smart_specific', e.target.value)}
-                                                            rows={2}
-                                                       />
-                                                  ) : (
-                                                       <Text css={{ color: '$gray' }}>
-                                                            {goal.smart_specific || 'Not specified'}
-                                                       </Text>
-                                                  )}
-                                             </Card>
-                                        </Grid>
-                                        <Grid xs={12} md={6}>
-                                             <Card variant="flat" css={{ p: '$4', width: '100%' }}>
-                                                  <Text h5 css={{ color: '$primary' }}>Measurable</Text>
-                                                  {isEditing ? (
-                                                       <Textarea
-                                                            fullWidth
-                                                            value={editedGoal.smart_measurable || ''}
-                                                            onChange={(e) => handleInputChange('smart_measurable', e.target.value)}
-                                                            rows={2}
-                                                       />
-                                                  ) : (
-                                                       <Text css={{ color: '$gray' }}>
-                                                            {goal.smart_measurable || 'Not specified'}
-                                                       </Text>
-                                                  )}
-                                             </Card>
-                                        </Grid>
-                                        <Grid xs={12} md={6}>
-                                             <Card variant="flat" css={{ p: '$4', width: '100%' }}>
-                                                  <Text h5 css={{ color: '$primary' }}>Achievable</Text>
-                                                  {isEditing ? (
-                                                       <Textarea
-                                                            fullWidth
-                                                            value={editedGoal.smart_achievable || ''}
-                                                            onChange={(e) => handleInputChange('smart_achievable', e.target.value)}
-                                                            rows={2}
-                                                       />
-                                                  ) : (
-                                                       <Text css={{ color: '$gray' }}>
-                                                            {goal.smart_achievable || 'Not specified'}
-                                                       </Text>
-                                                  )}
-                                             </Card>
-                                        </Grid>
-                                        <Grid xs={12} md={6}>
-                                             <Card variant="flat" css={{ p: '$4', width: '100%' }}>
-                                                  <Text h5 css={{ color: '$primary' }}>Relevant</Text>
-                                                  {isEditing ? (
-                                                       <Textarea
-                                                            fullWidth
-                                                            value={editedGoal.smart_relevant || ''}
-                                                            onChange={(e) => handleInputChange('smart_relevant', e.target.value)}
-                                                            rows={2}
-                                                       />
-                                                  ) : (
-                                                       <Text css={{ color: '$gray' }}>
-                                                            {goal.smart_relevant || 'Not specified'}
-                                                       </Text>
-                                                  )}
-                                             </Card>
-                                        </Grid>
-                                   </Grid.Container>
-
-                                   <Spacer y={2} />
-
-                                   {/* Time Bound */}
-                                   <Text h3 css={{ mb: '$4' }}>Time Bound</Text>
-                                   <Card variant="flat" css={{ p: '$4' }}>
-                                        <Row align="center">
-                                             {isEditing ? (
-                                                  <>
-                                                       <Input
-                                                            type="number"
-                                                            label="Count"
-                                                            value={frequencyCount.toString()}
-                                                            onChange={(e) => setFrequencyCount(parseInt(e.target.value) || 0)}
-                                                            css={{ width: '100px', mr: '$4' }}
-                                                       />
-                                                       <Text css={{ mr: '$4' }}>times per</Text>
-                                                       <Input
-                                                            type="number"
-                                                            label="Value"
-                                                            value={frequencyDuration.toString()}
-                                                            onChange={(e) => setFrequencyDuration(parseInt(e.target.value) || 1)}
-                                                            css={{ width: '100px', mr: '$4' }}
-                                                       />
-                                                       <Select
-                                                            value={frequencyUnit}
-                                                            onChange={(e: any) => setFrequencyUnit(e.target.value as any)}
-                                                            css={{ width: '120px' }}
-                                                       >
-                                                            <Select.Option value="daily">Day(s)</Select.Option>
-                                                            <Select.Option value="weekly">Week(s)</Select.Option>
-                                                            <Select.Option value="monthly">Month(s)</Select.Option>
-                                                            <Select.Option value="yearly">Year(s)</Select.Option>
-                                                       </Select>
-                                                  </>
-                                             ) : (
-                                                  <Text>
-                                                       {goal.time_bound_count} times per {goal.time_bound_value} {goal.time_bound_period}
-                                                  </Text>
-                                             )}
-                                        </Row>
-                                        {goal.target_date && (
-                                             <Row css={{ mt: '$4' }}>
-                                                  <Text small css={{ color: '$gray' }}>
-                                                       Target Date: {new Date(goal.target_date).toLocaleDateString()}
-                                                  </Text>
-                                             </Row>
-                                        )}
-                                   </Card>
-                              </Card.Body>
-                         </Card>
+                              {/* SMART Framework */}
+                              <SectionHeader>SMART Strategy</SectionHeader>
+                              <Grid.Container gap={2}>
+                                   <SmartField
+                                        label="Specific"
+                                        value={isEditing ? editedGoal.smart_specific : goal.smart_specific}
+                                        isEditing={isEditing}
+                                        onChange={(val) => handleInputChange('smart_specific', val)}
+                                   />
+                                   <SmartField
+                                        label="Measurable"
+                                        value={isEditing ? editedGoal.smart_measurable : goal.smart_measurable}
+                                        isEditing={isEditing}
+                                        onChange={(val) => handleInputChange('smart_measurable', val)}
+                                   />
+                                   <SmartField
+                                        label="Achievable"
+                                        value={isEditing ? editedGoal.smart_achievable : goal.smart_achievable}
+                                        isEditing={isEditing}
+                                        onChange={(val) => handleInputChange('smart_achievable', val)}
+                                   />
+                                   <SmartField
+                                        label="Relevant"
+                                        value={isEditing ? editedGoal.smart_relevant : goal.smart_relevant}
+                                        isEditing={isEditing}
+                                        onChange={(val) => handleInputChange('smart_relevant', val)}
+                                   />
+                              </Grid.Container>
+                         </Col>
                     </Grid>
 
-                    {/* Right Column - Assignment & Rewards */}
+                    {/* 3. SIDEBAR COLUMN (Time & Reward) */}
                     <Grid xs={12} md={4}>
-                         <Card css={{ width: '100%', p: '$6' }}>
-                              <Card.Body>
+                         <Col>
+                              {/* Schedule Card */}
+                              <Card css={{ p: '$8', mb: '$8', bg: '$blue50' }}>
+                                   <Text h4 css={{ mb: '$6' }}>Time Frame</Text>
 
-                                   <Spacer y={2} />
-
-                                   {/* Reward Section */}
-                                   <Text h3 css={{ mb: '$4' }}>Reward</Text>
-                                   <Card variant="flat" css={{ p: '$4' }}>
-                                        {isEditing ? (
-                                             <>
+                                   {isEditing ? (
+                                        <Col css={{ gap: '$4', display: 'flex', flexDirection: 'column' }}>
+                                             <Input
+                                                  type="number"
+                                                  label="Frequency (Times)"
+                                                  fullWidth
+                                                  value={frequencyCount.toString()}
+                                                  onChange={(e) => setFrequencyCount(parseInt(e.target.value) || 0)}
+                                             />
+                                             <Row css={{ gap: '$4' }}>
                                                   <Input
-                                                       fullWidth
-                                                       labelPlaceholder="Reward Name"
-                                                       value={reward.name}
-                                                       onChange={(e) => updateRewardField('name', e.target.value)}
-                                                       css={{ mb: '$4' }}
+                                                       type="number"
+                                                       label="Every"
+                                                       css={{ flex: 1 }}
+                                                       value={frequencyDuration.toString()}
+                                                       onChange={(e) => setFrequencyDuration(parseInt(e.target.value) || 1)}
                                                   />
-                                                  <Textarea
-                                                       fullWidth
-                                                       labelPlaceholder="Notes"
-                                                       value={reward.notes}
-                                                       onChange={(e) => updateRewardField('notes', e.target.value)}
-                                                       rows={3}
-                                                  />
-                                             </>
-                                        ) : (
-                                             <>
-                                                  {reward.name && (
-                                                       <Text h5>{reward.name}</Text>
-                                                  )}
-                                                  {reward.notes && (
-                                                       <Text css={{ color: '$gray', mt: '$2' }}>
-                                                            {reward.notes}
-                                                       </Text>
-                                                  )}
-                                                  {!reward.name && !reward.notes && (
-                                                       <Text css={{ color: '$gray' }}>No reward set</Text>
-                                                  )}
-                                             </>
-                                        )}
-                                   </Card>
+                                                  <Col css={{ flex: 1.5 }}>
+                                                       <Text size="$xs" css={{ mb: '$2', ml: '$2' }}>Unit</Text>
+                                                       <select
+                                                            className="custom-select"
+                                                            value={frequencyUnit}
+                                                            onChange={(e) => setFrequencyUnit(e.target.value as 'daily' | 'weekly' | 'monthly' | 'yearly')}
+                                                            style={{
+                                                                 width: '100%',
+                                                                 height: '40px',
+                                                                 background: 'primary',
+                                                                 border: 'none',
+                                                                 borderRadius: '12px',
+                                                                 padding: '0 12px',
+                                                                 fontFamily: 'inherit',
+                                                                 fontSize: '14px',
+                                                                 cursor: 'pointer',
+                                                                 outline: 'none'
+                                                            }}
+                                                       >
+                                                            <option value="daily">Day(s)</option>
+                                                            <option value="weekly">Week(s)</option>
+                                                            <option value="monthly">Month(s)</option>
+                                                            <option value="yearly">Year(s)</option>
+                                                       </select>
+                                                  </Col>
+                                             </Row>
+                                        </Col>
+                                   ) : (
+                                        <div style={{ padding: '12px', borderRadius: '12px', border: '2px dashed #0072f522' }}>
+                                             <Text b size="$md" color="$primary">
+                                                  {goal.time_bound_count} times per {goal.time_bound_value} {goal.time_bound_period}
+                                             </Text>
+                                        </div>
+                                   )}
 
-                                   <Spacer y={2} />
-                              </Card.Body>
-                         </Card>
+                                   {goal.target_date && (
+                                        <Row align="center" css={{ mt: '$8', p: '$4', bg: '$background', borderRadius: '$md' }}>
+                                             <Text small b color="$accents7">
+                                                  Target: {new Date(goal.target_date).toLocaleDateString()}</Text>
+                                        </Row>
+                                   )}
+                              </Card>
+
+                              {/* Reward Card */}
+                              <Card css={{ p: '$8', borderColor: '$warningLight', borderWidth: '1px' }} variant="bordered">
+                                   <Text h4 color="$warning" css={{ mb: '$4' }}>The Reward</Text>
+                                   {isEditing ? (
+                                        <>
+                                             <Input
+                                                  bordered
+                                                  fullWidth
+                                                  label="What is the prize?"
+                                                  value={reward.name}
+                                                  onChange={(e) => updateRewardField('name', e.target.value)}
+                                                  css={{ mb: '$4' }}
+                                             />
+                                             <Textarea
+                                                  bordered
+                                                  fullWidth
+                                                  label="Incentive Notes"
+                                                  value={reward.notes}
+                                                  onChange={(e) => updateRewardField('notes', e.target.value)}
+                                             />
+                                        </>
+                                   ) : (
+                                        <Col>
+                                             <Text b size="$xl" css={{ display: 'block' }}>{reward.name || 'No reward set'}</Text>
+                                             <Text color="$accents7">{reward.notes}</Text>
+                                        </Col>
+                                   )}
+                              </Card>
+                         </Col>
                     </Grid>
                </Grid.Container>
           </Container>
