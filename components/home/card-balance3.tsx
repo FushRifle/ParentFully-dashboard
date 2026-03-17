@@ -1,20 +1,23 @@
-import { Badge, Card, Text } from '@nextui-org/react';
+import { Badge, Card, Loading, Text } from '@nextui-org/react';
 import React from 'react';
 import { Community } from '../icons/community';
 import { Box } from '../styles/box';
 import { Flex } from '../styles/flex';
+import { useUserStats } from '@/hooks/user/useUserStats';
 
 export const CardPremium = () => {
+   const { premiumUsers, loading } = useUserStats();
+
    return (
       <Card
          css={{
             mw: '375px',
-            bg: '$green600',
+            bg: '#005A31',
             borderRadius: '$xl',
             px: '$6',
             position: 'relative',
             overflow: 'hidden',
-            width: '100%', // Allows the card to shrink when sidebar opens
+            width: '100%',
          }}
       >
          <Card.Body css={{ py: '$10', zIndex: 1 } as any}>
@@ -24,10 +27,10 @@ export const CardPremium = () => {
                </Box>
                <Flex direction={'column'}>
                   <Text span css={{ color: 'white', fontWeight: '$semibold' }}>
-                     Premium Revenue
+                     Premium Users
                   </Text>
-                  <Text span css={{ color: 'rgba(255,255,255,0.8)' }} size={'$xs'}>
-                     1,500 Active Subs
+                  <Text span size={'$xs'}>
+                     Last 30 days
                   </Text>
                </Flex>
             </Flex>
@@ -38,7 +41,7 @@ export const CardPremium = () => {
                   py: '$6',
                   px: '$6',
                   borderRadius: '$xl',
-                  zIndex: 2, // Keeps text readable above the illustration
+                  zIndex: 2,
                   position: 'relative',
                   background: `
                         linear-gradient(
@@ -65,10 +68,11 @@ export const CardPremium = () => {
                      letterSpacing: '-0.02em',
                   }}
                >
-                  $15,300
+                  {loading ? <Loading type="points" color="primary" size="sm" /> : `${premiumUsers.length * 10_000}`}
                </Text>
             </Flex>
          </Card.Body>
+
 
          {/* --- Responsive Premium Family Illustration --- */}
          <Box

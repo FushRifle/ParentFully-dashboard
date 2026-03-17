@@ -1,15 +1,18 @@
-import { Card, Text, Badge } from '@nextui-org/react';
+import { Card, Loading, Text } from '@nextui-org/react';
 import React from 'react';
 import { Community } from '../icons/community';
 import { Box } from '../styles/box';
 import { Flex } from '../styles/flex';
+import { useUserStats } from '@/hooks/user/useUserStats';
 
 export const CardUsersOverview = () => {
+   const { totalUsers, loading } = useUserStats();
+
    return (
       <Card
          css={{
             mw: '375px',
-            bg: '$blue600',
+            bg: '#B35D00',
             borderRadius: '$2xl',
             px: '$6',
             position: 'relative',
@@ -26,10 +29,10 @@ export const CardUsersOverview = () => {
                </Box>
                <Flex direction={'column'}>
                   <Text b span css={{ color: 'white', lineHeight: '$xs', fontWeight: '$bold' }}>
-                     Total Families
+                     Total Users
                   </Text>
-                  <Text span css={{ color: 'rgba(255,255,255,0.7)' }} size={'$xs'}>
-                     8,201 Active Today
+                  <Text span size={'$xs'}>
+                     Last 30 days
                   </Text>
                </Flex>
             </Flex>
@@ -45,7 +48,10 @@ export const CardUsersOverview = () => {
                   position: 'relative',
                   background: 'linear-gradient(90deg,rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.75) 60%, rgba(255,255,255,0.35) 85%, rgba(255,255,255,0.0) 100%)',
                   backdropFilter: 'blur(12px)',
-                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.55), 0 8px 24px rgba(0,0,0,0.08)',
+                  boxShadow: `
+            inset 0 1px 0 rgba(255,255,255,0.06),
+            0 10px 28px rgba(0,0,0,0.45)
+        `,
                }}
             >
                <Text
@@ -54,7 +60,7 @@ export const CardUsersOverview = () => {
                   weight="bold"
                   css={{ color: '$black', letterSpacing: '-0.02em' }}
                >
-                  45,910
+                  {loading ? <Loading type="points" color="primary" size="sm" /> : totalUsers.toLocaleString()}
                </Text>
             </Flex>
          </Card.Body>

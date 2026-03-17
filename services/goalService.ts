@@ -1,4 +1,4 @@
-import { api } from '@/lib/api'
+import { api } from '@/lib'
 import { AxiosError, AxiosResponse } from 'axios';
 import type { AgeGroupKey } from '@/hooks/goals/useAgeGroupComment'
 import { Reminder, Goal, ApiResponse, CoreValue } from '@/types/api'

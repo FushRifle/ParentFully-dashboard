@@ -18,7 +18,7 @@ import { SettingsIcon } from '../icons/sidebar/settings-icon';
 import { AnalyticsIcon } from '../icons/sidebar/analytics-icon';
 import { useSidebarContext } from '../layout/layout-context';
 import { SupportIcon } from '../icons/navbar/support-icon';
-import { AlignHorizontalJustifyCenter, BookAlert, BriefcaseBusiness, GroupIcon, Headphones, HeartPulseIcon, NotebookTabs, Settings2, SuperscriptIcon, User2, UserCheck2, UserPlus2Icon, Users2, Wallet2Icon } from 'lucide-react';
+import { AlignHorizontalJustifyCenter, BookAlert, BriefcaseBusiness, GoalIcon, GroupIcon, Headphones, HeartPulseIcon, NotebookTabs, Settings2, SuperscriptIcon, User2, UserCheck2, UserPlus2Icon, Users2, Wallet2Icon } from 'lucide-react';
 
 import { BalanceIcon } from '../icons/sidebar/balance-icon';
 import { ChildrenIcon } from '../icons/sidebar/children-icon';
@@ -62,7 +62,7 @@ export const SidebarWrapper = () => {
                   />
 
                   {/* User & Family Management */}
-                  <SidebarMenu title="USER & FAMILY MANAGEMENT">
+                  <SidebarMenu title="USER MANAGEMENT">
                      <SidebarItem
                         title="Users"
                         icon={<Users2 />}
@@ -72,7 +72,10 @@ export const SidebarWrapper = () => {
                      <CollapseItems
                         title="Invites & Referrals"
                         icon={<UserPlus2Icon />}
-                        items={['Referals', 'Invites']}
+                        items={[
+                           { label: 'Referrals', href: '/referrals' },
+                           { label: 'Invites', href: '/invites' },
+                        ]}
                      />
                   </SidebarMenu>
 
@@ -90,15 +93,20 @@ export const SidebarWrapper = () => {
                         href="/experts"
                         isActive={activePath.startsWith('/experts')}
                      />
+
                      <CollapseItems
                         title="Resources"
                         icon={<NotebookTabs />}
-                        items={['Goals', 'Routine', 'Discipline']}
+                        items={[
+                           { label: 'Goals', href: '/goals' },
+                           { label: 'Routines', href: '/routinex' },
+                           { label: 'Disciplines', href: '/disciplinex' },
+                        ]}
                      />
                   </SidebarMenu>
 
                   {/* Subscription & Payments */}
-                  <SidebarMenu title="SUBSCRIPTION & PAYMENTS">
+                  <SidebarMenu title="SUBSCRIPTION">
                      <SidebarItem
                         title="Payments History"
                         icon={<Wallet2Icon />}
@@ -115,6 +123,7 @@ export const SidebarWrapper = () => {
                         isActive={activePath.startsWith('/feedbacks')}
                      />
                   */}
+
                   <SidebarMenu title="ANALYTICS & REPORTS">
                      <SidebarItem
                         title="Usage Analytics"
@@ -125,7 +134,7 @@ export const SidebarWrapper = () => {
                   </SidebarMenu>
 
                   {/* Settings & Config */}
-                  <SidebarMenu title="SETTINGS & CONFIGURATION">
+                  <SidebarMenu title="SETTINGS">
                      <SidebarItem
                         title="Profile"
                         icon={<User2 />}

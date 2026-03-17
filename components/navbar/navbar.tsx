@@ -63,7 +63,7 @@ export const NavbarWrapper = ({ children }: Props) => {
             {/* Right Side: Actions */}
             <Navbar.Content css={{ gap: '$6', alignItems: 'center' }}>
                {/* Feedback */}
-               <Navbar.Content hideIn={'md'}>
+               <Navbar.Content>
                   <Flex align="center" css={{ gap: '$2', cursor: 'pointer', '&:hover': { opacity: 0.7 } }}>
                      <FeedbackIcon />
                      <Text span size="$sm" b>Feedbacks</Text>

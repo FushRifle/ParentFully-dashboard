@@ -1,23 +1,33 @@
-import { Badge, Card, Text } from '@nextui-org/react';
+import { Badge, Card, Loading, Text } from '@nextui-org/react';
 import React from 'react';
 import { Community } from '../icons/community';
 import { Box } from '../styles/box';
 import { Flex } from '../styles/flex';
+import { useUserStats } from '@/hooks/user/useUserStats';
 
 export const CardNewUsers = () => {
+   const { newUsers, loading } = useUserStats();
+
+   const recentUsers = newUsers.filter(user => {
+      if (!user.created_at) return false;
+      const created = new Date(user.created_at).getTime();
+      const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+      return created >= thirtyDaysAgo;
+   });
+
    return (
       <Card
          css={{
             mw: '375px',
-            bg: '$accents0',
+            bg: ' #2E2E2E',
             borderRadius: '$xl',
-            px: '$6',
+            px: '$8',
             position: 'relative',
             overflow: 'hidden',
-            width: '100%', // Allows card to shrink
+            width: '100%',
          }}
       >
-         <Card.Body css={{ py: '$10', zIndex: 1 } as any}>
+         <Card.Body css={{ py: '$10', zIndex: 2, } as any}>
             <Flex css={{ gap: '$6', py: '$4' }} align="center">
                <Community color={'$accents9'} />
                <Flex direction={'column'}>
@@ -60,14 +70,15 @@ export const CardNewUsers = () => {
                   size="32px"
                   weight="bold"
                   css={{
-                     color: '$success',
+                     color: '$white',
                      letterSpacing: '-0.02em',
                   }}
                >
-                  3,562
+                  {loading ? <Loading type="points" color="primary" size="sm" /> : recentUsers.length.toLocaleString()}
                </Text>
             </Flex>
          </Card.Body>
+
 
          {/* --- Responsive Community Illustration --- */}
          <Box

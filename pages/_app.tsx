@@ -4,57 +4,45 @@ import { createTheme, NextUIProvider } from '@nextui-org/react';
 import { ThemeProvider as NextThemesProvider } from 'next-themes';
 import { Layout } from '../components/layout/layout';
 import { GoalBackground } from '../constants/GoalBackground';
-import { AuthProvider } from '../lib/context/authContext';
+import { AuthProvider, useAuth } from '../lib/context/authContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
-// Create light and dark NextUI themes
+// NextUI themes
 const lightTheme = createTheme({
    type: 'light',
-   theme: {
-      colors: {
-         primary: '#3f3bef',
-      },
-   },
+   theme: { colors: { primary: '#3f3bef' } },
 });
-
 const darkTheme = createTheme({
    type: 'dark',
-   theme: {
-      colors: {
-         primary: '#3f3bef',
-      },
+   theme: { colors: { primary: '#3f3bef' } },
+});
+
+// React Query client
+const queryClient = new QueryClient({
+   defaultOptions: {
+      queries: { staleTime: 5 * 60 * 1000, refetchOnWindowFocus: false },
    },
 });
 
-const queryClient = new QueryClient({
-   defaultOptions: {
-      queries: {
-         staleTime: 5 * 60 * 1000,
-         refetchOnWindowFocus: false,
-      },
-   },
-});
+const AuthGuard = ({ children }: { children: React.ReactNode }) => {
+   const { user, isLoading } = useAuth();
+   const router = useRouter();
+
+   useEffect(() => {
+      if (!isLoading && !user) router.replace('/login');
+   }, [user, isLoading, router]);
+
+   if (isLoading || !user) return null;
+
+   return <>{children}</>;
+};
 
 export default function MyApp({ Component, pageProps }: AppProps) {
    const router = useRouter();
-   const [isInitialized, setIsInitialized] = useState(false);
 
-   useEffect(() => {
-      if (!isInitialized) {
-         if (router.pathname === '/') {
-            router.replace('/login');
-         }
-         setIsInitialized(true);
-      }
-   }, [router, isInitialized]);
-
-   if (!isInitialized && router.pathname === '/') {
-      return null;
-   }
-
-   const isAuthPage = ['/login', '/signup', '/forgot-password'].some((path) =>
+   const isAuthPage = ['/login'].some((path) =>
       router.pathname.startsWith(path)
    );
 
@@ -72,7 +60,9 @@ export default function MyApp({ Component, pageProps }: AppProps) {
                   ) : (
                      <GoalBackground>
                         <Layout>
-                           <Component {...pageProps} />
+                           <AuthGuard>
+                              <Component {...pageProps} />
+                           </AuthGuard>
                         </Layout>
                      </GoalBackground>
                   )}

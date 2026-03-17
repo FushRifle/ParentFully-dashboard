@@ -3,7 +3,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAllUsers } from '@/services/authService';
 import { User } from '@/types/api';
 
-// In your useGetUserList hook
 export const useUser = (page: number = 1) => {
      const [users, setUsers] = useState<User[]>([]);
      const [loading, setLoading] = useState(true);

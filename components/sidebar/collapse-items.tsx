@@ -1,18 +1,25 @@
-import {Collapse, Text} from '@nextui-org/react';
-import React, {useState} from 'react';
-import {ChevronUpIcon} from '../icons/sidebar/chevron-up-icon';
-import {Flex} from '../styles/flex';
+import { Collapse, Text } from '@nextui-org/react';
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { ChevronUpIcon } from '../icons/sidebar/chevron-up-icon';
+import { Flex } from '../styles/flex';
+
+interface CollapseItemLink {
+   label: string;
+   href: string;
+}
 
 interface Props {
    icon: React.ReactNode;
    title: string;
-   items: string[];
+   items: CollapseItemLink[];
 }
 
-export const CollapseItems = ({icon, items, title}: Props) => {
+export const CollapseItems = ({ icon, items, title }: Props) => {
    const [open, setOpen] = useState(false);
 
    const handleToggle = () => setOpen(!open);
+
    return (
       <Flex
          css={{
@@ -27,12 +34,12 @@ export const CollapseItems = ({icon, items, title}: Props) => {
             title={
                <Flex
                   css={{
-                     'gap': '$6',
-                     'width': '100%',
-                     'py': '$5',
-                     'px': '$7',
-                     'borderRadius': '8px',
-                     'transition': 'all 0.15s ease',
+                     gap: '$6',
+                     width: '100%',
+                     py: '$5',
+                     px: '$7',
+                     borderRadius: '8px',
+                     transition: 'all 0.15s ease',
                      '&:active': {
                         transform: 'scale(0.98)',
                      },
@@ -43,7 +50,7 @@ export const CollapseItems = ({icon, items, title}: Props) => {
                   justify={'between'}
                   onClick={handleToggle}
                >
-                  <Flex css={{gap: '$6'}}>
+                  <Flex css={{ gap: '$6' }}>
                      {icon}
                      <Text
                         span
@@ -66,7 +73,7 @@ export const CollapseItems = ({icon, items, title}: Props) => {
                </Flex>
             }
             css={{
-               'width': '100%',
+               width: '100%',
                '& .nextui-collapse-view': {
                   p: '0',
                },
@@ -86,20 +93,22 @@ export const CollapseItems = ({icon, items, title}: Props) => {
                      paddingLeft: '$16',
                   }}
                >
-                  <Text
-                     span
-                     weight={'normal'}
-                     size={'$md'}
-                     css={{
-                        'color': '$accents8',
-                        'cursor': 'pointer',
-                        '&:hover': {
-                           color: '$accents9',
-                        },
-                     }}
-                  >
-                     {item}
-                  </Text>
+                  <Link href={item.href} passHref>
+                     <Text
+                        span
+                        weight={'normal'}
+                        size={'$md'}
+                        css={{
+                           color: '$accents8',
+                           cursor: 'pointer',
+                           '&:hover': {
+                              color: '$accents9',
+                           },
+                        }}
+                     >
+                        {item.label}
+                     </Text>
+                  </Link>
                </Flex>
             ))}
          </Collapse>

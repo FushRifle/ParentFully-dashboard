@@ -30,7 +30,7 @@ export interface AuthUser {
      has_completed_onboarding: boolean;
      has_sent_invite: boolean;
      has_seen_success: boolean;
-     created_at: string;
+     created_at: string | Date;
      updated_at: string;
      deleted_at: string | null;
 }
@@ -65,7 +65,7 @@ export interface User {
      } | undefined;
 
      two_factor_enabled?: boolean;
-     created_at?: string;
+     created_at?: string | Date;
      is_premium?: boolean;
 }
 
