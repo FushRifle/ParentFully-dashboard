@@ -70,17 +70,6 @@ export const MetricCard: React.FC<MetricCardProps> = ({ metric, compact = false 
                               >
                                    {metric.value}
                               </Text>
-                              {!compact && (
-                                   <Text
-                                        css={{
-                                             fontSize: '$4xl',
-                                             opacity: 0.2,
-                                             lineHeight: 1
-                                        }}
-                                   >
-                                        {metric.icon}
-                                   </Text>
-                              )}
                          </Flex>
 
                          {!compact && (

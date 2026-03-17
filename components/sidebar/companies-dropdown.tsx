@@ -49,7 +49,6 @@ export const CompaniesDropdown = () => {
                         {company.location}
                      </Text>
                   </Box>
-                  <BottomIcon />
                </Flex>
             </Box>
          </Dropdown.Trigger>

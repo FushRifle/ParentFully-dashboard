@@ -1,6 +1,5 @@
 import React from 'react';
 import { Table, Text, Badge, Card } from '@nextui-org/react';
-
 import { Box } from '../styles/box';
 import { Flex } from '../styles/flex';
 import { TopContent } from './data';
