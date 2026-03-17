@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Input, Button, Text, Link, Spacer, Loading, Card, Checkbox } from '@nextui-org/react';
 import { useRouter } from 'next/router';
 
 import { Mail } from '../components/icons/auth/mail';
@@ -8,6 +7,10 @@ import { Password } from '../components/icons/auth/password';
 import { Box } from '../components/styles/box';
 import { Flex } from '../components/styles/flex';
 import { useLogin } from '../hooks/auth/useLogin';
+import {
+     Input, Button, Text, Link,
+     Spacer, Loading, Card
+} from '@nextui-org/react';
 
 const LoginPage = () => {
      const router = useRouter();

@@ -1,11 +1,19 @@
 import React from 'react';
 import { Card, Text, Badge } from '@nextui-org/react';
 import { Flex } from '../../components/styles/flex';
-import { Ticket } from './data';
-import { UserAvatar } from './user-avatar';
+import ChatAvatarWrapper from '../Avatar/ChatAvatarWrapper';
 
 interface TicketCardProps {
-     ticket: Ticket;
+     ticket: {
+          id: number;
+          user: string;
+          issue: string;
+          time: string;
+          status: 'open' | 'closed' | 'urgent';
+          priority?: 'high' | 'medium' | 'low';
+          avatar?: string;
+          tags?: string[];
+     };
      isSelected?: boolean;
      onClick?: () => void;
 }
@@ -15,7 +23,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({
      isSelected = false,
      onClick
 }) => {
-     const getStatusColor = (status: Ticket['status']) => {
+     const getStatusColor = (status: string) => {
           switch (status) {
                case 'urgent': return 'error';
                case 'open': return 'primary';
@@ -24,13 +32,22 @@ export const TicketCard: React.FC<TicketCardProps> = ({
           }
      };
 
-     const getPriorityColor = (priority?: Ticket['priority']) => {
+     const getPriorityColor = (priority?: string) => {
           switch (priority) {
                case 'high': return 'error';
                case 'medium': return 'warning';
                case 'low': return 'success';
                default: return 'default';
           }
+     };
+
+     const getInitials = (name: string) => {
+          return name
+               .split(' ')
+               .map(word => word[0])
+               .join('')
+               .toUpperCase()
+               .slice(0, 2);
      };
 
      return (
@@ -42,18 +59,25 @@ export const TicketCard: React.FC<TicketCardProps> = ({
                     p: '$6',
                     bg: isSelected ? '$accents0' : '$background',
                     border: isSelected ? '2px solid $primary' : '1px solid $border',
-                    transition: 'all 0.2s ease'
+                    transition: 'all 0.2s ease',
+                    width: '100%'
                }}
                onClick={onClick}
           >
                <Flex justify="between" align="center">
-                    <UserAvatar
-                         name={ticket.user}
-                         avatar={ticket.avatar}
-                         size="sm"
-                    />
+                    <Flex align="center" css={{ gap: '$3' }}>
+                         <ChatAvatarWrapper
+                              profile_image={ticket.avatar}
+                              contactName={ticket.user}
+                              size={40}
+                              variant="secondary"
+                              borderWidth={2}
+                              borderColor={ticket.status === 'open' ? '#17C964' : '#F5A623'}
+                         />
+                         <Text b size="$sm">{ticket.user}</Text>
+                    </Flex>
                     <Badge
-                         color={getStatusColor(ticket.status)}
+                         color={getStatusColor(ticket.status) as any}
                          variant="flat"
                          size="sm"
                     >
@@ -61,7 +85,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({
                     </Badge>
                </Flex>
 
-               <Text b size="$sm" css={{ mt: '$4' }}>{ticket.issue}</Text>
+               <Text size="$sm" css={{ mt: '$4', color: '$accents8' }}>{ticket.issue}</Text>
 
                {ticket.tags && ticket.tags.length > 0 && (
                     <Flex css={{ mt: '$2', gap: '$2' }} wrap="wrap">
@@ -82,7 +106,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({
                     <Text size="$xs" color="$accents7">{ticket.time}</Text>
                     {ticket.priority && (
                          <Badge
-                              color={getPriorityColor(ticket.priority)}
+                              color={getPriorityColor(ticket.priority) as any}
                               variant="flat"
                               size="xs"
                          >

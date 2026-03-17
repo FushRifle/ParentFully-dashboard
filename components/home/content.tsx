@@ -1,5 +1,4 @@
 import React from 'react';
-import { Text, Link, Button, Grid, Badge, Card, Divider, Avatar } from '@nextui-org/react';
 import { Box } from '../styles/box';
 import dynamic from 'next/dynamic';
 import { Flex } from '../styles/flex';
@@ -9,62 +8,18 @@ import NextLink from 'next/link';
 import { CardUsersOverview } from './card-balance1';
 import { CardNewUsers } from './card-balance2';
 import { CardPremium } from './card-balance3';
+import { CommunityNewsFeed } from './community-feeds';
+
+import {
+   Text, Link, Button, Grid,
+   Badge, Card, Divider, Avatar
+} from '@nextui-org/react';
+import { EngagementCharts } from './engagement-chart';
+
 
 const Chart = dynamic(
    () => import('../charts/steam').then((mod) => mod.Steam),
    { ssr: false }
-);
-
-const CommunityNewsFeed = () => (
-   <Card variant="flat" css={{ bg: '$background', border: '1px solid $border', p: '$4' }}>
-      <Card.Header css={{ pb: 0 } as any}>
-         <Text b size="$md">Family Milestones & News</Text>
-      </Card.Header>
-      <Card.Body css={{ pt: '$4' } as any}>
-         <Flex direction="column" css={{ gap: '$6' }}>
-            {/* News Item 1 */}
-            <Flex align="start" css={{ gap: '$4' }}>
-               <Avatar src="https://i.pravatar.cc/150?u=family1" size="md" />
-               <Box>
-                  <Text b size="$sm">The Smiths</Text>
-                  <Text size="$xs" css={{ color: '$accents7' }}>
-                     Just completed their "Potty Training Masterclass"!
-                  </Text>
-                  <Text size="$xs" css={{ color: '$accents6', mt: '$1' }}>2 hours ago</Text>
-               </Box>
-            </Flex>
-            <Divider />
-            {/* News Item 2 */}
-            <Flex align="start" css={{ gap: '$4' }}>
-               <Avatar src="https://i.pravatar.cc/150?u=family2" size="md" />
-               <Box>
-                  <Text b size="$sm">The Johnsons</Text>
-                  <Text size="$xs" css={{ color: '$accents7' }}>
-                     Shared their first "Family Meal Planning" template.
-                  </Text>
-                  <Text size="$xs" css={{ color: '$accents6', mt: '$1' }}>Yesterday</Text>
-               </Box>
-            </Flex>
-            <Divider />
-            {/* News Item 3 */}
-            <Flex align="start" css={{ gap: '$4' }}>
-               <Avatar src="https://i.pravatar.cc/150?u=family3" size="md" />
-               <Box>
-                  <Text b size="$sm">User @ParentPro</Text>
-                  <Text size="$xs" css={{ color: '$accents7' }}>
-                     Reached Level 5 in "Productive Parenthood" challenge!
-                  </Text>
-                  <Text size="$xs" css={{ color: '$accents6', mt: '$1' }}>2 days ago</Text>
-               </Box>
-            </Flex>
-         </Flex>
-      </Card.Body>
-      <Card.Footer>
-         <Link href="/community">
-            <Button flat size="sm" css={{ borderRadius: '$pill' }}>View All Feed</Button>
-         </Link>
-      </Card.Footer>
-   </Card>
 );
 
 export const Content = () => (
@@ -151,44 +106,10 @@ export const Content = () => (
             </Grid.Container>
 
             {/* Engagement Chart */}
-            <Card variant="flat" css={{
-               p: '$6',
-               borderRadius: '$2xl',
-               bg: '$background',
-               border: '1px solid $border',
-            }}>
-               <Card.Header css={{ p: '$4', mb: '$4' } as any}>
-                  <Flex justify="between" align="center" css={{ width: '100%' }}>
-                     <Box>
-                        <Text b size="$lg">User Engagement Trends</Text>
-                        <Text size="$xs" css={{ color: '$accents6', display: 'block' }}>Guide completions vs. Productivity tool usage</Text>
-                     </Box>
-                     <Flex css={{ gap: '$2' }}>
-                        <Badge color="primary" variant="dot">Guides</Badge>
-                        <Badge color="success" variant="dot">Tools</Badge>
-                     </Flex>
-                  </Flex>
-               </Card.Header>
-               <Card.Body css={{ p: 0, overflow: 'hidden' } as any}>
-                  <Box css={{ height: '380px', width: '100%', px: '$2' }}>
-                     <Chart />
-                  </Box>
-               </Card.Body>
-            </Card>
+            <EngagementCharts />
 
             {/* Latest User Registrations */}
             <Box css={{ mt: '$15' }}>
-               <Flex justify="between" align="center" css={{ mb: '$8' }}>
-                  <Box>
-                     <Text h3 css={{ m: 0 }}>New Parents Signups</Text>
-                     <Text size="$sm" css={{ color: '$accents7' }}>Real-time feed of new members</Text>
-                  </Box>
-                  <NextLink href="/accounts">
-                     <Text color="primary" b css={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>
-                        View All Parents →
-                     </Text>
-                  </NextLink>
-               </Flex>
                <Card variant="bordered" css={{ borderRadius: '$2xl', border: '1px solid $border', bg: '$background' }}>
                   <Card.Body css={{ p: 0 } as any}>
                      <TableWrapper />

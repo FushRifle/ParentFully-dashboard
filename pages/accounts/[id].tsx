@@ -5,7 +5,7 @@ import { Loading, } from '@nextui-org/react';
 
 import { AccountDetails } from '../../components/accounts/details';
 import type { User } from '../../types/api';
-import { getUserByID } from '../../lib/services/authServices';
+import { getUserByID } from '@/services/authService';
 
 const AccountDetailsPage = () => {
      const router = useRouter();

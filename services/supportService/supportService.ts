@@ -1,4 +1,4 @@
-import { api } from '@/lib/api';
+import { api } from '@/lib';
 import axios from 'axios';
 import type {
      ChatMessage,
@@ -20,9 +20,6 @@ export const getSupportData = async (): Promise<SupportData> => {
           success: boolean;
           data: SupportData;
      }>('/v1/support');
-
-     console.debug('[SupportService] getSupportData ←', res.data);
-
      return res.data.data;
 };
 
@@ -32,14 +29,12 @@ export interface StartChatResponse {
 }
 
 export const startSupportChat = async (): Promise<StartChatResponse> => {
-     console.debug('[SupportService] startSupportChat → /v1/support/start-chat');
-
      const res = await api.post<{
           success: boolean;
           data: StartChatResponse;
      }>('/v1/support/start-chat');
 
-     console.debug('[SupportService] startSupportChat ←', res.data);
+     console.log('[SupportService] startSupportChat ←', res.data);
 
      return res.data.data;
 };

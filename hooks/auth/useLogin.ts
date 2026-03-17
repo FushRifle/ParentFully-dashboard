@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/router';
-import { login as loginService } from '../../lib/services/authServices';
+import { login as loginService } from '@/services/authService';
 import { useAuth } from '../../lib/context/authContext';
 import { AuthResponse } from '../../types/api';
 

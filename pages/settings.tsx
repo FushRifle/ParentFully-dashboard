@@ -1,12 +1,13 @@
 import React, { useState, useContext } from 'react';
 import { Box } from '../components/styles/box';
 import { Flex } from '../components/styles/flex';
+import { SidebarContext } from '../components/layout/layout-context';
+import { DarkModeSwitch } from '../components/navbar/darkmodeswitch';
+
 import {
      Card, Text, Input, Button, Switch,
      Spacer, Divider, Dropdown
 } from '@nextui-org/react';
-import { SidebarContext } from '../components/layout/layout-context';
-import { DarkModeSwitch } from '../components/navbar/darkmodeswitch';
 
 export const SettingsDetails = () => {
      const { showToast } = useContext(SidebarContext);
@@ -59,7 +60,6 @@ export const SettingsDetails = () => {
                                    {[
                                         { id: 'security', label: 'Security', icon: '🔒' },
                                         { id: 'localization', label: 'Localization', icon: '🌍' },
-                                        { id: 'api', label: 'API Access', icon: '⚡' },
                                    ].map((tab) => (
                                         <Button
                                              key={tab.id}

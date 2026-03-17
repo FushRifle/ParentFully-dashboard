@@ -1,9 +1,3 @@
-import type { ThemeColors } from '@/styles/ThemeContext';
-
-export type RootStackParamList = {
-    Community: undefined;
-};
-
 export type SupportTab = 'faq' | 'chat' | 'resources' | 'contact';
 
 export interface FAQItem {
@@ -36,7 +30,7 @@ export interface TabButtonProps {
     label: string;
     active: boolean;
     onPress: () => void;
-    colors: ThemeColors;
+    colors: any;
 }
 
 export interface FAQItemProps {
@@ -44,17 +38,17 @@ export interface FAQItemProps {
     index: number;
     expanded: boolean;
     onPress: (index: number) => void;
-    colors: ThemeColors;
+    colors: any;
 }
 
 export interface MessageBubbleProps {
     message: ChatMessage;
-    colors: ThemeColors;
+    colors: any;
 }
 
 export interface ChatInputProps {
     message: string;
     setMessage: (msg: string) => void;
     handleSendMessage: () => void;
-    colors: ThemeColors;
+    colors: any;
 }

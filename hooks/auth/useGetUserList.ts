@@ -14,12 +14,11 @@ export const useUser = (page: number = 1) => {
           setError(null);
 
           try {
-               const apiUser = await getAllUsers(); // Pass page to API
+               const apiUser = await getAllUsers();
 
                if (apiUser && Array.isArray(apiUser)) {
                     setUsers(apiUser);
-                    // Set total pages from API response if available
-                    // setTotalPages(apiUser.totalPages);
+
                     return;
                }
 

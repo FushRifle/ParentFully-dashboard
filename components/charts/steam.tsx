@@ -1,17 +1,7 @@
 import React from 'react';
 import { Box } from '../styles/box';
 import Chart, { Props } from 'react-apexcharts';
-
-const state: Props['series'] = [
-   {
-      name: 'Active Families',
-      data: [310, 400, 280, 510, 420, 1090, 1000],
-   },
-   {
-      name: 'Premium Subs',
-      data: [110, 320, 450, 320, 340, 520, 410],
-   },
-];
+import { useUserStats } from '@/hooks/user/useUserStats';
 
 const options: Props['options'] = {
    chart: {
@@ -39,7 +29,7 @@ const options: Props['options'] = {
       },
    },
    dataLabels: {
-      enabled: false, // Hides the data labels as requested
+      enabled: false,
    },
    fill: {
       type: 'gradient',
@@ -51,11 +41,10 @@ const options: Props['options'] = {
          stops: [20, 100],
       },
    },
-   // ParentFully Brand Colors: Soft Blue and Parenting Green
-   colors: ['#3f3bef', '#17C964'],
+   colors: ['#3f3bef', '#17C964', '#F5A524'],
    stroke: {
       curve: 'smooth',
-      width: 4, // Thicker lines look more modern/premium
+      width: 4,
       lineCap: 'round'
    },
    markers: {
@@ -93,7 +82,7 @@ const options: Props['options'] = {
       x: {
          show: false,
       },
-      theme: 'light', // Light theme fits the "soft" branding better
+      theme: 'light',
       style: {
          fontSize: '12px',
          fontFamily: 'Inter, sans-serif',
@@ -108,11 +97,11 @@ const options: Props['options'] = {
    grid: {
       show: true,
       borderColor: 'var(--nextui-colors-border)',
-      strokeDashArray: 0, // Solid lines for a cleaner grid
+      strokeDashArray: 0,
       position: 'back',
       xaxis: {
          lines: {
-            show: false // Remove vertical lines for a more "airy" look
+            show: false
          }
       },
    },
@@ -131,6 +120,45 @@ const options: Props['options'] = {
 };
 
 export const Steam = () => {
+   const { totalUsers, premiumUsers, newUsers, loading } = useUserStats();
+
+   const weeklyActiveData = [310, 400, 280, 510, 420, 1090, totalUsers || 1000];
+   const weeklyPremiumData = [110, 320, 450, 320, 340, 520, premiumUsers.length || 410];
+   const weeklyNewUsersData = [45, 78, 62, 91, 84, 120, newUsers.length || 95];
+
+   const series: Props['series'] = [
+      {
+         name: 'Active Families',
+         data: weeklyActiveData,
+      },
+      {
+         name: 'Premium Subs',
+         data: weeklyPremiumData,
+      },
+      {
+         name: 'New Users',
+         data: weeklyNewUsersData,
+      },
+   ];
+
+   if (loading) {
+      return (
+         <Box
+            css={{
+               width: '100%',
+               height: 425,
+               display: 'flex',
+               alignItems: 'center',
+               justifyContent: 'center',
+               backgroundColor: 'transparent',
+               borderRadius: '$xl',
+            }}
+         >
+            Loading statistics...
+         </Box>
+      );
+   }
+
    return (
       <Box
          css={{
@@ -140,7 +168,7 @@ export const Steam = () => {
          }}
       >
          <div id="chart">
-            <Chart options={options} series={state} type="area" height={425} />
+            <Chart options={options} series={series} type="area" height={425} />
          </div>
       </Box>
    );

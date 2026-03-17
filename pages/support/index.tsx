@@ -1,71 +1,154 @@
 import React, { useState, useEffect } from 'react';
-import { Text, Card, Badge, Button, Spacer } from '@nextui-org/react';
+import { Text, Card, Button, Loading } from '@nextui-org/react';
 import { Box } from '../../components/styles/box';
 import { Flex } from '../../components/styles/flex';
-
-import {
-     tickets as initialTickets,
-     chatMessages as initialMessages,
-     currentUser
-} from '../../components/support/data';
-
 import { TicketCard } from '../../components/support/ticket-card';
 import { ChatHeader } from '../../components/support/chat-header';
 import { ChatBubble } from '../../components/support/chat-bubble';
 import { ChatInput } from '../../components/support/chat-input';
-
-import { Select } from '../../components/styles/select';
 import { useIsMobile } from '../../components/hooks/useMediaQuery';
-
 import { Menu } from '../../components/icons/support/menu';
 import { ChevronDown } from '../../components/icons/support/chevron-down';
+import { useSupport } from '@/hooks/support/useSupport';
+import { useUser } from '@/hooks/auth/useGetUserList';
+import { User } from '@/types/api';
 
 const SupportPage = () => {
-     const [selectedTicket, setSelectedTicket] = useState(1);
+     const [selectedTicket, setSelectedTicket] = useState<number | null>(null);
      const [message, setMessage] = useState('');
-     const [tickets, setTickets] = useState(initialTickets);
-     const [chatMessages, setChatMessages] = useState(initialMessages);
-     const [isTicketClosed, setIsTicketClosed] = useState(false);
      const [showTicketList, setShowTicketList] = useState(false);
+     const [selectedUser, setSelectedUser] = useState<User | null>(null);
+     const [activeTickets, setActiveTickets] = useState<Array<{
+          id: number;
+          user: string;
+          issue: string;
+          time: string;
+          status: 'open' | 'closed' | 'urgent';
+          avatar?: string;
+     }>>([]);
 
      const isMobile = useIsMobile();
+     const {
+          messages,
+          conversationId,
+          conversationStatus,
+          supportUserId,
+          loading: supportLoading,
+          error: supportError,
+          startChat,
+          sendMessage,
+          clearChat,
+          loadConversation
+     } = useSupport();
+
+     const {
+          users,
+          loading: usersLoading,
+          error: usersError,
+          refresh: refreshUsers
+     } = useUser();
 
      useEffect(() => {
-          // On mobile, hide list by default. On desktop, keep it visible.
           setShowTicketList(!isMobile);
      }, [isMobile]);
 
+     useEffect(() => {
+          // If we have an active conversation, add it to tickets
+          if (conversationId && supportUserId && messages.length > 0) {
+               const lastMessage = messages[messages.length - 1];
+               const existingTicket = activeTickets.find(t => t.id === supportUserId);
+
+               if (!existingTicket) {
+                    // Find user details
+                    const user = users.find(u => u.id === supportUserId);
+
+                    setActiveTickets(prev => [{
+                         id: supportUserId,
+                         user: user?.user?.name || 'Support User',
+                         issue: lastMessage?.text.substring(0, 50) || 'Support conversation',
+                         time: formatMessageTime(lastMessage?.createdAt) || 'Just now',
+                         status: conversationStatus === 'open' ? 'open' : 'closed',
+                         avatar: user?.user?.profile_image as any || '/avatars/default.jpg'
+                    }, ...prev]);
+               }
+          }
+     }, [conversationId, supportUserId, messages, conversationStatus, users]);
+
+     useEffect(() => {
+          // Clear selected ticket when chat is cleared
+          if (!conversationId && !supportUserId) {
+               setSelectedTicket(null);
+               setSelectedUser(null);
+          }
+     }, [conversationId, supportUserId]);
+
+     useEffect(() => {
+          // Find the user associated with the selected ticket
+          if (selectedTicket && users.length > 0) {
+               const user = users.find(u => u.id === selectedTicket);
+               if (user) {
+                    setSelectedUser(user);
+               }
+          }
+     }, [selectedTicket, users]);
+
+     const handleStartChat = async () => {
+          const chat = await startChat();
+          if (chat) {
+               setSelectedTicket(chat.support_user_id);
+               refreshUsers();
+          }
+     };
+
      const handleSendMessage = () => {
-          if (!message.trim()) return;
-
-          const newMessage = {
-               id: Date.now(),
-               message: message.trim(),
-               sender: 'support' as const,
-               time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-               isRead: true
-          };
-
-          setChatMessages([...chatMessages, newMessage]);
+          if (!message.trim() || !selectedTicket) return;
+          sendMessage(message.trim());
           setMessage('');
      };
 
      const handleCloseTicket = () => {
-          setIsTicketClosed(true);
-          setTickets(tickets.map(ticket =>
-               ticket.id === selectedTicket ? { ...ticket, status: 'closed' } : ticket
-          ));
+          clearChat();
+          setSelectedTicket(null);
+          setSelectedUser(null);
      };
 
-     const handleTicketSelect = (ticketId: number) => {
-          const ticket = tickets.find(t => t.id === ticketId);
+     const handleTicketSelect = async (ticketId: number) => {
           setSelectedTicket(ticketId);
-          setIsTicketClosed(ticket?.status === 'closed');
+          // If this is an existing conversation, load it
+          if (conversationId) {
+               await loadConversation();
+          }
           if (isMobile) setShowTicketList(false);
      };
 
-     const selectedTicketData = tickets.find(ticket => ticket.id === selectedTicket);
-     const activeTicketsCount = tickets.filter(t => t.status !== 'closed').length;
+     const handleViewDetails = () => {
+          console.log('Viewing details for user:', selectedUser);
+     };
+
+     const formatMessageTime = (timestamp?: string) => {
+          if (!timestamp) return '';
+          const date = new Date(timestamp);
+          return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+     };
+
+     // Transform chat messages to match ChatBubble props
+     const transformedMessages = messages.map(msg => ({
+          id: msg.id,
+          text: msg.text,
+          sender: msg.sender,
+          createdAt: msg.createdAt,
+          isRead: true
+     }));
+
+     if (supportLoading.supportData) {
+          return (
+               <Flex align="center" justify="center" css={{ height: 'calc(100vh - 100px)' }}>
+                    <Loading size="xl" />
+               </Flex>
+          );
+     }
+
+     const error = supportError || usersError;
 
      return (
           <Flex
@@ -103,24 +186,36 @@ const SupportPage = () => {
                >
                     <Flex justify="between" align="center" css={{ mb: '$8' }}>
                          <Box>
-                              <Text h3>Tickets</Text>
-                              <Text size="$xs" color="$accents7">{activeTicketsCount} active conversations</Text>
+                              <Text h3>Support Tickets</Text>
+                              <Text size="$xs" color="$accents7">
+                                   {activeTickets.length > 0 ? `${activeTickets.length} active tickets` : 'No tickets'}
+                              </Text>
                          </Box>
-                         {isMobile && (
+                         {isMobile && activeTickets.length > 0 && (
                               <Button auto light icon={<ChevronDown size={24} />} onPress={() => setShowTicketList(false)} />
                          )}
                     </Flex>
 
                     <Box css={{ flex: 1, overflowY: 'auto', pr: '$2' }}>
                          <Flex direction="column" css={{ gap: '$4' }}>
-                              {tickets.map((ticket) => (
-                                   <TicketCard
-                                        key={ticket.id}
-                                        ticket={ticket}
-                                        isSelected={ticket.id === selectedTicket}
-                                        onClick={() => handleTicketSelect(ticket.id)}
-                                   />
-                              ))}
+                              {/* Tickets from Active Conversations */}
+                              {activeTickets.length > 0 ? (
+                                   activeTickets.map((ticket) => (
+                                        <TicketCard
+                                             key={ticket.id}
+                                             ticket={ticket}
+                                             isSelected={selectedTicket === ticket.id}
+                                             onClick={() => handleTicketSelect(ticket.id)}
+                                        />
+                                   ))
+                              ) : (
+                                   <Flex direction="column" align="center" css={{ py: '$10', gap: '$4' }}>
+                                        <Text color="$accents6">No active conversations</Text>
+                                        <Text size="$sm" color="$accents7" css={{ textAlign: 'center', maxWidth: '250px' }}>
+                                             Start a new chat to get help from our support team
+                                        </Text>
+                                   </Flex>
+                              )}
                          </Flex>
                     </Box>
                </Flex>
@@ -156,57 +251,75 @@ const SupportPage = () => {
                               color="primary"
                          />
                          <Box>
-                              <Text b size="$sm" css={{ lineHeight: 1 }}>{selectedTicketData?.user || "Support"}</Text>
-                              <Text size="$tiny" color="$accents7">Ticket #{selectedTicket}</Text>
+                              <Text b size="$sm" css={{ lineHeight: 1 }}>
+                                   {selectedUser?.user?.name || 'No Conversation Selected'}
+                              </Text>
+                              {selectedTicket && (
+                                   <Text size="$tiny" color="$accents7">Ticket #{selectedTicket}</Text>
+                              )}
                          </Box>
                     </Flex>
 
-                    {/* Header: Desktop Info */}
-                    {!isMobile && selectedTicketData && (
+                    {/* Header: Desktop Info with Real User Data */}
+                    {!isMobile && selectedUser && (
                          <ChatHeader
-                              user={currentUser}
+                              user={selectedUser}
                               onCloseTicket={handleCloseTicket}
-                              isClosed={isTicketClosed}
+                              onViewDetails={handleViewDetails}
+                              isClosed={conversationStatus === 'closed' || conversationStatus === 'resolved'}
+                              isAgent={false}
+                              showOnlineStatus={true}
                          />
                     )}
 
                     {/* Chat Messages Area */}
                     <Box css={{ flex: 1, padding: '$6', '@md': { padding: '$10' }, overflowY: 'auto' }}>
-                         {selectedTicketData ? (
+                         {selectedUser ? (
                               <>
-                                   <Card css={{ mb: '$10', border: 'none', bg: '$background' }}>
-                                        <Card.Body>
-                                             <Text size="$xs" color="$primary" b css={{ tt: 'uppercase' }}>Issue Reported</Text>
-                                             <Text size="$sm">{selectedTicketData.issue}</Text>
-                                        </Card.Body>
-                                   </Card>
-
-                                   {chatMessages.map((msg) => (
-                                        <ChatBubble key={msg.id} {...msg} />
-                                   ))}
+                                   {transformedMessages.length > 0 ? (
+                                        transformedMessages.map((msg) => (
+                                             <ChatBubble key={msg.id} {...msg} />
+                                        ))
+                                   ) : (
+                                        <Flex align="center" justify="center" css={{ height: '100%' }}>
+                                             <Text color="$accents6">No messages yet. Start the conversation!</Text>
+                                        </Flex>
+                                   )}
                               </>
                          ) : (
-                              <Flex align="center" justify="center" css={{ height: '100%' }}>
-                                   <Text color="$accents6">Select a ticket to view messages</Text>
+                              <Flex direction="column" align="center" justify="center" css={{ height: '100%', gap: '$6' }}>
+                                   <Text h4 color="$accents6">Welcome to Support</Text>
+                                   <Text color="$accents7" css={{ textAlign: 'center', maxWidth: '400px' }}>
+                                        {activeTickets.length > 0
+                                             ? 'Select a ticket from the left to view the conversation.'
+                                             : 'No active conversations. Start a new chat to get help from our support team.'}
+                                   </Text>
                               </Flex>
                          )}
                     </Box>
 
                     {/* Footer: Input Area */}
-                    {selectedTicketData && !isTicketClosed && (
+                    {selectedUser && conversationStatus === 'open' && (
                          <Box css={{ p: '$8', bg: '$background', borderTop: '1px solid $border' }}>
                               <ChatInput
                                    value={message}
                                    onChange={setMessage}
                                    onSend={handleSendMessage}
                                    placeholder="Type a reply..."
+                                   disabled={supportLoading.chat}
                               />
                          </Box>
                     )}
 
-                    {isTicketClosed && (
+                    {selectedUser && conversationStatus !== 'open' && (
                          <Box css={{ p: '$6', bg: '$warningLight', textAlign: 'center' }}>
-                              <Text color="$warning" size="$sm">Ticket closed by Agent</Text>
+                              <Text color="$warning" size="$sm">This conversation is {conversationStatus}</Text>
+                         </Box>
+                    )}
+
+                    {error && (
+                         <Box css={{ p: '$4', bg: '$errorLight', textAlign: 'center' }}>
+                              <Text color="$error" size="$sm">{error}</Text>
                          </Box>
                     )}
                </Flex>

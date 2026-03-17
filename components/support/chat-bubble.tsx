@@ -1,22 +1,42 @@
 import React from 'react';
 import { Text, Badge } from '@nextui-org/react';
-
 import { Box } from '../styles/box';
 import { Flex } from '../../components/styles/flex';
-import { ChatMessage } from './data';
 
-interface ChatBubbleProps extends ChatMessage {
+interface ChatBubbleProps {
+     id: string;
+     text: string;
+     sender: 'user' | 'support';
+     createdAt?: string;
+     isRead?: boolean;
      showTime?: boolean;
 }
 
 export const ChatBubble: React.FC<ChatBubbleProps> = ({
-     message,
+     text,
      sender,
-     time,
+     createdAt,
      isRead = true,
      showTime = true
 }) => {
      const isUser = sender === 'user';
+
+     const formatTime = (timestamp?: string) => {
+          if (!timestamp) return '';
+          const date = new Date(timestamp);
+          return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+     };
+
+     const getSenderName = () => {
+          switch (sender) {
+               case 'user':
+                    return 'You';
+               case 'support':
+                    return 'Support Agent';
+               default:
+                    return sender;
+          }
+     };
 
      return (
           <Flex direction="column" align={isUser ? 'end' : 'start'} css={{ mb: '$6' }}>
@@ -33,7 +53,7 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
                          color="$accents6"
                          css={{ order: isUser ? 2 : 1 }}
                     >
-                         {sender === 'user' ? 'You' : 'Support Agent'}
+                         {getSenderName()}
                     </Text>
                     {!isRead && sender === 'support' && (
                          <Badge size="xs" color="primary" variant="flat">New</Badge>
@@ -49,12 +69,13 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
                     borderTopRightRadius: isUser ? '0' : '$lg',
                     borderTopLeftRadius: isUser ? '$lg' : '0',
                     position: 'relative',
-                    boxShadow: '$sm'
+                    boxShadow: '$sm',
+                    wordBreak: 'break-word'
                }}>
-                    <Text css={{ lineHeight: 1.6 }}>{message}</Text>
+                    <Text css={{ lineHeight: 1.6 }}>{text}</Text>
                </Box>
 
-               {showTime && (
+               {showTime && createdAt && (
                     <Text
                          size="$tiny"
                          color="$accents7"
@@ -63,7 +84,7 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
                               alignSelf: isUser ? 'flex-end' : 'flex-start'
                          }}
                     >
-                         {time}
+                         {formatTime(createdAt)}
                     </Text>
                )}
           </Flex>

@@ -22,8 +22,6 @@ const COLUMNS: { name: string; uid: string }[] = [
    { name: 'POINTS', uid: 'points' },
    { name: 'ACTIONS', uid: 'actions' },
 ];
-
-// Create a temporary ID to avoid duplicates
 const generateTempId = (user: User, index: number) =>
    `user-${index}-${user.id}`;
 
@@ -84,12 +82,10 @@ export const TableWrapper = () => {
       loadNextBatch();
    }, []);
 
-   // Prepare all table items
    const tableUsers = useMemo(() => {
       return prepareTableItems(allUsers);
    }, [allUsers]);
 
-   // Get current page users
    const paginatedUsers = useMemo(() => {
       const start = (currentPage - 1) * ITEMS_PER_PAGE;
       const end = start + ITEMS_PER_PAGE;
@@ -98,7 +94,6 @@ export const TableWrapper = () => {
       return pageUsers;
    }, [tableUsers, currentPage]);
 
-   // Calculate total pages
    const totalPages = Math.max(1, Math.ceil(tableUsers.length / ITEMS_PER_PAGE));
 
    const handlePageChange = useCallback(

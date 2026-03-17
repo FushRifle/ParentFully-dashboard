@@ -1,19 +1,59 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { Card, Text, Divider, Button, Badge, Grid, Spacer } from '@nextui-org/react';
 import { Flex } from '../../components/styles/flex';
 import { Box } from '../../components/styles/box';
 import { SidebarContext } from '../../components/layout/layout-context';
+import { getUserByID } from '@/services/authService';
+import { Card, Text, Divider, Button, Badge, Grid, Spacer, Loading } from '@nextui-org/react';
+
+type User = {
+     id: number;
+     name: string;
+     email: string;
+     is_premium: boolean;
+     premium_since?: string;
+     subscription?: {
+          planName: string;
+          price: string;
+          status: string;
+          startDate: string;
+          nextBilling: string;
+          paymentMethod: string;
+          usage: string;
+     };
+};
 
 const PlanDetails = () => {
      const router = useRouter();
+     const { id } = router.query;
      const { showToast } = useContext(SidebarContext);
+     const [user, setUser] = useState<User | null>(null);
+     const [loading, setLoading] = useState(true);
 
-     const subscription = {
-          planName: 'Professional Plan',
+     useEffect(() => {
+          if (!id) return;
+
+          const fetchUser = async () => {
+               setLoading(true);
+               try {
+                    const fetchedUser = await getUserByID(Number(id));
+                    setUser(fetchedUser as any);
+               } catch (err) {
+                    console.error('Failed to fetch user:', err);
+                    setUser(null);
+               } finally {
+                    setLoading(false);
+               }
+          };
+
+          fetchUser();
+     }, [id]);
+
+     const subscription = user?.subscription || {
+          planName: 'Premium Plan',
           price: '$19.00/mo',
-          status: 'Active',
-          startDate: 'Jan 12, 2025',
+          status: user?.is_premium ? 'Active' : 'Inactive',
+          startDate: user?.premium_since ? new Date(user.premium_since).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A',
           nextBilling: 'Feb 12, 2026',
           paymentMethod: 'Visa ending in 4242',
           usage: '85%',
@@ -23,6 +63,59 @@ const PlanDetails = () => {
           showToast('Subscription has been successfully revoked');
           router.back();
      };
+
+     if (loading) {
+          return (
+               <Box css={{ p: '$10', '@sm': { p: '$20' }, maxW: '800px', margin: '0 auto', textAlign: 'center' }}>
+                    <Loading size="xl" />
+               </Box>
+          );
+     }
+
+     if (!user?.is_premium) {
+          return (
+               <Box css={{ p: '$10', '@sm': { p: '$20' }, maxW: '800px', margin: '0 auto' }}>
+                    <Button
+                         light
+                         color="primary"
+                         auto
+                         onClick={() => router.back()}
+                         css={{ p: 0, mb: '$8' }}
+                    >
+                         ← Back to Account Details
+                    </Button>
+
+                    <Card variant="bordered" css={{ p: '$12', borderRadius: '$xl', textAlign: 'center' }}>
+                         <Box css={{
+                              width: '80px',
+                              height: '80px',
+                              borderRadius: '$full',
+                              bg: '$accents1',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              margin: '0 auto $10'
+                         }}>
+                              <span style={{ fontSize: '40px' }}>⭐</span>
+                         </Box>
+
+                         <Text h3 css={{ mb: '$4' }}>User is not a premium subscriber</Text>
+
+                         <Text css={{ color: '$accents7', maxW: '500px', margin: '0 auto $8' }}>
+                              This user is currently on the free plan. Premium features including advanced analytics, priority support, and exclusive content are not available.
+                         </Text>
+
+                         <Button
+                              color="primary"
+                              bordered
+                              onClick={() => router.push(`/accounts/${id}/upgrade`)}
+                         >
+                              <Text color='white'> Upgrade User to Premium</Text>
+                         </Button>
+                    </Card>
+               </Box>
+          );
+     }
 
      return (
           <Box css={{ p: '$10', '@sm': { p: '$20' }, maxW: '800px', margin: '0 auto' }}>
