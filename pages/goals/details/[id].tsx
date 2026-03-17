@@ -158,7 +158,7 @@ const GoalDetailsPage: NextPage = () => {
                                                   css={{ mb: '$4' }}
                                              />
                                         ) : (
-                                             <Text css={{ fontSize: '1.2rem', color: '$gray700' }}>
+                                             <Text css={{ fontSize: '1.2rem', color: '$gray' }}>
                                                   {goal.title}
                                              </Text>
                                         )}
@@ -173,7 +173,7 @@ const GoalDetailsPage: NextPage = () => {
                                              />
                                         ) : (
                                              goal.description && (
-                                                  <Text css={{ color: '$gray600', mt: '$2' }}>
+                                                  <Text css={{ color: '$gray', mt: '$2' }}>
                                                        {goal.description}
                                                   </Text>
                                              )
@@ -194,7 +194,7 @@ const GoalDetailsPage: NextPage = () => {
                                                             rows={2}
                                                        />
                                                   ) : (
-                                                       <Text css={{ color: '$gray700' }}>
+                                                       <Text css={{ color: '$gray' }}>
                                                             {goal.smart_specific || 'Not specified'}
                                                        </Text>
                                                   )}
@@ -211,7 +211,7 @@ const GoalDetailsPage: NextPage = () => {
                                                             rows={2}
                                                        />
                                                   ) : (
-                                                       <Text css={{ color: '$gray700' }}>
+                                                       <Text css={{ color: '$gray' }}>
                                                             {goal.smart_measurable || 'Not specified'}
                                                        </Text>
                                                   )}
@@ -228,7 +228,7 @@ const GoalDetailsPage: NextPage = () => {
                                                             rows={2}
                                                        />
                                                   ) : (
-                                                       <Text css={{ color: '$gray700' }}>
+                                                       <Text css={{ color: '$gray' }}>
                                                             {goal.smart_achievable || 'Not specified'}
                                                        </Text>
                                                   )}
@@ -245,7 +245,7 @@ const GoalDetailsPage: NextPage = () => {
                                                             rows={2}
                                                        />
                                                   ) : (
-                                                       <Text css={{ color: '$gray700' }}>
+                                                       <Text css={{ color: '$gray' }}>
                                                             {goal.smart_relevant || 'Not specified'}
                                                        </Text>
                                                   )}
@@ -295,7 +295,7 @@ const GoalDetailsPage: NextPage = () => {
                                         </Row>
                                         {goal.target_date && (
                                              <Row css={{ mt: '$4' }}>
-                                                  <Text small css={{ color: '$gray600' }}>
+                                                  <Text small css={{ color: '$gray' }}>
                                                        Target Date: {new Date(goal.target_date).toLocaleDateString()}
                                                   </Text>
                                              </Row>
@@ -338,12 +338,12 @@ const GoalDetailsPage: NextPage = () => {
                                                        <Text h5>{reward.name}</Text>
                                                   )}
                                                   {reward.notes && (
-                                                       <Text css={{ color: '$gray600', mt: '$2' }}>
+                                                       <Text css={{ color: '$gray', mt: '$2' }}>
                                                             {reward.notes}
                                                        </Text>
                                                   )}
                                                   {!reward.name && !reward.notes && (
-                                                       <Text css={{ color: '$gray600' }}>No reward set</Text>
+                                                       <Text css={{ color: '$gray' }}>No reward set</Text>
                                                   )}
                                              </>
                                         )}
