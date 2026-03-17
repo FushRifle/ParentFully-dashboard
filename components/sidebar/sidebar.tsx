@@ -9,16 +9,14 @@ import { SidebarItem } from './sidebar-item';
 import { SidebarMenu } from './sidebar-menu';
 import { CollapseItems } from './collapse-items';
 import { HomeIcon } from '../icons/sidebar/home-icon';
-import { AccountsIcon } from '../icons/sidebar/accounts-icon';
-import { PaymentsIcon } from '../icons/sidebar/payments-icon';
-import { CustomersIcon } from '../icons/sidebar/customers-icon';
-import { DevIcon } from '../icons/sidebar/dev-icon';
-import { ViewIcon } from '../icons/sidebar/view-icon';
-import { SettingsIcon } from '../icons/sidebar/settings-icon';
-import { AnalyticsIcon } from '../icons/sidebar/analytics-icon';
 import { useSidebarContext } from '../layout/layout-context';
-import { SupportIcon } from '../icons/navbar/support-icon';
-import { AlignHorizontalJustifyCenter, BookAlert, BriefcaseBusiness, GoalIcon, GroupIcon, Headphones, HeartPulseIcon, NotebookTabs, Settings2, SuperscriptIcon, User2, UserCheck2, UserPlus2Icon, Users2, Wallet2Icon } from 'lucide-react';
+import {
+   AlignHorizontalJustifyCenter,
+   BriefcaseBusiness, GroupIcon, Headphones,
+   HeartPulseIcon, NotebookTabs, Settings2,
+   User2, UserCheck2, UserPlus2Icon, Users2,
+   Wallet2Icon
+} from 'lucide-react';
 
 import { BalanceIcon } from '../icons/sidebar/balance-icon';
 import { ChildrenIcon } from '../icons/sidebar/children-icon';
@@ -27,7 +25,14 @@ import { ChangeLogIcon } from '../icons/sidebar/changelog-icon';
 import { ProductsIcon } from '../icons/sidebar/products-icon';
 import { ReportsIcon } from '../icons/sidebar/reports-icon';
 import { SecurityIcon } from '../icons/sidebar/security-icon';
-
+import { AccountsIcon } from '../icons/sidebar/accounts-icon';
+import { PaymentsIcon } from '../icons/sidebar/payments-icon';
+import { CustomersIcon } from '../icons/sidebar/customers-icon';
+import { DevIcon } from '../icons/sidebar/dev-icon';
+import { ViewIcon } from '../icons/sidebar/view-icon';
+import { SettingsIcon } from '../icons/sidebar/settings-icon';
+import { AnalyticsIcon } from '../icons/sidebar/analytics-icon';
+import { SupportIcon } from '../icons/navbar/support-icon';
 
 export const SidebarWrapper = () => {
    const router = useRouter();

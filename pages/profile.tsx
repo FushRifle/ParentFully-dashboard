@@ -59,7 +59,7 @@ export const ProfileDetails = () => {
 
      const handleSave = async () => {
           if (!formData) return;
-          await handleUpdateProfile(formData);
+          await handleUpdateProfile(formData as any);
           showToast('Profile updated successfully');
      };
 

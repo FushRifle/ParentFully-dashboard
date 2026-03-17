@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import { NextPage } from 'next';
-import { supabase } from '@/supabase/client';
+import { useFeedbacks } from '@/hooks/feedback/useFetchFeedbacks';
 import {
      Container,
      Card,
@@ -14,90 +14,52 @@ import {
      Pagination,
      Avatar
 } from '@nextui-org/react';
-import { useProfileData } from '@/hooks/auth/useProfileData';
 import { formatDistanceToNow } from 'date-fns';
-
-type Feedback = {
-     id: number;
-     type: 'bug' | 'idea' | 'feedback' | 'feature';
-     message: string;
-     name: string;
-     email: string;
-     attachments: string[];
-     created_at: string;
-     status?: 'pending' | 'reviewed' | 'implemented' | 'rejected';
-};
+import { useRouter } from 'next/router';
+import debounce from 'lodash/debounce';
+import { SearchCheckIcon, SearchIcon } from 'lucide-react';
 
 const FeedbackPage: NextPage = () => {
-     const { user } = useProfileData();
-     const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
-     const [loading, setLoading] = useState(true);
-     const [filter, setFilter] = useState<string>('all');
-     const [search, setSearch] = useState('');
-     const [currentPage, setCurrentPage] = useState(1);
-     const [totalPages, setTotalPages] = useState(1);
-     const [isAdmin, setIsAdmin] = useState(false);
-     const itemsPerPage = 10;
+     const router = useRouter();
 
-     // Check if user is admin
-     useEffect(() => {
-          const checkAdminStatus = async () => {
-               if (!user?.user?.id) return;
+     const {
+          feedbacks,
+          loading,
+          filter,
+          setFilter,
+          search,
+          setSearch,
+          currentPage,
+          setCurrentPage,
+          totalPages,
+          isAdmin,
+          updateFeedbackStatus,
+          refetch
+     } = useFeedbacks();
 
-               try {
-                    const { data, error } = await supabase
-                         .from('profiles')
-                         .select('role')
-                         .eq('id', user.user.id)
-                         .single();
+     const debouncedSetSearch = useMemo(
+          () => debounce((value: string) => {
+               setSearch(value);
+               setCurrentPage(1);
+          }, 500),
+          [setSearch, setCurrentPage]
+     );
 
-                    if (error) throw error;
-                    setIsAdmin(data?.role === 'admin');
-               } catch (error) {
-                    console.error('Error checking admin status:', error);
-               }
-          };
-
-          checkAdminStatus();
-     }, [user]);
-
-     const fetchFeedbacks = async () => {
-          setLoading(true);
-          try {
-               let query = supabase
-                    .from('feedbacks')
-                    .select('*', { count: 'exact' })
-                    .order('created_at', { ascending: false })
-                    .range((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage - 1);
-
-               // Apply type filter
-               if (filter !== 'all') {
-                    query = query.eq('type', filter);
-               }
-
-               // Apply search if provided
-               if (search) {
-                    query = query.or(`message.ilike.%${search}%,name.ilike.%${search}%,email.ilike.%${search}%`);
-               }
-
-               const { data, error, count } = await query;
-
-               if (error) throw error;
-
-               setFeedbacks(data || []);
-               setTotalPages(Math.ceil((count || 0) / itemsPerPage));
-          } catch (error) {
-               console.error('Error fetching feedbacks:', error);
-          } finally {
-               setLoading(false);
-          }
+     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+          debouncedSetSearch(e.target.value);
      };
 
      useEffect(() => {
-          fetchFeedbacks();
-     }, [filter, currentPage, search]);
+          return () => {
+               debouncedSetSearch.cancel();
+          };
+     }, [debouncedSetSearch]);
 
-     const getTypeColor = (type: string) => {
+     useEffect(() => {
+          refetch();
+     }, [filter, search, currentPage]);
+
+     const getTypeColor = useCallback((type: string) => {
           const colors = {
                bug: 'error',
                idea: 'warning',
@@ -105,9 +67,9 @@ const FeedbackPage: NextPage = () => {
                feature: 'success'
           };
           return colors[type as keyof typeof colors] || 'default';
-     };
+     }, []);
 
-     const getStatusBadge = (status?: string) => {
+     const getStatusBadge = useCallback((status?: string) => {
           const colors = {
                pending: 'warning',
                reviewed: 'primary',
@@ -115,27 +77,24 @@ const FeedbackPage: NextPage = () => {
                rejected: 'error'
           };
           return colors[status as keyof typeof colors] || 'default';
-     };
+     }, []);
 
-     const updateFeedbackStatus = async (feedbackId: number, newStatus: string) => {
-          try {
-               const { error } = await supabase
-                    .from('feedbacks')
-                    .update({ status: newStatus })
-                    .eq('id', feedbackId);
+     const handleCardClick = useCallback((feedbackId: number) => {
+          router.push(`/feedbacks/${feedbackId}`);
+     }, [router]);
 
-               if (error) throw error;
+     const handleAttachmentClick = useCallback((e: React.MouseEvent, url: string) => {
+          e.stopPropagation();
+          window.open(url, '_blank');
+     }, []);
 
-               // Update local state
-               setFeedbacks(prev =>
-                    prev.map(f =>
-                         f.id === feedbackId ? { ...f, status: newStatus as any } : f
-                    )
-               );
-          } catch (error) {
-               console.error('Error updating feedback status:', error);
-          }
-     };
+     const handleStatusChange = useCallback((
+          e: React.ChangeEvent<HTMLSelectElement>,
+          feedbackId: number
+     ) => {
+          e.stopPropagation();
+          updateFeedbackStatus(feedbackId, e.target.value);
+     }, [updateFeedbackStatus]);
 
      if (loading && feedbacks.length === 0) {
           return (
@@ -165,7 +124,10 @@ const FeedbackPage: NextPage = () => {
                          <div style={{ position: 'relative', width: '200px' }}>
                               <select
                                    value={filter}
-                                   onChange={(e) => setFilter(e.target.value)}
+                                   onChange={(e) => {
+                                        setFilter(e.target.value);
+                                        setCurrentPage(1);
+                                   }}
                                    style={{
                                         width: '100%',
                                         height: '40px',
@@ -203,11 +165,11 @@ const FeedbackPage: NextPage = () => {
                          </div>
 
                          <Input
-                              value={search}
-                              onChange={(e) => setSearch(e.target.value)}
-                              placeholder="Search feedback..."
+                              defaultValue={search}
+                              onChange={handleSearchChange as any}
+                              placeholder="Search feedbacks..."
                               css={{ flex: 1 }}
-                              contentLeft={<span>🔍</span>}
+                              contentLeft={<span><SearchIcon /></span>}
                          />
                     </Row>
                </Card>
@@ -224,7 +186,11 @@ const FeedbackPage: NextPage = () => {
                     ) : (
                          feedbacks.map((feedback) => (
                               <Grid xs={12} key={feedback.id}>
-                                   <Card css={{ p: '$6', width: '100%' }}>
+                                   <Card
+                                        css={{ p: '$6', width: '100%', cursor: 'pointer' }}
+                                        isPressable
+                                        onClick={() => handleCardClick(feedback.id)}
+                                   >
                                         <Row justify="space-between" align="center">
                                              <Row align="center" css={{ gap: '$4' }}>
                                                   <Avatar
@@ -251,32 +217,40 @@ const FeedbackPage: NextPage = () => {
                                              </Row>
                                         </Row>
 
-                                        <Text css={{ mt: '$4', whiteSpace: 'pre-wrap' }}>{feedback.message}</Text>
+                                        <Text css={{
+                                             mt: '$4',
+                                             whiteSpace: 'pre-wrap',
+                                             maxHeight: '100px',
+                                             overflow: 'hidden',
+                                             textOverflow: 'ellipsis'
+                                        }}>
+                                             {feedback.message.length > 200
+                                                  ? `${feedback.message.substring(0, 200)}...`
+                                                  : feedback.message}
+                                        </Text>
 
                                         {feedback.attachments && feedback.attachments.length > 0 && (
                                              <Row css={{ mt: '$4', gap: '$2' }} wrap="wrap">
                                                   {feedback.attachments.map((url, idx) => (
-                                                       <a
+                                                       <Badge
                                                             key={idx}
-                                                            href={url}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            style={{ textDecoration: 'none' }}
+                                                            variant="flat"
+                                                            color="primary"
+                                                            onClick={(e) => handleAttachmentClick(e, url)}
+                                                            css={{ cursor: 'pointer' }}
                                                        >
-                                                            <Badge variant="flat" color="primary">
-                                                                 📎 Attachment {idx + 1}
-                                                            </Badge>
-                                                       </a>
+                                                            📎 Attachment {idx + 1}
+                                                       </Badge>
                                                   ))}
                                              </Row>
                                         )}
 
                                         {isAdmin && (
                                              <Row css={{ mt: '$4', gap: '$2' }} justify="flex-end">
-                                                  <div style={{ position: 'relative', width: '150px' }}>
+                                                  <div style={{ position: 'relative', width: '150px' }} onClick={(e) => e.stopPropagation()}>
                                                        <select
                                                             value={feedback.status || 'pending'}
-                                                            onChange={(e) => updateFeedbackStatus(feedback.id, e.target.value)}
+                                                            onChange={(e) => handleStatusChange(e, feedback.id)}
                                                             style={{
                                                                  width: '100%',
                                                                  height: '36px',
@@ -314,7 +288,7 @@ const FeedbackPage: NextPage = () => {
                     <Row justify="center" css={{ mt: '$8' }}>
                          <Pagination
                               total={totalPages}
-                              initialPage={1}
+                              page={currentPage}
                               onChange={(page) => setCurrentPage(page)}
                          />
                     </Row>

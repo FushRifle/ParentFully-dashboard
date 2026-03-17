@@ -12,11 +12,13 @@ interface Props {
 }
 
 export const SidebarItem = ({ icon, title, isActive, href = '' }: Props) => {
-   const { setCollapsed } = useSidebarContext();
+   const { setCollapsed, collapsed } = useSidebarContext();
 
    const handleClick = () => {
-      if (typeof window !== 'undefined' && window.innerWidth < 768) {
-         setCollapsed();
+      if (typeof window !== 'undefined' && window.innerWidth < 768 && !collapsed) {
+         setTimeout(() => {
+            setCollapsed();
+         }, 100);
       }
    };
 
