@@ -5,15 +5,30 @@ import NextLink from 'next/link';
 import { Flex } from '../styles/flex';
 import { useProfileData } from '@/hooks/auth/useProfileData';
 import ChatAvatarWrapper from '../Avatar/ChatAvatarWrapper';
+import { useAuth } from '@/lib/context/authContext';
+import { useRouter } from 'next/router';
 
 export const UserDropdown = () => {
+   const { logout } = useAuth();
+   const router = useRouter();
    const { user, loading } = useProfileData();
    const [mounted, setMounted] = useState(false);
+   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-   // ensure we only render client-side
    useEffect(() => {
       setMounted(true);
    }, []);
+
+   const handleLogout = async () => {
+      try {
+         setIsLoggingOut(true);
+         await logout();
+         router.push('/login');
+      } catch (error) {
+         console.error('Logout failed:', error);
+         setIsLoggingOut(false);
+      }
+   };
 
    if (!mounted || loading) return null;
 
@@ -27,7 +42,6 @@ export const UserDropdown = () => {
    return (
       <Dropdown placement="bottom-right">
          <Dropdown.Trigger>
-            {/* Wrap the avatar in a button/div to make it clickable */}
             <div style={{ cursor: 'pointer', display: 'inline-block' }}>
                <ChatAvatarWrapper
                   profile_image={avatar as any}
@@ -43,8 +57,11 @@ export const UserDropdown = () => {
          <Dropdown.Menu
             aria-label="User menu actions"
             onAction={(actionKey) => {
-               if (actionKey === 'logout') console.log('Logging out...');
+               if (actionKey === 'logout') {
+                  handleLogout();
+               }
             }}
+            disabledKeys={isLoggingOut ? ['logout'] : []}
          >
             <Dropdown.Item key="profile" css={{ height: '$18' }}>
                <Text b color="inherit" css={{ d: 'flex' }}>
@@ -61,7 +78,7 @@ export const UserDropdown = () => {
                </NextLink>
             </Dropdown.Item>
 
-            <Dropdown.Item key="teams">
+            <Dropdown.Item key="teams" withDivider>
                <NextLink href="/team" passHref>
                   <div style={{ width: '100%' }}>Team Settings</div>
                </NextLink>
@@ -73,10 +90,16 @@ export const UserDropdown = () => {
                </NextLink>
             </Dropdown.Item>
 
-            <Dropdown.Item key="logout" withDivider color="error">
-               <NextLink href="/" passHref>
-                  <div style={{ width: '100%' }}>Log Out</div>
-               </NextLink>
+            <Dropdown.Item
+               key="logout"
+               withDivider
+               color="error"
+               css={{
+                  color: isLoggingOut ? '$accents5' : '$error',
+                  cursor: isLoggingOut ? 'not-allowed' : 'pointer',
+               }}
+            >
+               {isLoggingOut ? 'Logging out...' : 'Log Out'}
             </Dropdown.Item>
 
             <Dropdown.Item key="switch" withDivider>

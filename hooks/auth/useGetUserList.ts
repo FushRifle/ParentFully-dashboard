@@ -3,46 +3,72 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAllUsers } from '@/services/authService';
 import { User } from '@/types/api';
 
-export const useUser = (page: number = 1) => {
-     const [users, setUsers] = useState<User[]>([]);
+export const useUser = (page: number = 1, perPage: number = 10) => {
+     const [allUsers, setAllUsers] = useState<User[]>([]);
+     const [paginatedUsers, setPaginatedUsers] = useState<User[]>([]);
      const [loading, setLoading] = useState(true);
      const [error, setError] = useState<string | null>(null);
      const [totalPages, setTotalPages] = useState(1);
 
-     const loadUser = useCallback(async (pageNum: number = page) => {
+     const loadAllUsers = useCallback(async () => {
           setLoading(true);
           setError(null);
 
           try {
-               const apiUser = await getAllUsers();
+               const apiUsers = await getAllUsers();
 
-               if (apiUser && Array.isArray(apiUser)) {
-                    setUsers(apiUser);
+               if (apiUsers && Array.isArray(apiUsers)) {
+                    setAllUsers(apiUsers);
+
+                    const pages = Math.ceil(apiUsers.length / perPage);
+                    setTotalPages(pages || 1);
 
                     return;
                }
 
-               const cached = await AsyncStorage.getItem('user');
+               const cached = await AsyncStorage.getItem('users');
                if (cached) {
-                    setUsers(JSON.parse(cached));
+                    const cachedUsers = JSON.parse(cached);
+                    setAllUsers(cachedUsers);
+
+                    const pages = Math.ceil(cachedUsers.length / perPage);
+                    setTotalPages(pages || 1);
                }
           } catch (e: any) {
-               setError(e?.message ?? 'Failed to load user');
+               setError(e?.message ?? 'Failed to load users');
           } finally {
                setLoading(false);
           }
-     }, [page]);
+     }, [perPage]);
 
      useEffect(() => {
-          loadUser();
-     }, [loadUser, page]);
+          if (allUsers.length > 0) {
+               const start = (page - 1) * perPage;
+               const end = start + perPage;
+               const pageUsers = allUsers.slice(start, end);
+
+               console.log(`Page ${page}: showing users ${start} to ${end - 1}, total: ${allUsers.length}`);
+               setPaginatedUsers(pageUsers);
+          } else {
+               setPaginatedUsers([]);
+          }
+     }, [page, allUsers, perPage]);
+
+     useEffect(() => {
+          loadAllUsers();
+     }, [loadAllUsers]);
+
+     const refresh = useCallback(async () => {
+          await loadAllUsers();
+     }, [loadAllUsers]);
 
      return {
-          users,
+          users: paginatedUsers,
+          allUsers,
           loading,
           error,
           totalPages,
-          refresh: loadUser,
-          setUsers,
+          refresh,
+          setUsers: setPaginatedUsers,
      };
 };

@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { login as loginService } from '@/services/authService';
-import { useAuth } from '../../lib/context/authContext';
-import { AuthResponse } from '../../types/api';
+import { useAuth } from '@/lib/context/authContext';
+import { AuthResponse } from '@/types/api';
 
 interface LoginCredentials {
      email: string;

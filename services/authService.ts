@@ -212,31 +212,55 @@ export const getUser = async (): Promise<User | null> => {
      }
 };
 
-export const getAllUsers = async (): Promise<User | null> => {
+// services/authService.ts
+export const getAllUsers = async (): Promise<User[] | null> => {
      try {
-          const res = await api.get<{
+          const initialRes = await api.get<{
                success: boolean;
-               data: User;
-          }>('/v1/users');
+               data: User[];
+               total?: number;
+          }>('/v1/users', {
+               params: {
+                    page: 1,
+                    per_page: 100
+               }
+          });
 
-          const userData = res.data?.data;
+          let allUsers = [...(initialRes.data?.data || [])];
+          const total = initialRes.data?.total || allUsers.length;
+          const perPage = 100;
+          const possiblePages = Math.ceil(total / perPage);
 
-          if (userData) {
-               await AsyncStorage.setItem('user', JSON.stringify(userData));
+          if (possiblePages > 1) {
+               for (let page = 2; page <= possiblePages; page++) {
+                    const res = await api.get<{
+                         success: boolean;
+                         data: User[];
+                    }>('/v1/users', {
+                         params: {
+                              page,
+                              per_page: 100
+                         }
+                    });
+
+                    if (res.data?.data) {
+                         allUsers = [...allUsers, ...res.data.data];
+                         console.log(`Page ${page}: added ${res.data.data.length} users`);
+                    }
+
+                    if (!res.data?.data || res.data.data.length === 0) {
+                         break;
+                    }
+               }
           }
 
-          return userData ?? null;
-     } catch (err: any) {
-          console.error(
-               'Get user API failed:',
-               JSON.stringify(
-                    err?.response?.data || err?.message || err,
-                    null,
-                    2
-               )
-          );
+          console.log(`Total users fetched: ${allUsers.length}`);
 
-          await AsyncStorage.removeItem('auth_token');
+          await AsyncStorage.setItem('users', JSON.stringify(allUsers));
+
+          return allUsers;
+     } catch (err: any) {
+          console.error('Failed to fetch all users:', err);
           return null;
      }
 };

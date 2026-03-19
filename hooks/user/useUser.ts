@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios, { AxiosRequestConfig } from 'axios';
-import { api } from '../../lib';
-import { User } from '../../types/api';
+import { api } from '@/lib';
+import { User } from '@/types/api';
 
 
 /* ----------------------------- LOCAL STORAGE HELPERS ----------------------------- */

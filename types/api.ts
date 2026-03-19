@@ -33,6 +33,9 @@ export interface AuthUser {
      created_at: string | Date;
      updated_at: string;
      deleted_at: string | null;
+
+     is_premium?: boolean;
+     points?: number;
 }
 
 export interface User {
