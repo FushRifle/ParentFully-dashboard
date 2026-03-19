@@ -106,7 +106,7 @@ export const TableWrapper = () => {
          ) : (
             <>
                <Table
-                  key={tableKey} // Add key to force re-render on page change
+                  key={tableKey}
                   aria-label="User directory table"
                   selectionMode="none"
                   shadow={false}

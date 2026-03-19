@@ -43,23 +43,9 @@ export const AccountDetails = ({ user }: Props) => {
      const profile_image = u.profile_image;
      const userPhoto = user.user?.profile_image || u.photo;
 
-     const [formData, setFormData] = useState({
-          firstName: profile.firstName,
-          lastName: profile.lastName,
-          email: profile.email,
-     });
-
      const SECURITY_LOGS = [
           { event: 'Last Activity', time: user.user.updated_at },
      ];
-
-     const updateField = useCallback((key: keyof typeof formData, value: string) => {
-          setFormData((prev) => ({ ...prev, [key]: value }));
-     }, []);
-
-     const handleUpdate = useCallback(() => {
-          showToast(`Profile updated successfully`);
-     }, [showToast]);
 
      const handleRevokePlan = useCallback(() => {
           showToast(`Subscription revoked for ${profile.firstName}`);
@@ -119,11 +105,8 @@ export const AccountDetails = ({ user }: Props) => {
                          </Grid>
                          <Grid css={{ '@xsMax': { mt: '$8', width: '100%' } }}>
                               <Flex css={{ gap: '$6' }}>
-                                   <Button auto light color="error" onClick={() => setDeleteVisible(true)}>
+                                   <Button auto color="error" onClick={() => setDeleteVisible(true)}>
                                         Disable Account
-                                   </Button>
-                                   <Button auto onClick={handleUpdate} css={{ px: '$10' }}>
-                                        Save Changes
                                    </Button>
                               </Flex>
                          </Grid>
@@ -135,65 +118,45 @@ export const AccountDetails = ({ user }: Props) => {
                     <Grid xs={12} md={8}>
                          <Flex direction="column" css={{ gap: '$10', width: '100%' }}>
 
-                              {/* Card: Profile Edit */}
+                              {/* Card: Profile Information (Read Only) */}
                               <Card variant="bordered" css={{ borderRadius: '$xl', bg: '$backgroundContrast' }}>
                                    <Card.Header css={{ px: '$10', pt: '$10' }}>
                                         <Flex direction="column">
                                              <Text h4 css={{ m: 0 }}>Profile Information</Text>
-                                             <Text size="$sm" color="$accents7">Update user personal details and contact information.</Text>
+                                             <Text size="$sm" color="$accents7">User personal details and contact information.</Text>
                                         </Flex>
                                    </Card.Header>
                                    <Card.Body css={{ px: '$10', py: '$12' }}>
                                         <Grid.Container gap={3}>
                                              <Grid xs={12} sm={6}>
-                                                  <Input
-                                                       label="First Name"
-                                                       fullWidth
-                                                       bordered
-                                                       size="lg"
-                                                       value={formData.firstName}
-                                                       onChange={(e) => updateField('firstName', e.target.value)}
-                                                  />
+                                                  <Flex direction="column" css={{ gap: '$2' }}>
+                                                       <Text size="$sm" color="$accents7">First Name</Text>
+                                                       <Text size="$lg" b>{profile.firstName}</Text>
+                                                  </Flex>
                                              </Grid>
                                              <Grid xs={12} sm={6}>
-                                                  <Input
-                                                       label="Last Name"
-                                                       fullWidth
-                                                       bordered
-                                                       size="lg"
-                                                       value={formData.lastName}
-                                                       onChange={(e) => updateField('lastName', e.target.value)}
-                                                  />
+                                                  <Flex direction="column" css={{ gap: '$2' }}>
+                                                       <Text size="$sm" color="$accents7">Last Name</Text>
+                                                       <Text size="$lg" b>{profile.lastName || '—'}</Text>
+                                                  </Flex>
                                              </Grid>
                                              <Grid xs={12}>
-                                                  <Input
-                                                       label="Email Address"
-                                                       fullWidth
-                                                       bordered
-                                                       size="lg"
-                                                       value={formData.email}
-                                                       onChange={(e) => updateField('email', e.target.value)}
-                                                  />
+                                                  <Flex direction="column" css={{ gap: '$2' }}>
+                                                       <Text size="$sm" color="$accents7">Email Address</Text>
+                                                       <Text size="$lg" b>{profile.email}</Text>
+                                                  </Flex>
                                              </Grid>
                                              <Grid xs={12} sm={6}>
-                                                  <Input
-                                                       label="Rewards Points"
-                                                       fullWidth
-                                                       bordered
-                                                       size="lg"
-                                                       value={profile.points.toLocaleString()}
-                                                       readOnly
-                                                  />
+                                                  <Flex direction="column" css={{ gap: '$2' }}>
+                                                       <Text size="$sm" color="$accents7">Rewards Points</Text>
+                                                       <Text size="$lg" b>{profile.points.toLocaleString()}</Text>
+                                                  </Flex>
                                              </Grid>
                                              <Grid xs={12} sm={6}>
-                                                  <Input
-                                                       label="Referrals"
-                                                       fullWidth
-                                                       bordered
-                                                       size="lg"
-                                                       value={profile.points.toLocaleString()}
-                                                       readOnly
-                                                  />
+                                                  <Flex direction="column" css={{ gap: '$2' }}>
+                                                       <Text size="$sm" color="$accents7">Referrals</Text>
+                                                       <Text size="$lg" b>{profile.points.toLocaleString()}</Text>
+                                                  </Flex>
                                              </Grid>
                                         </Grid.Container>
                                    </Card.Body>
