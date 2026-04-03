@@ -1,13 +1,14 @@
 import React from 'react';
 import { Goal } from '@/types/api';
 import { useRouter } from 'next/router';
-import { Card, Grid, Text, Badge } from '@nextui-org/react';
+import { Card, Grid, Text, Badge, Button } from '@nextui-org/react';
 
 interface GoalsTableProps {
      goals: Goal[];
+     onDelete?: (id: number) => void;
 }
 
-export const GoalsTable: React.FC<GoalsTableProps> = ({ goals }) => {
+export const GoalsTable: React.FC<GoalsTableProps> = ({ goals, onDelete }) => {
      const router = useRouter();
 
      if (!goals || goals.length === 0) {
@@ -51,6 +52,28 @@ export const GoalsTable: React.FC<GoalsTableProps> = ({ goals }) => {
           <Grid.Container gap={1.5}>
                {goals.map((goal) => (
                     <Grid key={goal.id} xs={12} sm={6} md={4}>
+                         <div style={{ position: 'relative', width: '100%' }}>
+                         {onDelete && (
+                              <Button
+                                   auto
+                                   size="xs"
+                                   color="error"
+                                   flat
+                                   css={{
+                                        position: 'absolute',
+                                        top: 8,
+                                        right: 8,
+                                        zIndex: 10,
+                                        minWidth: 'auto',
+                                        px: '$4',
+                                   }}
+                                   onPress={(e) => {
+                                        onDelete(goal.id);
+                                   }}
+                              >
+                                   ✕
+                              </Button>
+                         )}
                          <Card
                               isPressable
                               isHoverable
@@ -126,6 +149,7 @@ export const GoalsTable: React.FC<GoalsTableProps> = ({ goals }) => {
                                    )}
                               </Card.Footer>
                          </Card>
+                         </div>
                     </Grid>
                ))}
           </Grid.Container>

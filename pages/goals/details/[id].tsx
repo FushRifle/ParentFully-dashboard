@@ -3,6 +3,7 @@ import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import type { GoalPayload } from '@/types/api';
 import { useGoalDetails } from '@/hooks/goals/useGoalsDetails';
+import { goalApi, certificateApi } from '@/services/goalService';
 import {
      Container,
      Card,
@@ -133,6 +134,9 @@ const GoalDetailsPage: NextPage = () => {
      });
 
      const [editedGoal, setEditedGoal] = useState<Partial<GoalPayload>>({});
+     const [certLoading, setCertLoading] = useState(false);
+     const [certMessage, setCertMessage] = useState<string | null>(null);
+     const [certUrl, setCertUrl] = useState<string | null>(null);
 
      useEffect(() => {
           if (goal) {
@@ -146,11 +150,42 @@ const GoalDetailsPage: NextPage = () => {
                     status: goal.status,
                     target_date: goal.target_date,
                });
+               if ((goal as any).certificate_url) {
+                    setCertUrl((goal as any).certificate_url);
+               }
           }
      }, [goal]);
 
      const handleInputChange = (field: keyof GoalPayload, value: any) => {
           setEditedGoal(prev => ({ ...prev, [field]: value }));
+     };
+
+     const handleDeleteGoal = async () => {
+          if (!goal) return;
+          if (!window.confirm('Are you sure you want to delete this goal? This action cannot be undone.')) return;
+          try {
+               await goalApi.delete(goal.id);
+               goBack();
+          } catch (err) {
+               console.error('Failed to delete goal:', err);
+          }
+     };
+
+     const handleGenerateCertificate = async () => {
+          if (!goal) return;
+          setCertLoading(true);
+          setCertMessage(null);
+          try {
+               const result = await certificateApi.generate(goal.id);
+               setCertMessage('Certificate generated successfully!');
+               if (result?.url || result?.certificate_url) {
+                    setCertUrl(result.url || result.certificate_url);
+               }
+          } catch (err) {
+               setCertMessage('Failed to generate certificate.');
+          } finally {
+               setCertLoading(false);
+          }
      };
 
      const loading = apiLoading || profileLoading;
@@ -233,8 +268,14 @@ const GoalDetailsPage: NextPage = () => {
                                         <Button shadow color="error" onClick={handleCancelEdit}>Cancel</Button>
                                    </>
                               ) : (
-                                   <Button shadow onClick={() => setIsEditing(true)}>
-                                        Edit Goal</Button>
+                                   <>
+                                        <Button shadow onClick={() => setIsEditing(true)}>
+                                             Edit Goal
+                                        </Button>
+                                        <Button shadow color="error" onPress={handleDeleteGoal}>
+                                             Delete Goal
+                                        </Button>
+                                   </>
                               )}
                          </Row>
                     </Col>
@@ -391,6 +432,50 @@ const GoalDetailsPage: NextPage = () => {
                          </Col>
                     </Grid>
                </Grid.Container>
+
+               {/* Certificates Section */}
+               <Card css={{ p: '$8', mt: '$10' }}>
+                    <SectionHeader>Certificates</SectionHeader>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                         {goal.status === 'Mastered' && (
+                              <Button
+                                   auto
+                                   shadow
+                                   color="success"
+                                   onPress={handleGenerateCertificate}
+                                   disabled={certLoading}
+                              >
+                                   {certLoading ? <Loading size="xs" /> : 'Generate Certificate'}
+                              </Button>
+                         )}
+                         {goal.status !== 'Mastered' && (
+                              <Text css={{ color: '$accents6' }}>
+                                   Certificates can only be generated for mastered goals.
+                              </Text>
+                         )}
+                         {certUrl && (
+                              <Button
+                                   auto
+                                   flat
+                                   color="primary"
+                                   as="a"
+                                   href={certUrl}
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                              >
+                                   View Certificate
+                              </Button>
+                         )}
+                    </div>
+                    {certMessage && (
+                         <Text
+                              css={{ mt: '$4' }}
+                              color={certMessage.includes('success') ? '$success' : '$error'}
+                         >
+                              {certMessage}
+                         </Text>
+                    )}
+               </Card>
           </Container>
      );
 };

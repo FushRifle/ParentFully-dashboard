@@ -229,6 +229,20 @@ export const goalApi = {
                     console.error('GoalApi.delete failed', { id, error })
                     throw error
                })
+     },
+
+     createPredefined: (): Promise<any> => {
+          return handleApiCall(
+               api.post<ApiResponse<any>>('/v1/create-predefined-goals'),
+               'POST /v1/create-predefined-goals'
+          )
+     },
+
+     restore: (id: number): Promise<Goal> => {
+          return handleApiCall(
+               api.post<ApiResponse<Goal>>(`/v1/goals/${id}/restore`),
+               `POST /v1/goals/${id}/restore`
+          )
      }
 }
 
@@ -331,6 +345,58 @@ export const childGoalApi = {
                     console.error('GoalApi.delete failed', { id, error })
                     throw error
                })
+     },
+
+     restoreChildGoal: (id: number): Promise<ChildGoal> => {
+          return handleApiCall(
+               api.post<ApiResponse<ChildGoal>>(`/v1/goal-children/${id}/restore`),
+               `POST /v1/goal-children/${id}/restore`
+          )
+     },
+
+     toggleActiveStatus: (id: number): Promise<ChildGoal> => {
+          return handleApiCall(
+               api.post<ApiResponse<ChildGoal>>(`/v1/goal-children/${id}/toggle-active`),
+               `POST /v1/goal-children/${id}/toggle-active`
+          )
+     },
+
+     bulkUpdateGoalOrder: (items: { id: number; order: number }[]): Promise<void> => {
+          return handleApiCall(
+               api.post<ApiResponse<void>>('/v1/goal-children/bulk-update-order', { items }),
+               'POST /v1/goal-children/bulk-update-order'
+          )
+     }
+}
+
+/* -------------------- Certificates -------------------- */
+export const certificateApi = {
+     generate: (goalChildId: number): Promise<any> => {
+          return handleApiCall(
+               api.post<ApiResponse<any>>(`/v1/goal-children/${goalChildId}/certificate`),
+               `POST /v1/goal-children/${goalChildId}/certificate`
+          )
+     },
+
+     get: (certId: number): Promise<any> => {
+          return handleApiCall(
+               api.get<ApiResponse<any>>(`/v1/certificates/${certId}`),
+               `GET /v1/certificates/${certId}`
+          )
+     },
+
+     download: (certId: number): Promise<any> => {
+          return handleApiCall(
+               api.get<ApiResponse<any>>(`/v1/certificates/${certId}/download`),
+               `GET /v1/certificates/${certId}/download`
+          )
+     },
+
+     getChildCertificates: (childId: number): Promise<any[]> => {
+          return handleApiCall(
+               api.get<ApiResponse<any[]>>(`/v1/children/${childId}/certificates`),
+               `GET /v1/children/${childId}/certificates`
+          )
      }
 }
 
@@ -350,7 +416,9 @@ export const {
      assignGoalsToChild: assignGoalsToChild,
      createFromTemplate: createGoalFromTemplate,
      update: updateGoal,
-     delete: deleteGoal
+     delete: deleteGoal,
+     createPredefined: createPredefinedGoals,
+     restore: restoreGoal
 } = goalApi
 
 export const {
@@ -361,5 +429,15 @@ export const {
      incrementProgress: getGoalIncrement,
      decrementProgress: getGoalDecrement,
      updateProgress: updateProgressValue,
-     updateReminder: updateGoalsReminder
+     updateReminder: updateGoalsReminder,
+     restoreChildGoal: restoreChildGoal,
+     toggleActiveStatus: toggleChildGoalActive,
+     bulkUpdateGoalOrder: bulkUpdateGoalOrder
 } = childGoalApi
+
+export const {
+     generate: generateCertificate,
+     get: getCertificate,
+     download: downloadCertificate,
+     getChildCertificates: getChildCertificates
+} = certificateApi

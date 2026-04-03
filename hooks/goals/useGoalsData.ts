@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { goalApi, childGoalApi } from '@/services/goalService';
+import { goalApi, childGoalApi, certificateApi } from '@/services/goalService';
 import { GoalPayload } from '@/types/api';
 import { useProfileData } from '../auth/useProfileData';
 
@@ -106,6 +106,54 @@ export const useGoals = () => {
           [handleAsync]
      );
 
+     const restoreGoal = useCallback(
+          (id: number) =>
+               handleAsync(() => goalApi.restore(id), 'Failed to restore goal'),
+          [handleAsync]
+     );
+
+     const restoreChildGoal = useCallback(
+          (id: number) =>
+               handleAsync(() => childGoalApi.restoreChildGoal(id), 'Failed to restore child goal'),
+          [handleAsync]
+     );
+
+     const toggleChildGoalActive = useCallback(
+          (id: number) =>
+               handleAsync(() => childGoalApi.toggleActiveStatus(id), 'Failed to toggle child goal status'),
+          [handleAsync]
+     );
+
+     const bulkUpdateGoalOrder = useCallback(
+          (items: { id: number; order: number }[]) =>
+               handleAsync(() => childGoalApi.bulkUpdateGoalOrder(items), 'Failed to bulk update goal order'),
+          [handleAsync]
+     );
+
+     const generateCertificate = useCallback(
+          (goalChildId: number) =>
+               handleAsync(() => certificateApi.generate(goalChildId), 'Failed to generate certificate'),
+          [handleAsync]
+     );
+
+     const getCertificate = useCallback(
+          (certId: number) =>
+               handleAsync(() => certificateApi.get(certId), 'Failed to get certificate'),
+          [handleAsync]
+     );
+
+     const downloadCertificate = useCallback(
+          (certId: number) =>
+               handleAsync(() => certificateApi.download(certId), 'Failed to download certificate'),
+          [handleAsync]
+     );
+
+     const getChildCertificates = useCallback(
+          (childId: number) =>
+               handleAsync(() => certificateApi.getChildCertificates(childId), 'Failed to get child certificates'),
+          [handleAsync]
+     );
+
      return {
           loading,
           error,
@@ -119,5 +167,13 @@ export const useGoals = () => {
           updateGoalProgress,
           incrementProgress,
           decrementProgress,
+          restoreGoal,
+          restoreChildGoal,
+          toggleChildGoalActive,
+          bulkUpdateGoalOrder,
+          generateCertificate,
+          getCertificate,
+          downloadCertificate,
+          getChildCertificates,
      };
 };

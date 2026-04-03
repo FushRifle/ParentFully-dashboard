@@ -95,6 +95,17 @@ export const deleteRule = async (id: number): Promise<void> => {
      await api.delete(`/v1/rules/${id}`)
 }
 
+// --- Restore --- //
+export const restorePlan = async (id: number): Promise<DisciplinePlan> => {
+     const res = await api.post<{ success: boolean; data: DisciplinePlan }>(`/v1/plans/${id}/restore`)
+     return res.data.data
+}
+
+export const restoreRule = async (id: number): Promise<Rule> => {
+     const res = await api.post<{ success: boolean; data: Rule }>(`/v1/rules/${id}/restore`)
+     return res.data.data
+}
+
 // --- Child --- //
 export const getChildPlans = async (childId: number): Promise<DisciplinePlan> => {
      const res = await api.get<{

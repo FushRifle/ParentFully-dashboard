@@ -37,3 +37,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 /.github/
+/.idea/.gitignore
+/.idea/modules.xml
+/.idea/ParentFully-dashboard.iml
+/pnpm-lock.yaml
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/vcs.xml
