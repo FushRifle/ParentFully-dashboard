@@ -1,4 +1,4 @@
-import { api } from '@/lib/api'
+import { api } from '@/lib'
 import { DisciplinePlan, Rule, PlansOrder, AssignedChildPlansResponse } from '@/types/api'
 
 //---Templates--//

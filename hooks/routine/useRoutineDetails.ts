@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTheme } from "@/styles/ThemeContext";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/lib/context/authContext";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Alert } from "react-native";
 import { getChildren } from "@/services/childService";

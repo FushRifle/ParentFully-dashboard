@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/lib/context/authContext";
 import { RootStackParamList } from "@/types/rootStack";
 import { getChildren } from "@/services/childService";
 import { createRoutine, createTask } from "@/services/routineService";

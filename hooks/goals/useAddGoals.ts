@@ -1,10 +1,10 @@
 import { useCallback, useState } from 'react';
 import { useGoals } from './useGoalsData';
 import { Goal, Reward, SmartFields } from '@/types/api';
-import { useProfileData } from '@/hooks/profile/useProfileData';
-import { useAuth } from '@/context/AuthContext';
+import { useProfileData } from '../auth/useProfileData';
+import { useAuth } from '@/lib/context/authContext';
 import { notifyGoalCreated } from '@/utils/notification';
-import { useCreateNotification } from '../notification/useCreateNotification';
+import { useCreateNotification } from '@/hooks/notification/useCreateNotification';
 
 export const SMART_FIELDS_CONFIG = [
      { key: 'specific', Text: 'Specific', placeholder: 'What are the areas you need to focus on?' },

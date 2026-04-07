@@ -1,4 +1,4 @@
-import { api } from '@/lib/api';
+import { api } from '@/lib';
 import { AssignedChildPlansResponse } from '@/types/api';
 
 export interface Rule {

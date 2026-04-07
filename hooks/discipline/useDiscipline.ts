@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { Alert } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/lib/context/authContext';
 import {
      getPlans,
      deletePlan,

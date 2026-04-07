@@ -1,4 +1,4 @@
-import { api } from '@/lib/api'
+import { api } from '@/lib'
 import { ApiResponse, Chat, Message } from '@/types/chat';
 import { AxiosError, AxiosResponse } from 'axios';
 

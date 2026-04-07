@@ -1,5 +1,5 @@
 
-import { api } from '@/lib/api'
+import { api } from '@/lib'
 import NetInfo from '@react-native-community/netinfo';
 import { AxiosResponse } from 'axios';
 import {

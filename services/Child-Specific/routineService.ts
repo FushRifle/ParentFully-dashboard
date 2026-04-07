@@ -1,4 +1,4 @@
-import { api } from '@/lib/api';
+import { api } from '@/lib';
 import { TaskChild } from '@/types/routine';
 
 export const getOneChildTask = async (child_task_id: number): Promise<TaskChild> => {

@@ -1,4 +1,4 @@
-import { api } from '@/lib/api'
+import { api } from '@/lib'
 import dayjs from 'dayjs'
 import { RoutineOrder, TaskOrder, BulkAssignTasksRequest } from '@/types/api'
 import { Task, Routine, TaskChild } from '@/types/routine'

@@ -1,4 +1,4 @@
-import { api } from '@/lib/api';
+import { api } from '@/lib';
 import { SubscriptionPlan, UserSubscription, CreateSubscriptionPayload } from "@/types/subscription";
 
 export const getSubscriptionPlans = async (): Promise<SubscriptionPlan[]> => {

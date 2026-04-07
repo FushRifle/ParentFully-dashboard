@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useTheme } from '@/styles/ThemeContext';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/lib/context/authContext';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 import { Alert } from 'react-native';

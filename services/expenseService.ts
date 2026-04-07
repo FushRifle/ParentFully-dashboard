@@ -1,4 +1,4 @@
-import { api } from '@/lib/api'
+import { api } from '@/lib'
 import { Expense, Payment } from '@/types/api'
 
 export const getExpenses = async (): Promise<Expense[]> => {

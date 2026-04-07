@@ -1,4 +1,4 @@
-import { api } from '@/lib/api'
+import { api } from '@/lib'
 import { AxiosError, AxiosResponse } from 'axios'
 import { Goal, ApiResponse } from '@/types/api'
 

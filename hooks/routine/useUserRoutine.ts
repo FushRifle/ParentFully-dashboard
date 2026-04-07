@@ -1,4 +1,4 @@
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/lib/context/authContext";
 import { useCallback, useState, useMemo } from "react";
 import { Alert } from "react-native";
 import { TaskCompletion } from "@/types/api";
