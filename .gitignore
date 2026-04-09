@@ -43,3 +43,7 @@ next-env.d.ts
 /pnpm-lock.yaml
 /.idea/inspectionProfiles/Project_Default.xml
 /.idea/vcs.xml
+/.output.txt
+/build_output.txt
+/build_output_2.txt
+/build_output_3.txt
