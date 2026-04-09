@@ -16,7 +16,7 @@ export const CommunityNewsFeed = () => (
                          <Box>
                               <Text b size="$sm">The Smiths</Text>
                               <Text size="$xs" css={{ color: '$accents7' }}>
-                                   Just completed their "Potty Training Masterclass"!
+                                   Just completed their &quot;Potty Training Masterclass&quot;!
                               </Text>
                               <Text size="$xs" css={{ color: '$accents6', mt: '$1' }}>2 hours ago</Text>
                          </Box>
@@ -28,7 +28,7 @@ export const CommunityNewsFeed = () => (
                          <Box>
                               <Text b size="$sm">The Johnsons</Text>
                               <Text size="$xs" css={{ color: '$accents7' }}>
-                                   Shared their first "Family Meal Planning" template.
+                                   Shared their first &quot;Family Meal Planning&quot; template.
                               </Text>
                               <Text size="$xs" css={{ color: '$accents6', mt: '$1' }}>Yesterday</Text>
                          </Box>
@@ -40,7 +40,7 @@ export const CommunityNewsFeed = () => (
                          <Box>
                               <Text b size="$sm">User @ParentPro</Text>
                               <Text size="$xs" css={{ color: '$accents7' }}>
-                                   Reached Level 5 in "Productive Parenthood" challenge!
+                                   Reached Level 5 in &quot;Productive Parenthood&quot; challenge!
                               </Text>
                               <Text size="$xs" css={{ color: '$accents6', mt: '$1' }}>2 days ago</Text>
                          </Box>
