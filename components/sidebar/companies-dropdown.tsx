@@ -24,12 +24,12 @@ export const CompaniesDropdown = () => {
       <Dropdown placement="bottom-right" borderWeight={'extrabold'}>
          <Dropdown.Trigger css={{ cursor: 'pointer' }}>
             <Box>
-               <Flex align={'center'} css={{ gap: '$7' }}>
+               <Flex align={'center'} css={{ gap: '$4' }}>
                   {company.logo}
                   <Box>
                      <Text
                         h3
-                        size={'$xl'}
+                        size={'$lg'}
                         weight={'medium'}
                         css={{
                            m: 0,

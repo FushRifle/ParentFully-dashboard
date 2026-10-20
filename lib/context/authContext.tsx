@@ -4,13 +4,14 @@ import React, {
 } from 'react';
 import { useRouter } from 'next/router';
 import { User } from '../../types/api';
+import { logout as logoutService } from '@/services/authService';
 
 interface AuthContextType {
      user: User | null;
      token: string | null;
      isLoading: boolean;
      login: (token: string, user: User) => void;
-     logout: () => void;
+     logout: () => Promise<void>;
      updateUser: (user: User) => void;
 }
 
@@ -48,6 +49,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           loadAuthData();
      }, []);
 
+     useEffect(() => {
+          const handleUnauthorized = () => {
+               setToken(null);
+               setUser(null);
+               router.replace('/login');
+          };
+
+          window.addEventListener('parentfully:unauthorized', handleUnauthorized);
+          return () => window.removeEventListener('parentfully:unauthorized', handleUnauthorized);
+     }, [router]);
+
      // Login function
      const login = (newToken: string, newUser: User) => {
           setToken(newToken);
@@ -57,12 +69,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
      };
 
      // Logout function
-     const logout = () => {
+     const logout = async () => {
+          await logoutService();
           setToken(null);
           setUser(null);
           localStorage.removeItem('auth_token');
           localStorage.removeItem('user');
-          router.push('/login');
+          await router.push('/login');
      };
 
      const updateUser = (updatedUser: User) => {

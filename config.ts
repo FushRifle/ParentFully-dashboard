@@ -1,7 +1,7 @@
-export const BASE_URL = 'https://parentfully.stacksgather.com/api';
+const configuredBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-export const USER_PICTURE_BASE_URL = 'https://parentfully.stacksgather.com/storage/profiles/profile_images/';
+export const BASE_URL = (configuredBaseUrl || 'https://production-api.parentfullyapp.com/api').replace(/\/$/, '');
 
-//export const BASE_URL = __DEV__ ? 'http://parentfully.stacksgather.com/api' :
-//'http://parentfully.stacksgather.com/api';
-
+export const API_ORIGIN = BASE_URL.replace(/\/api$/, '');
+export const API_V2_BASE_URL = `${BASE_URL}/v2`;
+export const USER_PICTURE_BASE_URL = `${API_ORIGIN}/storage/profiles/profile_images/`;

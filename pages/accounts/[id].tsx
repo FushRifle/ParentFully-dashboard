@@ -33,10 +33,11 @@ const AccountDetailsPage = () => {
           fetchUser();
      }, [id]);
 
-     if (loading) return
-     <Box css={{ py: '$20', textAlign: 'center' }}>
-          <Loading size="xl">Fetching user details...</Loading>
-     </Box>;
+     if (loading) return (
+          <Box css={{ py: '$20', textAlign: 'center' }}>
+               <Loading size="xl">Fetching user details...</Loading>
+          </Box>
+     );
      if (!user) return <div>User not found</div>;
 
      return <AccountDetails user={user} />;

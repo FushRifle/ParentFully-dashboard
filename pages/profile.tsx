@@ -1,249 +1,42 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Button, Card, Input, Text } from '@nextui-org/react';
+import { KeyRound, UserRound } from 'lucide-react';
+import { api } from '../lib';
+import { useAuth } from '../lib/context/authContext';
 import { Box } from '../components/styles/box';
 import { Flex } from '../components/styles/flex';
-import {
-     Button,
-     Input,
-     Card,
-     Text,
-     Divider,
-     Badge,
-     Switch,
-     Spacer,
-     Loading,
-} from '@nextui-org/react';
-import ChatAvatarWrapper from '@/components/Avatar/ChatAvatarWrapper';
-import { SidebarContext } from '../components/layout/layout-context';
-import { User } from '../types/api';
-import { useProfileData } from '@/hooks/auth/useProfileData';
 
-export const ProfileDetails = () => {
-     const { showToast } = useContext(SidebarContext);
-     const {
-          user,
-          loading,
-          handleUpdateProfile,
-          pickUserPhoto,
-          photoUploading
-     } = useProfileData();
+export default function ProfilePage() {
+   const { user, updateUser } = useAuth();
+   const [name, setName] = useState(''); const [email, setEmail] = useState(''); const [saving, setSaving] = useState(false);
+   const [currentPassword, setCurrentPassword] = useState(''); const [password, setPassword] = useState(''); const [confirmation, setConfirmation] = useState('');
+   const [message, setMessage] = useState(''); const [error, setError] = useState('');
+   useEffect(() => { setName(user?.name ?? user?.user?.name ?? ''); setEmail(user?.email ?? user?.user?.email ?? ''); }, [user]);
 
-     const profile = user?.user
-          ? {
-               ...user,
-               ...user.user
-          }
-          : user;
+   const saveProfile = async () => {
+      setSaving(true); setError(''); setMessage('');
+      try {
+         const { data } = await api.put('/v1/admin/me', { name, email });
+         if (user) updateUser({ ...user, name: data.name, email: data.email, user: { ...user.user, name: data.name, email: data.email } });
+         setMessage('Profile updated.');
+      } catch (err: any) { setError(err?.response?.data?.message ?? 'Profile update failed.'); }
+      finally { setSaving(false); }
+   };
+   const changePassword = async () => {
+      setSaving(true); setError(''); setMessage('');
+      try {
+         await api.put('/v1/admin/me/password', { current_password: currentPassword, password, password_confirmation: confirmation });
+         setCurrentPassword(''); setPassword(''); setConfirmation(''); setMessage('Password changed.');
+      } catch (err: any) { setError(err?.response?.data?.message ?? Object.values(err?.response?.data?.errors ?? {}).flat().join(' ') ?? 'Password change failed.'); }
+      finally { setSaving(false); }
+   };
 
-     const [formData, setFormData] = useState<Partial<User>>({});
-
-     const getFirstName = (fullName?: string) => fullName?.split(' ')[0] || '';
-     const getLastName = (fullName?: string) =>
-          fullName ? fullName.split(' ').slice(1).join(' ') : '';
-
-     const updateNameField = (key: 'firstName' | 'lastName', value: string) => {
-          const first = key === 'firstName' ? value : getFirstName(formData.name);
-          const last = key === 'lastName' ? value : getLastName(formData.name);
-          const merged = [first, last].filter(Boolean).join(' ');
-          setFormData((prev) => ({ ...prev, name: merged }));
-     };
-
-     useEffect(() => {
-          if (profile) {
-               setFormData(profile);
-          }
-     }, [profile]);
-
-     const updateField = (key: keyof User, value: string) => {
-          setFormData((prev) => ({ ...prev, [key]: value }));
-     };
-
-     const handleSave = async () => {
-          if (!formData) return;
-          await handleUpdateProfile(formData as any);
-          showToast('Profile updated successfully');
-     };
-
-     const handlePhotoUpload = async () => {
-          await pickUserPhoto();
-     };
-
-     if (loading) return <Text>Loading profile...</Text>;
-     if (!profile) return <Text>No user data found.</Text>;
-
-     return (
-          <Box css={{ px: '$12', py: '$10', '@xsMax': { px: '$6' } }}>
-               {/* Page Header */}
-               <Flex justify="between" align="center" css={{ mb: '$10', width: '100%' }}>
-                    <Box>
-                         <Text h2 css={{ m: 0, fontWeight: '$bold', ls: '-1px' }}>
-                              Account Settings
-                         </Text>
-                         <Badge color="primary" variant="flat" css={{ mt: '$2', border: 'none' }}>
-                              {profile.role || 'ADMIN'}
-                         </Badge>
-                    </Box>
-                    <Button
-                         auto
-                         shadow
-                         color="primary"
-                         onClick={handleSave}
-                         disabled={loading}
-                         css={{ px: '$12', borderRadius: '$pill' }}
-                    >
-                         {loading ? <Loading size="sm" /> : 'Save Changes'}
-                    </Button>
-               </Flex>
-
-               {/* Profile Card */}
-               <Card variant="flat" css={{ p: '$4', bg: '$accents0', border: '1px solid $border', minHeight: '500px' }}>
-                    <Card.Body css={{ p: '$8' } as any}>
-                         <Flex
-                              direction="row"
-                              wrap="nowrap"
-                              align="stretch"
-                              css={{ width: '100%', gap: '$4', '@xsMax': { flexDirection: 'column' } }}
-                         >
-                              {/* Left Column - Avatar */}
-                              <Flex direction="column" align="center" css={{ width: '250px', flexShrink: 0, pt: '$8' }}>
-                                   <Box css={{ position: 'relative', mb: '$8' }}>
-                                        <ChatAvatarWrapper
-                                             profile_image={profile.profile_image as any}
-                                             contactName={profile.name}
-                                             phoneNumber={profile.phone_number}
-                                             size={160}
-                                             variant='secondary'
-                                             borderWidth={2}
-                                             borderColor='#F5A623'
-                                        />
-                                        <Badge
-                                             color="success"
-                                             content=""
-                                             placement="bottom-right"
-                                             shape="circle"
-                                             css={{
-                                                  p: '$3',
-                                                  border: '3px solid $white',
-                                                  position: 'absolute',
-                                                  bottom: '10px',
-                                                  right: '10px',
-                                             }}
-                                        />
-                                   </Box>
-                                   <Button
-                                        size="sm"
-                                        light
-                                        color="primary"
-                                        css={{ borderRadius: '$pill' }}
-                                        onClick={handlePhotoUpload}
-                                        disabled={photoUploading}
-                                   >
-                                        {photoUploading ? <Loading size="xs" /> : 'Update Photo'}
-                                   </Button>
-                              </Flex>
-
-                              <Box css={{ width: '1px', bg: '$border', mx: '$10', '@xsMax': { display: 'none', my: '$8' } }} />
-
-                              {/* Middle Column: Form Section */}
-                              <Flex direction="column" css={{ flex: 1, gap: '$8' }}>
-                                   <Text b size="$lg" css={{ mb: '$2' }}>
-                                        Personal Details
-                                   </Text>
-
-                                   <Flex css={{ gap: '$10', width: '100%', '@xsMax': { flexDirection: 'column' } }}>
-                                        <Input
-                                             label="First Name"
-                                             value={getFirstName(formData.name)}
-                                             onChange={(e) => updateNameField('firstName', e.target.value)}
-                                             fullWidth
-                                             bordered
-                                        />
-                                        <Input
-                                             label="Last Name"
-                                             value={getLastName(formData.name)}
-                                             onChange={(e) => updateNameField('lastName', e.target.value)}
-                                             fullWidth
-                                             bordered
-                                        />
-                                   </Flex>
-
-                                   <Input
-                                        label="Email Address"
-                                        value={formData.email || ''}
-                                        onChange={(e) => updateField('email', e.target.value)}
-                                        fullWidth
-                                        bordered
-                                        type="email"
-                                   />
-
-                                   <Input
-                                        label="Phone Number"
-                                        value={formData.phone_number || ''}
-                                        onChange={(e) => updateField('phone_number', e.target.value)}
-                                        fullWidth
-                                        bordered
-                                        type="tel"
-                                   />
-
-                                   <Box css={{ mt: '$4' }}>
-                                        <Text b size="$md" css={{ mb: '$4', display: 'block' }}>
-                                             Social Handles
-                                        </Text>
-                                        <Flex direction="column" css={{ gap: '$6' }}>
-                                             <Input labelLeft="twitter.com/" placeholder="username" fullWidth bordered />
-                                             <Input labelLeft="linkedin.com/in/" placeholder="username" fullWidth bordered />
-                                             <Input labelLeft="github.com/" placeholder="username" fullWidth bordered />
-                                        </Flex>
-                                   </Box>
-                              </Flex>
-
-                              {/* Second Vertical Divider */}
-                              <Box css={{ width: '1px', bg: '$border', mx: '$10', '@xsMax': { display: 'none', my: '$8' } }} />
-
-                              {/* Right Column: Settings */}
-                              <Flex direction="column" css={{ width: '280px', flexShrink: 0, gap: '$8' }}>
-                                   <Text b size="$lg" css={{ mb: '$2' }}>
-                                        Preferences
-                                   </Text>
-
-                                   <Flex justify="between" align="center">
-                                        <Box>
-                                             <Text b size="$sm">
-                                                  Two-Factor Auth
-                                             </Text>
-                                             <Text size="$xs" css={{ color: '$accents7' }}>
-                                                  Secure your account
-                                             </Text>
-                                        </Box>
-                                        <Switch
-                                             initialChecked={profile.two_factor_enabled}
-                                             size="sm"
-                                             onChange={(e) => updateField('two_factor_enabled', String(e.target.checked))}
-                                        />
-                                   </Flex>
-
-                                   <Divider css={{ my: '$2' }} />
-
-                                   <Box>
-                                        <Text b size="$sm" color="error">
-                                             Danger Zone
-                                        </Text>
-                                        <Spacer y={0.3} />
-                                        <Button
-                                             light
-                                             color="error"
-                                             size="sm"
-                                             css={{ width: '100%', justifyContent: 'start', p: 0 }}
-                                             onClick={() => alert('Deactivate account')}
-                                        >
-                                             Deactivate Account
-                                        </Button>
-                                   </Box>
-                              </Flex>
-                         </Flex>
-                    </Card.Body>
-               </Card>
-          </Box>
-     );
-};
-
-export default ProfileDetails;
+   return <Box className="admin-page" css={{ maxW: '1100px' }}>
+      <Box className="glass-panel glass-hero"><Flex align="center" css={{ gap: '$4', position: 'relative', zIndex: 1 }}><Box css={{ width: 44, height: 44, borderRadius: 14, display: 'grid', placeItems: 'center', color: '#8b83ff', bg: 'rgba(99,91,255,.12)', border: '1px solid rgba(139,131,255,.25)' }}><UserRound size={20}/></Box><Box><Text className="section-kicker">Admin account</Text><Text h2 css={{ m: 0, mt: '$1', fontSize: '1.35rem' }}>Profile & security</Text><Text size="$sm" css={{ color: '$accents7', mt: '$1' }}>Manage your identity and login credentials.</Text></Box></Flex></Box>
+      {message && <Text color="success" size="$sm" css={{ mb: '$4' }}>{message}</Text>}{error && <Text color="error" size="$sm" css={{ mb: '$4' }}>{error}</Text>}
+      <div className="content-grid">
+         <Card css={{ gridColumn: 'span 6' }}><Card.Header css={{ gap: '$3' }}><UserRound size={17} color="#3b82f6"/><Box><Text b>Account details</Text><Text size="$xs" css={{ color: '$accents7' }}>Your dashboard identity</Text></Box></Card.Header><Card.Body css={{ gap: '$5' } as any}><Input bordered fullWidth label="Name" value={name} onChange={(e) => setName(e.target.value)} /><Input bordered fullWidth type="email" label="Email" value={email} onChange={(e) => setEmail(e.target.value)} /><Button auto color="primary" onPress={saveProfile} disabled={saving}>Save profile</Button></Card.Body></Card>
+         <Card css={{ gridColumn: 'span 6' }}><Card.Header css={{ gap: '$3' }}><KeyRound size={17} color="#f97316"/><Box><Text b>Change password</Text><Text size="$xs" css={{ color: '$accents7' }}>Keep your admin access protected</Text></Box></Card.Header><Card.Body css={{ gap: '$5' } as any}><Input bordered fullWidth type="password" label="Current password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} /><Input bordered fullWidth type="password" label="New password" value={password} onChange={(e) => setPassword(e.target.value)} /><Input bordered fullWidth type="password" label="Confirm new password" value={confirmation} onChange={(e) => setConfirmation(e.target.value)} /><Button auto color="primary" onPress={changePassword} disabled={saving || !currentPassword || !password || password !== confirmation}>Change password</Button></Card.Body></Card>
+      </div>
+   </Box>;
+}

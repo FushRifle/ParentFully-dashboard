@@ -1,43 +1,90 @@
 import React from 'react';
-import { useRouter } from 'next/router';
-import { Box } from '../styles/box';
-import { Sidebar } from './sidebar.styles';
 import { Text } from '@nextui-org/react';
+import { useRouter } from 'next/router';
+import {
+   BadgeHelp,
+   BarChart3,
+   CircleDollarSign,
+   ClipboardList,
+   Gift,
+   Handshake,
+   Home,
+   House,
+   MessageSquareText,
+   Settings,
+   ShieldCheck,
+   Target,
+   UserCircle,
+   Users,
+   UsersRound,
+   CalendarCheck,
+} from 'lucide-react';
+import { Box } from '../styles/box';
 import { Flex } from '../styles/flex';
 import { CompaniesDropdown } from './companies-dropdown';
 import { SidebarItem } from './sidebar-item';
 import { SidebarMenu } from './sidebar-menu';
-import { CollapseItems } from './collapse-items';
-import { HomeIcon } from '../icons/sidebar/home-icon';
+import { Sidebar } from './sidebar.styles';
 import { useSidebarContext } from '../layout/layout-context';
-import {
-   AlignHorizontalJustifyCenter,
-   BriefcaseBusiness, GroupIcon, Headphones,
-   HeartPulseIcon, NotebookTabs, Settings2,
-   User2, UserCheck2, UserPlus2Icon, Users2,
-   Wallet2Icon
-} from 'lucide-react';
 
-import { BalanceIcon } from '../icons/sidebar/balance-icon';
-import { ChildrenIcon } from '../icons/sidebar/children-icon';
-import { FilterIcon } from '../icons/sidebar/filter-icon';
-import { ChangeLogIcon } from '../icons/sidebar/changelog-icon';
-import { ProductsIcon } from '../icons/sidebar/products-icon';
-import { ReportsIcon } from '../icons/sidebar/reports-icon';
-import { SecurityIcon } from '../icons/sidebar/security-icon';
-import { AccountsIcon } from '../icons/sidebar/accounts-icon';
-import { PaymentsIcon } from '../icons/sidebar/payments-icon';
-import { CustomersIcon } from '../icons/sidebar/customers-icon';
-import { DevIcon } from '../icons/sidebar/dev-icon';
-import { ViewIcon } from '../icons/sidebar/view-icon';
-import { SettingsIcon } from '../icons/sidebar/settings-icon';
-import { AnalyticsIcon } from '../icons/sidebar/analytics-icon';
-import { SupportIcon } from '../icons/navbar/support-icon';
+const navSections = [
+   {
+      title: 'Dashboard',
+      items: [{ title: 'Overview', href: '/overview', icon: Home }],
+   },
+   {
+      title: 'People',
+      items: [
+         { title: 'Admin Users', href: '/admin-users', icon: ShieldCheck },
+         { title: 'Customers', href: '/customers', icon: Users },
+         { title: 'Families', href: '/families', icon: House },
+      ],
+   },
+   {
+      title: 'App Library',
+      items: [
+         { title: 'Goal Categories', href: '/goal-categories', icon: Target },
+         { title: 'Routines & Tasks', href: '/routines', icon: CalendarCheck },
+         { title: 'Discipline Plans', href: '/discipline-plans', icon: ClipboardList },
+      ],
+   },
+   {
+      title: 'Revenue & Growth',
+      items: [
+         { title: 'Subscriptions', href: '/subscriptions', icon: CircleDollarSign },
+         { title: 'Rewards', href: '/rewards', icon: Gift },
+         { title: 'Referrals', href: '/referrals', icon: UsersRound },
+         { title: 'Affiliates', href: '/affiliates', icon: Handshake },
+      ],
+   },
+   {
+      title: 'Insights',
+      items: [
+         { title: 'Feedback', href: '/feedback', icon: MessageSquareText },
+         { title: 'Analytics', href: '/analytics', icon: BarChart3 },
+         { title: 'FAQs', href: '/faqs', icon: BadgeHelp },
+      ],
+   },
+   {
+      title: 'Account',
+      items: [
+         { title: 'Settings', href: '/settings', icon: Settings },
+         { title: 'Profile', href: '/profile', icon: UserCircle },
+      ],
+   },
+] as const;
 
 export const SidebarWrapper = () => {
    const router = useRouter();
    const { collapsed, setCollapsed } = useSidebarContext();
-   const activePath = router.pathname;
+
+   const isActive = (href: string) => {
+      if (href === '/overview') return ['/', '/dashboard', '/overview'].includes(router.pathname);
+      return router.pathname === href || router.pathname.startsWith(`${href}/`);
+   };
+
+   const isSectionActive = (section: (typeof navSections)[number]) =>
+      section.items.some((item) => isActive(item.href));
 
    return (
       <Box
@@ -46,141 +93,93 @@ export const SidebarWrapper = () => {
             height: '100vh',
             zIndex: 202,
             position: 'sticky',
-            top: '0',
+            top: 0,
+            background: 'rgba(10, 10, 12, 0.85)',
+            backdropFilter: 'blur(24px)',
+            WebkitBackdropFilter: 'blur(24px)',
+            borderRight: '1px solid rgba(255, 255, 255, 0.06)',
          }}
       >
+         {/* Global Custom Sidebar & Active Glow Animations */}
+         <style>{`
+            .sidebar-body::-webkit-scrollbar {
+               width: 4px;
+            }
+            .sidebar-body::-webkit-scrollbar-track {
+               background: transparent;
+            }
+            .sidebar-body::-webkit-scrollbar-thumb {
+               background: rgba(255, 255, 255, 0.1);
+               border-radius: 4px;
+            }
+            .sidebar-body::-webkit-scrollbar-thumb:hover {
+               background: rgba(255, 255, 255, 0.2);
+            }
+         `}</style>
+
          {collapsed && <Sidebar.Overlay onClick={setCollapsed} />}
 
          <Sidebar collapsed={collapsed}>
-            <Sidebar.Header>
+            {/* Header Brand / Company Select */}
+            <Sidebar.Header
+               css={{
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+                  padding: '16px 20px',
+               }}
+            >
                <CompaniesDropdown />
             </Sidebar.Header>
 
-            <Flex direction="column" justify="between" css={{ height: '100%' }}>
-               <Sidebar.Body className="body sidebar">
-                  {/* Main Navigation */}
-                  <SidebarItem
-                     title="Home"
-                     icon={<HomeIcon />}
-                     isActive={activePath === '/dashboard'}
-                     href="/dashboard"
-                  />
-
-                  {/* User & Family Management */}
-                  <SidebarMenu title="USER MANAGEMENT">
-                     <SidebarItem
-                        title="Users"
-                        icon={<Users2 />}
-                        href="/accounts"
-                        isActive={activePath.startsWith('/accounts')}
-                     />
-                     <CollapseItems
-                        title="Invites & Referrals"
-                        icon={<UserPlus2Icon />}
-                        items={[
-                           { label: 'Referrals', href: '/referrals' },
-                           { label: 'Invites', href: '/invites' },
-                        ]}
-                     />
-                  </SidebarMenu>
-
-                  {/* Resources */}
-                  <SidebarMenu title="APP RESOURCES">
-                     <SidebarItem
-                        title="Community"
-                        icon={<GroupIcon />}
-                        href="/community"
-                        isActive={activePath.startsWith('/community')}
-                     />
-                     <SidebarItem
-                        title="Experts"
-                        icon={<BriefcaseBusiness />}
-                        href="/experts"
-                        isActive={activePath.startsWith('/experts')}
-                     />
-
-                     <CollapseItems
-                        title="Resources"
-                        icon={<NotebookTabs />}
-                        items={[
-                           { label: 'Goals', href: '/goals' },
-                           { label: 'Routines', href: '/routinex' },
-                           { label: 'Disciplines', href: '/disciplinex' },
-                        ]}
-                     />
-                  </SidebarMenu>
-
-                  {/* Subscription & Payments */}
-                  <SidebarMenu title="SUBSCRIPTION">
-                     <SidebarItem
-                        title="Payments History"
-                        icon={<Wallet2Icon />}
-                        href="/payments"
-                        isActive={activePath.startsWith('/payments')}
-                     />
-                  </SidebarMenu>
-
-                  {/* Analytics & Reports 
-                    <SidebarItem
-                        title="User Feedbacks"
-                        icon={<BookAlert />}
-                        href="/feedbacks"
-                        isActive={activePath.startsWith('/feedbacks')}
-                     />
-                  */}
-
-                  <SidebarMenu title="ANALYTICS & REPORTS">
-                     <SidebarItem
-                        title="Usage Analytics"
-                        icon={<AlignHorizontalJustifyCenter />}
-                        href="/analytics"
-                        isActive={activePath.startsWith('/analytics')}
-                     />
-                  </SidebarMenu>
-
-                  {/* Settings & Config */}
-                  <SidebarMenu title="SETTINGS">
-                     <SidebarItem
-                        title="Profile"
-                        icon={<User2 />}
-                        href="/profile"
-                        isActive={activePath.startsWith('/profile')}
-                     />
-                     <SidebarItem
-                        title="Settings"
-                        icon={<Settings2 />}
-                        href="/settings"
-                        isActive={activePath.startsWith('/settings')}
-                     />
-                     <SidebarItem
-                        title="Roles & Permissions"
-                        icon={<UserCheck2 />}
-                        href="/teams"
-                        isActive={activePath.startsWith('/teams')}
-                     />
-                  </SidebarMenu>
-
-                  {/* Optional / Advanced */}
-                  <SidebarMenu title="SUPPORT">
-                     <SidebarItem
-                        title="Support Tickets"
-                        icon={<Headphones />}
-                        href="/support"
-                        isActive={activePath.startsWith('/support')}
-                     />
-
-                     <SidebarItem
-                        title="System Health"
-                        icon={<HeartPulseIcon />}
-                        href="/system"
-                        isActive={activePath.startsWith('/system')}
-                     />
-                  </SidebarMenu>
+            <Flex
+               direction="column"
+               justify="between"
+               css={{
+                  height: 'calc(100% - 73px)',
+                  minHeight: 0,
+               }}
+            >
+               {/* Scrollable Navigation Sections */}
+               <Sidebar.Body
+                  className="sidebar-body"
+                  css={{
+                     py: '$4',
+                     px: '$3',
+                     overflowY: 'auto',
+                     flex: 1,
+                  }}
+               >
+                  {navSections.map((section) => (
+                     <SidebarMenu
+                        key={section.title}
+                        title={section.title}
+                        defaultOpen={isSectionActive(section)}
+                     >
+                        {section.items.map((item) => {
+                           const Icon = item.icon;
+                           return (
+                              <SidebarItem
+                                 key={item.href}
+                                 title={item.title}
+                                 icon={<Icon size={16} strokeWidth={2} />}
+                                 href={item.href}
+                                 isActive={isActive(item.href)}
+                              />
+                           );
+                        })}
+                     </SidebarMenu>
+                  ))}
                </Sidebar.Body>
 
-               <Sidebar.Footer>
-                  <Text size="$sm" css={{ color: '$accents6' }}>
-                     © 2024 ParentFully
+               {/* Footer copyright */}
+               <Sidebar.Footer
+                  css={{
+                     borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                     padding: '16px 24px',
+                     background: 'rgba(12, 12, 16, 0.4)',
+                  }}
+               >
+                  <Text size="11px" css={{ color: 'rgba(255, 255, 255, 0.35)', fontWeight: 500, letterSpacing: '0.03em' }}>
+                     © 2026 ParentFully
                   </Text>
                </Sidebar.Footer>
             </Flex>

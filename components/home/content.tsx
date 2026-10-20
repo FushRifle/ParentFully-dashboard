@@ -1,271 +1,33 @@
 import React from 'react';
+import { Badge, Card, Grid, Text } from '@nextui-org/react';
 import { Box } from '../styles/box';
-import dynamic from 'next/dynamic';
 import { Flex } from '../styles/flex';
-import { TableWrapper } from '../table/table';
-import NextLink from 'next/link';
+import { OverviewStats } from './overview-stats';
+import { useUserStats } from '../../hooks/user/useUserStats';
 
-import { CardUsersOverview } from './card-balance1';
-import { CardNewUsers } from './card-balance2';
-import { CardPremium } from './card-balance3';
-import { CommunityNewsFeed } from './community-feeds';
-
-import {
-   Text, Link, Button, Grid,
-   Badge, Card, Divider, Avatar
-} from '@nextui-org/react';
-import { EngagementCharts } from './engagement-chart';
-
-
-const Chart = dynamic(
-   () => import('../charts/steam').then((mod) => mod.Steam),
-   { ssr: false }
-);
-
-export const Content = () => (
-   <Box css={{
-      overflow: 'hidden',
-      height: '100%',
-      px: '$8',
-      pb: '$20',
-      '@sm': { px: '$12' },
-      maxW: '1600px',
-      margin: '0 auto',
-      bg: '$accents0'
-   }}>
-
-      <Flex justify="between" align="end" css={{
-         mt: '$12', mb: '$10',
-         flexWrap: 'wrap', gap: '$6', position: 'relative'
-      }}>
-         <Box css={{ zIndex: 1 }}>
-            <Flex align="center" css={{ gap: '$3', mb: '$2' }}>
-               <Badge color="secondary" variant="flat" css={{ border: 'none', px: '$4' }}>ParentFully Admin</Badge>
-            </Flex>
-            <Text h2 css={{ m: 0, fontWeight: '$bold', letterSpacing: '-0.03em' }}>
-               ParentFully Insights Dashboard
+export const Content = () => {
+   const { stats, loading, error } = useUserStats();
+   return (
+   <Box css={{ width: '100%', maxW: '1440px', mx: 'auto', pb: '$12' }}>
+      <Flex justify="between" align="end" css={{ mb: '$7', flexWrap: 'wrap', gap: '$4' }}>
+         <Box>
+            <Badge color="secondary" variant="flat" css={{ border: 'none', mb: '$2' }}>
+               Live platform data
+            </Badge>
+            <Text h2 css={{ m: 0, fontSize: '1.45rem', letterSpacing: '-0.025em' }}>
+               Platform overview
             </Text>
-            <Text span css={{ color: '$accents7' }}>
-               Monitoring family growth, guide engagement, and productivity metrics.
+            <Text size="$sm" css={{ color: '$accents7', mt: '$1' }}>
+               Customer, family, content, and activity totals from ParentFully.
             </Text>
-         </Box>
-
-         <Flex css={{ gap: '$4', zIndex: 1 }}>
-            <Button auto flat color="secondary" css={{ borderRadius: '$pill' }}>Export Report</Button>
-            <Button auto shadow color="primary" css={{ borderRadius: '$pill' }}>+ New Guide</Button>
-         </Flex>
-
-         {/* Header Illustration */}
-         <Box
-            css={{
-               position: 'absolute',
-               right: '-20px',
-               top: '-20px',
-               width: '320px',
-               height: '220px',
-               zIndex: 0,
-               opacity: 0.8,
-               display: 'none',
-               '@md': { display: 'block' }
-            }}
-         >
-            <img
-               src="https://thumbs.dreamstime.com/b/happy-african-american-family-disabled-girl-sitting-wheelchair-holding-basketball-ball-concept-parents-involvement-98439832.jpg"
-               alt="Parenting and Family Growth Illustration"
-               style={{
-                  width: '100%',
-                  height: '100%',
-                  borderRadius: '12px',
-                  objectFit: 'contain'
-               }}
-            />
          </Box>
       </Flex>
 
-      <Flex
-         css={{
-            'gap': '$12',
-            'flexDirection': 'column',
-            '@lg': { flexDirection: 'row' },
-         }}
-      >
-         {/* --- 2. Left Column: Data & Activity (72%) --- */}
-         <Box css={{ flex: '1 1 72%', minWidth: 0 }}>
-
-            {/* Parenting KPI Row */}
-            <Grid.Container gap={2} css={{ p: 0, mb: '$10' }}>
-               <Grid xs={12} sm={4}>
-                  <CardUsersOverview />
-               </Grid>
-               <Grid xs={12} sm={4}>
-                  <CardNewUsers />
-               </Grid>
-               <Grid xs={12} sm={4}>
-                  <CardPremium />
-               </Grid>
-            </Grid.Container>
-
-            {/* Engagement Chart */}
-            <EngagementCharts />
-
-            {/* Latest User Registrations */}
-            <Box css={{ mt: '$15' }}>
-               <Card variant="bordered" css={{ borderRadius: '$2xl', border: '1px solid $border', bg: '$background' }}>
-                  <Card.Body css={{ p: 0 } as any}>
-                     <TableWrapper />
-                  </Card.Body>
-               </Card>
-            </Box>
-         </Box>
-
-         {/* --- 3. Right Column: Content & Support (28%) --- */}
-         <Box
-            css={{
-               'flex': '1 1 28%',
-               'display': 'flex',
-               'flexDirection': 'column',
-               'gap': '$10',
-            }}
-         >
-            {/* New: Community News Feed */}
-            <CommunityNewsFeed />
-
-            {/* Parenting Experts */}
-            <Card variant="flat" css={{ bg: '$background', border: '1px solid $border', p: '$4' }}>
-               <Card.Header css={{ pb: 0 } as any}>
-                  <Text b size="$md">On-Call Parenting Experts</Text>
-               </Card.Header>
-               <Card.Body>
-                  <Flex direction="column" css={{ gap: '$6' }}>
-                     <Flex align="center" justify="between">
-                        <Flex align="center" css={{ gap: '$4' }}>
-                           <Avatar src="https://i.pravatar.cc/150?u=a042581f4e29026704d" color="secondary" bordered />
-                           <Box>
-                              <Text b size="$sm">Dr. Sarah Jenkins</Text>
-                              <Text size="$xs" css={{ color: '$accents6' }}>Child Psychologist</Text>
-                           </Box>
-                        </Flex>
-                        <Badge color="success" variant="flat">Online</Badge>
-                     </Flex>
-                     <Divider />
-                     <Flex align="center" justify="between">
-                        <Flex align="center" css={{ gap: '$4' }}>
-                           <Avatar src="https://i.pravatar.cc/150?u=a04258114e29026702d" color="primary" bordered />
-                           <Box>
-                              <Text b size="$sm">Marcus Chen</Text>
-                              <Text size="$xs" css={{ color: '$accents6' }}>Sleep Consultant</Text>
-                           </Box>
-                        </Flex>
-                        <Badge color="warning" variant="flat">Busy</Badge>
-                     </Flex>
-                  </Flex>
-               </Card.Body>
-               <Card.Footer>
-                  <Link href="/experts">
-                     <Button
-                        as="a"
-                        flat
-                        size="sm"
-                        css={{ borderRadius: '$pill' }}
-                     >
-                        Manage Experts
-                     </Button>
-                  </Link>
-               </Card.Footer>
-            </Card>
-
-            {/* Support & Help Card */}
-            <Card
-               css={{
-                  bg: '#3f3bef',
-                  borderRadius: '$2xl',
-                  p: '$4',
-                  border: 'none',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  boxShadow: '0 10px 20px -5px rgba(63, 59, 239, 0.3)',
-                  width: '100%',
-               }}
-            >
-               <Card.Body css={{ py: '$10', zIndex: 1 } as any}>
-                  <Flex direction="column" align="start" css={{ textAlign: 'left', px: '$4' }}>
-                     <Badge
-                        disableOutline
-                        css={{
-                           bg: 'rgba(255,255,255,0.2)',
-                           color: 'white',
-                           mb: '$4',
-                           border: 'none',
-                        }}
-                     >
-                        Support & Issues
-                     </Badge>
-
-                     <Text h4 color="white" css={{ mb: '$2', lineHeight: '$xs' }}>
-                        Review pending <br />user issues
-                     </Text>
-
-                     <Text
-                        size="$xs"
-                        color="white"
-                        css={{ opacity: 0.85, mb: '$8', maxW: '180px' }}
-                     >
-                        Monitor, investigate, and resolve support requests and reports submitted by users.
-                     </Text>
-
-                     <Link href="/support">
-                        <Button
-                           size="sm"
-                           auto
-                           css={{
-                              bg: 'white',
-                              color: '#3f3bef',
-                              fontWeight: '$bold',
-                              borderRadius: '$pill',
-                              px: '$10',
-                              zIndex: 2,
-                              '&:hover': {
-                                 opacity: 0.9,
-                                 transform: 'translateY(-2px)',
-                              },
-                           }}
-                        >
-                           View Tickets
-                        </Button>
-                     </Link>
-                  </Flex>
-               </Card.Body>
-
-               {/* --- Support Illustration --- */}
-               <Box
-                  css={{
-                     position: 'absolute',
-                     bottom: '-10px',
-                     right: '-15px',
-                     width: '45%',
-                     minWidth: '120px',
-                     maxWidth: '200px',
-                     aspectRatio: '1 / 1',
-                     zIndex: 0,
-                     pointerEvents: 'none',
-                     transition: 'width 0.3s ease',
-                     '@md': {
-                        animation: 'float 6s ease-in-out infinite',
-                        '@keyframes float': {
-                           '0%, 100%': { transform: 'translateY(0)' },
-                           '50%': { transform: 'translateY(-10px)' },
-                        },
-                     },
-                  }}
-               >
-                  <img
-                     src="https://png.pngtree.com/png-vector/20231014/ourmid/pngtree-3d-customer-service-operator-png-illustration-png-image_10160272.png"
-                     alt="Admin Support Illustration"
-                     style={{ width: '100%', height: 'auto', objectFit: 'contain' }}
-                  />
-               </Box>
-            </Card>
-         </Box>
-      </Flex>
+      <OverviewStats dashboardStats={stats} loading={loading} error={error} />
+      <Grid.Container gap={1.5} css={{ p: 0, mt: '$4' }}>
+         <Grid xs={12} md={6}><Card variant="bordered"><Card.Header><Text b>Top goal categories</Text></Card.Header><Card.Body css={{ gap: '$3' } as any}>{(stats?.top_goal_categories ?? []).map((category) => <Flex key={category.id} justify="between"><Text size="$sm">{category.name}</Text><Text b size="$sm">{category.goals_count.toLocaleString()}</Text></Flex>)}{!loading && !stats?.top_goal_categories?.length && <Text size="$sm" css={{ color: '$accents7' }}>No category activity yet.</Text>}</Card.Body></Card></Grid>
+         <Grid xs={12} md={6}><Card variant="bordered"><Card.Header><Text b>Recent activity</Text></Card.Header><Card.Body css={{ gap: '$3' } as any}>{(stats?.recent_activity ?? []).map((activity) => <Box key={activity.id}><Text size="$sm">{activity.description || activity.action || activity.model_type || 'Activity'}</Text><Text size="$xs" css={{ color: '$accents7' }}>{activity.family_name || '—'} · {activity.created_at ? new Date(activity.created_at).toLocaleString() : '—'}</Text></Box>)}{!loading && !stats?.recent_activity?.length && <Text size="$sm" css={{ color: '$accents7' }}>No recent activity.</Text>}</Card.Body></Card></Grid>
+      </Grid.Container>
    </Box>
-);
+   );
+};

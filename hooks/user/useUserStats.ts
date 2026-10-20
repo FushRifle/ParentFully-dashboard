@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getAllUsers } from '@/services/authService';
-import { User } from '@/types/api';
+import { getDashboardStats } from '@/services/adminService';
+import type { AdminDashboardStats } from '@/types/api';
 
 export const useUserStats = () => {
-     const [allUsers, setAllUsers] = useState<User[]>([]);
+     const [stats, setStats] = useState<AdminDashboardStats | null>(null);
      const [loading, setLoading] = useState(true);
      const [error, setError] = useState<string | null>(null);
 
@@ -13,23 +12,9 @@ export const useUserStats = () => {
           setError(null);
 
           try {
-               const apiUsers = await getAllUsers();
-
-               let users: User[] = [];
-               if (apiUsers && Array.isArray(apiUsers)) {
-                    users = apiUsers;
-                    await AsyncStorage.setItem('user', JSON.stringify(users));
-               } else {
-                    const cached = await AsyncStorage.getItem('user');
-                    if (cached) users = JSON.parse(cached);
-               }
-
-               setAllUsers(users);
+               setStats(await getDashboardStats());
           } catch (e: any) {
                setError(e?.message ?? 'Failed to load users');
-
-               const cached = await AsyncStorage.getItem('user');
-               if (cached) setAllUsers(JSON.parse(cached));
           } finally {
                setLoading(false);
           }
@@ -39,22 +24,17 @@ export const useUserStats = () => {
           loadUsers();
      }, [loadUsers]);
 
-     const totalUsers = allUsers.length;
-     const newUsers = [...allUsers]
-          .filter(u => u.created_at)
-          .sort((a, b) => new Date(b.created_at!).getTime() - new Date(a.created_at!).getTime());
-     const premiumUsers = [...allUsers]
-          .filter((u) => u.is_premium)
-          .sort((a, b) => Number(b.is_premium) - Number(a.is_premium));
+     const totalUsers = stats?.total_users ?? 0;
+     const newUsers = stats?.new_users_this_month ?? 0;
+     const premiumUsers = stats?.active_subscriptions ?? 0;
 
      return {
-          allUsers,
+          stats,
           totalUsers,
           newUsers,
           premiumUsers,
           loading,
           error,
           refresh: loadUsers,
-          setAllUsers,
      };
 };

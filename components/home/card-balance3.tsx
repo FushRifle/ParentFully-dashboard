@@ -68,7 +68,7 @@ export const CardPremium = () => {
                      letterSpacing: '-0.02em',
                   }}
                >
-                  {loading ? <Loading type="points" color="primary" size="sm" /> : `${premiumUsers.length * 10_000}`}
+                  {loading ? <Loading type="points" color="primary" size="sm" /> : premiumUsers.toLocaleString()}
                </Text>
             </Flex>
          </Card.Body>

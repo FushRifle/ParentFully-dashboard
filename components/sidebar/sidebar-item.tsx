@@ -1,8 +1,6 @@
-import { Text, Link } from '@nextui-org/react';
-import NextLink from 'next/link';
 import React from 'react';
+import NextLink from 'next/link';
 import { useSidebarContext } from '../layout/layout-context';
-import { Flex } from '../styles/flex';
 
 interface Props {
    title: string;
@@ -11,7 +9,7 @@ interface Props {
    href?: string;
 }
 
-export const SidebarItem = ({ icon, title, isActive, href = '' }: Props) => {
+export const SidebarItem = ({ icon, title, isActive, href = '#' }: Props) => {
    const { setCollapsed, collapsed } = useSidebarContext();
 
    const handleClick = () => {
@@ -23,82 +21,100 @@ export const SidebarItem = ({ icon, title, isActive, href = '' }: Props) => {
    };
 
    return (
-      <NextLink href={href} passHref legacyBehavior>
-         <Link
-            css={{
-               color: '$accents9',
-               maxWidth: '100%',
-               width: '100%',
-               textDecoration: 'none',
+      <NextLink
+         href={href}
+         onClick={handleClick}
+         style={{
+            width: '100%',
+            textDecoration: 'none',
+            display: 'block',
+            color: 'inherit',
+         }}
+      >
+         <div
+            style={{
                display: 'flex',
+               alignItems: 'center',
+               gap: '12px',
+               width: '100%',
+               height: '38px',
+               padding: '0 12px 0 16px',
+               borderRadius: '10px',
+               cursor: 'pointer',
+               position: 'relative',
+               userSelect: 'none',
+               transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+               background: isActive ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
+               border: isActive
+                  ? '1px solid rgba(255, 255, 255, 0.12)'
+                  : '1px solid transparent',
+               boxShadow: isActive ? '0 4px 15px -3px rgba(0, 0, 0, 0.5)' : 'none',
             }}
-            onClick={handleClick}
+            className="sidebar-item-pill"
          >
-            <Flex
-               css={{
-                  'gap': '$6',
-                  'width': '100%',
-                  'minHeight': '48px',
-                  'alignItems': 'center',
-                  'px': '$7',
-                  'borderRadius': '12px',
-                  'cursor': 'pointer',
-                  'position': 'relative',
-                  'transition': 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  ...(isActive
-                     ? {
-                        'bg': '$blue100',
-                        '& svg path': {
-                           fill: '$blue600',
-                        },
-                        '&:before': {
-                           content: '""',
-                           position: 'absolute',
-                           left: '0',
-                           width: '4px',
-                           height: '24px',
-                           borderRadius: '0 4px 4px 0',
-                           bg: '$blue600',
-                        },
-                     }
-                     : {
-                        '&:hover': {
-                           bg: '$accents1',
-                           transform: 'translateX(4px)',
-                        },
-                     }),
+            {/* Keyframe & Micro-interactions */}
+            <style>{`
+          .sidebar-item-pill:hover {
+            background: ${isActive
+                  ? 'rgba(255, 255, 255, 0.12)'
+                  : 'rgba(255, 255, 255, 0.04)'
+               } !important;
+            transform: ${isActive ? 'none' : 'translateX(3px)'};
+          }
+          .sidebar-item-pill:active {
+            transform: scale(0.98);
+          }
+        `}</style>
 
-                  '&:active': {
-                     transform: 'scale(0.97)',
-                  },
+            {/* Left Glowing Active Indicator Line */}
+            {isActive && (
+               <span
+                  style={{
+                     position: 'absolute',
+                     left: '0',
+                     top: '50%',
+                     transform: 'translateY(-50%)',
+                     width: '3.5px',
+                     height: '18px',
+                     borderRadius: '0 4px 4px 0',
+                     background: '#3b82f6',
+                     boxShadow: '0 0 10px #3b82f6',
+                  }}
+               />
+            )}
+
+            {/* Icon Container */}
+            <div
+               style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: isActive ? '#ffffff' : 'rgba(255, 255, 255, 0.5)',
+                  transition: 'color 0.2s ease, transform 0.2s ease',
+                  filter: isActive
+                     ? 'drop-shadow(0 0 6px rgba(255, 255, 255, 0.3))'
+                     : 'none',
                }}
-               align={'center'}
             >
-               <Flex
-                  css={{
-                     'display': 'flex',
-                     'alignItems': 'center',
-                     '& svg': {
-                        transition: 'transform 0.2s ease',
-                     }
-                  }}
-               >
-                  {icon}
-               </Flex>
+               {icon}
+            </div>
 
-               <Text
-                  span
-                  size={'$base'}
-                  css={{
-                     color: isActive ? '$blue600' : '$accents9',
-                     fontWeight: isActive ? '$semibold' : '$normal',
-                     transition: 'color 0.2s ease',
-                  }}
-               >
-                  {title}
-               </Text>
-            </Flex>
-         </Link>
+            {/* Title Text */}
+            <span
+               style={{
+                  fontSize: '13px',
+                  fontWeight: isActive ? 600 : 400,
+                  color: isActive ? '#ffffff' : 'rgba(255, 255, 255, 0.65)',
+                  letterSpacing: '-0.01em',
+                  transition: 'color 0.2s ease',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+               }}
+            >
+               {title}
+            </span>
+         </div>
       </NextLink>
    );
 };

@@ -1,10 +1,18 @@
 import { api } from '@/lib';
-import axios, { AxiosError, AxiosRequestConfig } from 'axios';
+import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
      AuthResponse, User,
      GoogleSignInPayload, AppleSignInPayload
 } from '@/types/api';
+import {
+     getAdminProfile,
+     getAllAppUsers,
+     getAppUser,
+     loginAdmin,
+     logoutAdmin,
+     updateAdminProfile,
+} from '@/services/adminService';
 
 interface VerifyResetCodeResponse {
      token: string
@@ -57,15 +65,14 @@ export const register = async (data: {
 
 export const login = async (data: { email: string; password: string }): Promise<AuthResponse | null> => {
      try {
-          const res = await api.post<{ success: boolean; data: AuthResponse }>('/v1/login', data);
-          const authData = res.data?.data;
+          const authData = await loginAdmin(data);
 
           if (authData?.access_token) {
                await AsyncStorage.setItem('auth_token', authData.access_token);
                if (authData.user) await AsyncStorage.setItem('user', JSON.stringify(authData.user));
                return authData;
           } else {
-               console.warn('No token returned from API', res.data);
+               console.warn('No token returned from admin API');
                return null;
           }
      } catch (err: any) {
@@ -76,7 +83,7 @@ export const login = async (data: { email: string; password: string }): Promise<
 
 export const logout = async (): Promise<void> => {
      try {
-          await api.post('/v1/logout');
+          await logoutAdmin();
      } catch (err: any) {
           console.error('Logout API failed:', err.response?.data || err.message || err);
      } finally {
@@ -185,12 +192,7 @@ export const loginWithApple = async (identityToken: string): Promise<AuthRespons
 /* --------------------------------- PROFILE -------------------------------- */
 export const getUser = async (): Promise<User | null> => {
      try {
-          const res = await api.get<{
-               success: boolean;
-               data: User;
-          }>('/v1/user');
-
-          const userData = res.data?.data;
+          const userData = await getAdminProfile();
 
           if (userData) {
                await AsyncStorage.setItem('user', JSON.stringify(userData));
@@ -215,46 +217,7 @@ export const getUser = async (): Promise<User | null> => {
 // services/authService.ts
 export const getAllUsers = async (): Promise<User[] | null> => {
      try {
-          const initialRes = await api.get<{
-               success: boolean;
-               data: User[];
-               total?: number;
-          }>('/v1/users', {
-               params: {
-                    page: 1,
-                    per_page: 100
-               }
-          });
-
-          let allUsers = [...(initialRes.data?.data || [])];
-          const total = initialRes.data?.total || allUsers.length;
-          const perPage = 100;
-          const possiblePages = Math.ceil(total / perPage);
-
-          if (possiblePages > 1) {
-               for (let page = 2; page <= possiblePages; page++) {
-                    const res = await api.get<{
-                         success: boolean;
-                         data: User[];
-                    }>('/v1/users', {
-                         params: {
-                              page,
-                              per_page: 100
-                         }
-                    });
-
-                    if (res.data?.data) {
-                         allUsers = [...allUsers, ...res.data.data];
-                         console.log(`Page ${page}: added ${res.data.data.length} users`);
-                    }
-
-                    if (!res.data?.data || res.data.data.length === 0) {
-                         break;
-                    }
-               }
-          }
-
-          console.log(`Total users fetched: ${allUsers.length}`);
+          const allUsers = await getAllAppUsers();
 
           await AsyncStorage.setItem('users', JSON.stringify(allUsers));
 
@@ -267,9 +230,7 @@ export const getAllUsers = async (): Promise<User[] | null> => {
 
 export const getUserByID = async (id: number): Promise<User | null> => {
      try {
-          const res = await api.get<{ success: boolean; data: User }>(`/v1/users/${id}`);
-          const userData = res.data?.data;
-          return userData ?? null;
+          return await getAppUser(id);
      } catch (err: any) {
           console.error('Error fetching user:', err.response?.data || err.message || err);
           return null;
@@ -280,21 +241,13 @@ export const updateProfile = async (
      data: Partial<User> | FormData
 ): Promise<User | null> => {
      try {
-          const isFormData = data instanceof FormData;
-
-          const config: AxiosRequestConfig = isFormData
-               ? {
-                    headers: {
-                         'Content-Type': 'multipart/form-data',
-                    },
-               }
-               : {};
-
-          const res = await api.post<{
-               success: boolean;
-               data: User;
-          }>('/v1/user', data, config);
-          const updatedUser = res.data?.data;
+          if (data instanceof FormData) {
+               throw new Error('The admin profile API does not support file uploads.');
+          }
+          const updatedUser = await updateAdminProfile({
+               name: data.name || '',
+               email: data.email || '',
+          });
           if (updatedUser) {
                await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
           }

@@ -6,7 +6,7 @@ export const SidebarWrapper = styled('div', {
    'height': '100%',
    'position': 'fixed',
    'transform': 'translateX(-100%)',
-   'width': '16rem',
+   'width': '15rem',
    'flexShrink': 0,
    'zIndex': '202',
    'overflowY': 'auto',
@@ -52,19 +52,20 @@ export const Header = styled('div', {
    display: 'flex',
    gap: '$4',
    alignItems: 'center',
-   px: '$10',
-   py: '$8',
-   height: '80px',
+   px: '$8',
+   py: '$5',
+   height: '66px',
    borderBottom: '1px solid transparent',
 });
 
 export const Body = styled('div', {
    display: 'flex',
    flexDirection: 'column',
-   gap: '$10',
-   mt: '$4',
+   gap: '$6',
+   mt: '$2',
    px: '$4',
    flex: '1 1 auto',
+   overflowY: 'auto',
 });
 
 export const Footer = styled('div', {
@@ -73,7 +74,7 @@ export const Footer = styled('div', {
    'justifyContent': 'center',
    'gap': '$8',
    'mt': 'auto',
-   'py': '$8',
+   'py': '$5',
    'borderTop': '1px solid $border',
    'mx': '$6',
 });

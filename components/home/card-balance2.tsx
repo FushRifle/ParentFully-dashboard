@@ -8,13 +8,6 @@ import { useUserStats } from '@/hooks/user/useUserStats';
 export const CardNewUsers = () => {
    const { newUsers, loading } = useUserStats();
 
-   const recentUsers = newUsers.filter(user => {
-      if (!user.created_at) return false;
-      const created = new Date(user.created_at).getTime();
-      const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-      return created >= thirtyDaysAgo;
-   });
-
    return (
       <Card
          css={{
@@ -74,7 +67,7 @@ export const CardNewUsers = () => {
                      letterSpacing: '-0.02em',
                   }}
                >
-                  {loading ? <Loading type="points" color="primary" size="sm" /> : recentUsers.length.toLocaleString()}
+                  {loading ? <Loading type="points" color="primary" size="sm" /> : newUsers.toLocaleString()}
                </Text>
             </Flex>
          </Card.Body>

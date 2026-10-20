@@ -54,7 +54,7 @@ const ChatAvatarWrapper: React.FC<ChatAvatarWrapperProps> = ({
                return cleaned;
           }
 
-          return `https://parentfully.stacksgather.com/storage/${cleaned.replace(/^\/+/, '')}`;
+          return `https://production-api.parentfullyapp.com/storage/${cleaned.replace(/^\/+/, '')}`;
      };
 
      const getInitials = () => {

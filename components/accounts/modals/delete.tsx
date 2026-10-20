@@ -6,17 +6,17 @@ export const DeleteUserModal = ({ visible, closeHandler, userName, onConfirm }) 
           <Modal closeButton blur aria-labelledby="modal-title" open={visible} onClose={closeHandler}>
                <Modal.Header>
                     <Text id="modal-title" size={18}>
-                         Confirm <Text b size={18}>Deletion</Text>
+                         Confirm <Text b size={18}>Suspension</Text>
                     </Text>
                </Modal.Header>
                <Modal.Body>
                     <Text>
-                         Are you sure you want to delete <b>{userName}</b>? This action cannot be undone and all associated data will be lost.
+                         Are you sure you want to suspend <b>{userName}</b>? They will be unable to use their account until reactivated.
                     </Text>
                </Modal.Body>
                <Modal.Footer>
                     <Button auto flat color="error" onClick={closeHandler}>Cancel</Button>
-                    <Button auto onClick={onConfirm} color="error">Delete User</Button>
+                    <Button auto onClick={onConfirm} color="error">Suspend User</Button>
                </Modal.Footer>
           </Modal>
      );

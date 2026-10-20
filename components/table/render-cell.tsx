@@ -32,7 +32,7 @@ interface RenderCellProps {
 
 const RenderCellComponent = ({ user, columnKey }: RenderCellProps) => {
    const router = useRouter();
-   const u = user.user ?? user;
+   const u = { ...user, ...(user.user ?? {}) };
    const profile_image = u.profile_image;
    const userPhoto = user.user?.profile_image || u.photo;
 
@@ -53,7 +53,7 @@ const RenderCellComponent = ({ user, columnKey }: RenderCellProps) => {
 
    const handleDetails = useCallback(() => {
       if (resolvedUserId) {
-         router.push(`/accounts/${resolvedUserId}`);
+         router.push(`/customers/${resolvedUserId}`);
       }
    }, [router, resolvedUserId]);
 

@@ -32,7 +32,7 @@ const UltimateProfileAvatar: React.FC<UltimateProfileAvatarProps> = ({
                return cleaned;
           }
 
-          const finalUrl = `https://parentfully.stacksgather.com/storage/${cleaned.replace(/^\/+/, '')}`;
+          const finalUrl = `https://production-api.parentfullyapp.com/storage/${cleaned.replace(/^\/+/, '')}`;
           return finalUrl;
      };
 

@@ -1,5 +1,4 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosError } from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BASE_URL } from '../config';
 
 let isLoggingOut = false;
@@ -15,8 +14,10 @@ const api: AxiosInstance = axios.create({
 
 // REQUEST INTERCEPTOR
 api.interceptors.request.use(
-     async (config: InternalAxiosRequestConfig) => {
-          const token = await AsyncStorage.getItem('auth_token');
+     (config: InternalAxiosRequestConfig) => {
+          const token = typeof window !== 'undefined'
+               ? window.localStorage.getItem('auth_token')
+               : null;
           if (token && config.headers) {
                config.headers['Authorization'] = `Bearer ${token}`;
           }
@@ -29,15 +30,18 @@ api.interceptors.request.use(
 api.interceptors.response.use(
      (response) => response,
      async (error: AxiosError) => {
-          if (error.response?.status === 401 && !isLoggingOut) {
+          const requestUrl = error.config?.url || '';
+          if (error.response?.status === 401 && requestUrl.includes('/admin/') && !isLoggingOut) {
                isLoggingOut = true;
 
                console.warn('Unauthenticated. Logging out...');
 
                try {
-                    await AsyncStorage.multiRemove(['auth_token', 'user']);
-               } catch (e) {
-                    console.error('Error clearing auth data:', e);
+                    if (typeof window !== 'undefined') {
+                         window.localStorage.removeItem('auth_token');
+                         window.localStorage.removeItem('user');
+                         window.dispatchEvent(new Event('parentfully:unauthorized'));
+                    }
                } finally {
                     setTimeout(() => {
                          isLoggingOut = false;

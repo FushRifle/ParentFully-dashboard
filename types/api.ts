@@ -17,8 +17,15 @@ export interface AuthUser {
      name: string;
      email: string;
      phone_number: string;
+     role?: string;
+     status?: string;
      country?: string;
-     profile_image?: | {
+     profile_image?: string | {
+          uri: string;
+          type: string;
+          fileName?: string | undefined;
+     } | undefined;
+     photo?: string | {
           uri: string;
           type: string;
           fileName?: string | undefined;
@@ -48,6 +55,7 @@ export interface User {
      is_active: boolean;
      email: string;
      role?: string;
+     status?: string;
      phone_number: string;
      country?: string;
      updated_at?: string;
@@ -57,12 +65,12 @@ export interface User {
      has_sent_invite: boolean;
      has_seen_success: boolean;
      children: any[];
-     profile_image?: | {
+     profile_image?: string | {
           uri: string;
           type: string;
           fileName?: string | undefined;
      } | undefined;
-     photo?: | {
+     photo?: string | {
           uri: string;
           type: string;
           fileName?: string | undefined;
@@ -71,6 +79,41 @@ export interface User {
      two_factor_enabled?: boolean;
      created_at?: string | Date;
      is_premium?: boolean;
+     active_subscription?: {
+          plan_type: string;
+          status: string;
+     } | null;
+     family?: { id: number; name: string } | null;
+     family_member?: { role?: string; status?: string } | null;
+     subscriptions?: Array<{
+          id: number;
+          plan_type: string;
+          status: string;
+          start_date?: string | null;
+          end_date?: string | null;
+          amount?: number | string | null;
+     }>;
+}
+
+export interface AdminDashboardStats {
+     total_users: number;
+     total_families: number;
+     active_families: number;
+     active_subscriptions: number;
+     subscriptions_by_plan: Record<string, number>;
+     new_users_this_week: number;
+     new_users_this_month: number;
+     open_support_tickets: number;
+     total_goals: number;
+     active_goals: number;
+     completed_goals: number;
+     total_system_routines: number;
+     total_plans_active: number;
+     total_children: number;
+     rewards_claimed_this_month: number;
+     rewards_month_label: string;
+     top_goal_categories?: Array<{ id: number; name: string; goals_count: number }>;
+     recent_activity?: Array<{ id: number; action?: string; description?: string; model_type?: string; family_name?: string; created_at?: string }>;
 }
 
 export interface AuthContextType {

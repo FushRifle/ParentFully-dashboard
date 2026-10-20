@@ -36,6 +36,18 @@ Project Structure
 Getting Started
 Install dependencies:
 npm install
+
+Configure the Laravel API (copy `.env.example` to `.env.local` when needed):
+```env
+NEXT_PUBLIC_API_BASE_URL=https://production-api.parentfullyapp.com/api
+```
+
+The dashboard uses the backend's `/api/v1/admin/*` routes. From `parentfully-backend-main`, make sure the database is migrated and an admin exists:
+```bash
+php artisan migrate
+php artisan db:seed --class=AdminUserSeeder
+```
+
 Start the development server:
 npm run dev
 Open your browser and visit http://localhost:3000

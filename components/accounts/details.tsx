@@ -14,6 +14,7 @@ import {
      Button, Card, Divider, Input, Text,
      Badge, User as NextUser, Grid, Spacer
 } from '@nextui-org/react';
+import { updateAppUserStatus } from '@/services/adminService';
 
 type Props = {
      user: User;
@@ -23,6 +24,7 @@ export const AccountDetails = ({ user }: Props) => {
      const router = useRouter();
      const { showToast } = useContext(SidebarContext);
      const [deleteVisible, setDeleteVisible] = useState(false);
+     const [updatingStatus, setUpdatingStatus] = useState(false);
 
      const profile = useMemo(() => {
           const fullName = user.user.name || 'Unknown User';
@@ -37,19 +39,40 @@ export const AccountDetails = ({ user }: Props) => {
                avatar: user.user.profile_image,
                points: user.user.points ?? 0,
                isPremium: user.user.is_premium ?? false,
+               status: user.status || user.user.status || 'active',
+               country: user.country || user.user.country,
+               registeredAt: user.created_at || user.user.created_at,
+               onboardingComplete: user.has_completed_onboarding,
+               family: user.family,
+               subscription: user.subscriptions?.[0] || user.active_subscription,
           };
      }, [user]);
      const u = user.user ?? user;
-     const profile_image = u.profile_image;
-     const userPhoto = user.user?.profile_image || u.photo;
+     const profileImage = user.user?.profile_image || u.profile_image;
+     const photo = user.user?.photo || u.photo;
+     const profile_image = typeof profileImage === 'string' ? profileImage : profileImage?.uri;
+     const userPhoto = typeof photo === 'string' ? photo : photo?.uri;
 
-     const SECURITY_LOGS = [
-          { event: 'Last Activity', time: user.user.updated_at },
-     ];
+     const formatDate = (value?: string | Date | null) => {
+          if (!value) return '—';
+          const date = new Date(value);
+          return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleDateString();
+     };
 
-     const handleRevokePlan = useCallback(() => {
-          showToast(`Subscription revoked for ${profile.firstName}`);
-     }, [profile, showToast]);
+     const handleSuspendAccount = useCallback(async () => {
+          setUpdatingStatus(true);
+          try {
+               await updateAppUserStatus(profile.id, 'suspended');
+               setDeleteVisible(false);
+               showToast(`${profile.fullName} has been suspended`);
+               await router.push('/customers');
+          } catch (error) {
+               console.error('Failed to suspend account:', error);
+               showToast('Failed to suspend account');
+          } finally {
+               setUpdatingStatus(false);
+          }
+     }, [profile, router, showToast]);
 
      return (
           <Flex css={{ mt: '$5', px: '$6', '@sm': { mt: '$10', px: '$16' } }} direction="column">
@@ -57,10 +80,7 @@ export const AccountDetails = ({ user }: Props) => {
                     visible={deleteVisible}
                     closeHandler={() => setDeleteVisible(false)}
                     userName={profile.fullName}
-                    onConfirm={() => {
-                         setDeleteVisible(false);
-                         router.push('/accounts');
-                    }}
+                    onConfirm={handleSuspendAccount}
                />
 
                {/* Navigation Section */}
@@ -68,12 +88,12 @@ export const AccountDetails = ({ user }: Props) => {
                     <Breadcrumbs>
                          <Crumb>
                               <HouseIcon />
-                              <Link href="/dashboard"><CrumbLink>Home</CrumbLink></Link>
+                              <Link href="/overview"><CrumbLink>Overview</CrumbLink></Link>
                               <Text css={{ mx: '$2' }}>/</Text>
                          </Crumb>
                          <Crumb>
                               <UsersIcon />
-                              <Link href="/accounts"><CrumbLink>Accounts</CrumbLink></Link>
+                              <Link href="/customers"><CrumbLink>Customers</CrumbLink></Link>
                               <Text css={{ mx: '$2' }}>/</Text>
                          </Crumb>
                          <Crumb><CrumbLink>{profile.fullName}</CrumbLink></Crumb>
@@ -99,14 +119,14 @@ export const AccountDetails = ({ user }: Props) => {
                                         variant="flat"
                                         css={{ height: '$fit', px: '$6', borderRadius: '$pill', border: 'none' }}
                                    >
-                                        {profile.isPremium ? 'PREMIUM' : 'ACTIVE'}
+                                        {profile.status.toUpperCase()}
                                    </Badge>
                               </Flex>
                          </Grid>
                          <Grid css={{ '@xsMax': { mt: '$8', width: '100%' } }}>
                               <Flex css={{ gap: '$6' }}>
-                                   <Button auto color="error" onClick={() => setDeleteVisible(true)}>
-                                        Disable Account
+                                   <Button auto color="error" disabled={updatingStatus || profile.status === 'suspended'} onClick={() => setDeleteVisible(true)}>
+                                        {profile.status === 'suspended' ? 'Account Suspended' : 'Suspend Account'}
                                    </Button>
                               </Flex>
                          </Grid>
@@ -148,14 +168,14 @@ export const AccountDetails = ({ user }: Props) => {
                                              </Grid>
                                              <Grid xs={12} sm={6}>
                                                   <Flex direction="column" css={{ gap: '$2' }}>
-                                                       <Text size="$sm" color="$accents7">Rewards Points</Text>
-                                                       <Text size="$lg" b>{profile.points.toLocaleString()}</Text>
+                                                       <Text size="$sm" color="$accents7">Country</Text>
+                                                       <Text size="$lg" b>{profile.country || '—'}</Text>
                                                   </Flex>
                                              </Grid>
                                              <Grid xs={12} sm={6}>
                                                   <Flex direction="column" css={{ gap: '$2' }}>
-                                                       <Text size="$sm" color="$accents7">Referrals</Text>
-                                                       <Text size="$lg" b>{profile.points.toLocaleString()}</Text>
+                                                       <Text size="$sm" color="$accents7">Registered</Text>
+                                                       <Text size="$lg" b>{formatDate(profile.registeredAt)}</Text>
                                                   </Flex>
                                              </Grid>
                                         </Grid.Container>
@@ -168,16 +188,17 @@ export const AccountDetails = ({ user }: Props) => {
                                         <Flex justify="between" align="center" wrap="wrap" css={{ gap: '$8' }}>
                                              <Box>
                                                   <Text h5 css={{ m: 0 }}>Subscription Management</Text>
-                                                  <Text size="$sm" color="$accents7">Manage plan billing, status, and termination.</Text>
+                                                  <Text size="$sm" color="$accents7">
+                                                       {profile.subscription
+                                                            ? `${profile.subscription.plan_type} · ${profile.subscription.status}`
+                                                            : 'No current subscription'}
+                                                  </Text>
                                              </Box>
-                                             <Flex css={{ gap: '$6' }}>
+                                             {profile.subscription && <Flex css={{ gap: '$6' }}>
                                                   <Button auto flat size="sm" onClick={() => router.push(`/plans/${profile.id}`)}>
                                                        Plan Details
                                                   </Button>
-                                                  <Button auto flat color="error" size="sm" onClick={handleRevokePlan}>
-                                                       Revoke Plan
-                                                  </Button>
-                                             </Flex>
+                                             </Flex>}
                                         </Flex>
                                    </Card.Body>
                               </Card>
@@ -188,36 +209,29 @@ export const AccountDetails = ({ user }: Props) => {
                     <Grid xs={12} md={4}>
                          <Flex direction="column" css={{ gap: '$10', width: '100%' }}>
 
-                              {/* Security Card */}
+                              {/* Account data from the customer record */}
                               <Card variant="bordered" css={{ borderRadius: '$xl', bg: '$backgroundContrast' }}>
                                    <Card.Header css={{ px: '$8', pt: '$8' }}>
-                                        <Text b size="$md" transform="uppercase" color="$accents7">Recent Logs</Text>
+                                        <Text b size="$md" transform="uppercase" color="$accents7">Account details</Text>
                                    </Card.Header>
                                    <Divider css={{ opacity: 0.5 }} />
                                    <Card.Body css={{ px: '$8', py: '$8' }}>
                                         <Flex direction="column" css={{ gap: '$8' }}>
-                                             {SECURITY_LOGS.map((log, index) => (
-                                                  <Flex key={index} justify="between" align="center">
-                                                       <Box>
-                                                            <Text size="$sm" b>{log.event}</Text>
-                                                            <Text size="$xs" color="$accents6">{log.device}</Text>
-                                                       </Box>
-                                                       <Badge variant="flat" size="xs" color="neutral">{log.time}</Badge>
-                                                  </Flex>
-                                             ))}
+                                             <Flex justify="between" align="center">
+                                                  <Text size="$sm">Onboarding</Text>
+                                                  <Badge variant="flat" size="xs" color={profile.onboardingComplete ? 'success' : 'warning'}>
+                                                       {profile.onboardingComplete ? 'Complete' : 'Incomplete'}
+                                                  </Badge>
+                                             </Flex>
+                                             <Flex justify="between" align="center">
+                                                  <Text size="$sm">Family</Text>
+                                                  <Text size="$sm" b>{profile.family?.name || '—'}</Text>
+                                             </Flex>
+                                             <Flex justify="between" align="center">
+                                                  <Text size="$sm">Email verified</Text>
+                                                  <Text size="$sm" b>{user.user.email_verified_at ? 'Yes' : 'No'}</Text>
+                                             </Flex>
                                         </Flex>
-                                        <Spacer y={1.5} />
-                                        <Button light color="primary" auto size="sm" css={{ width: '100%', borderRadius: '$md' }}>
-                                             View History
-                                        </Button>
-                                   </Card.Body>
-                              </Card>
-
-                              {/* Quick Stats Card */}
-                              <Card variant="flat" css={{ borderRadius: '$xl', bg: '$primaryLight' }}>
-                                   <Card.Body css={{ py: '$8' }}>
-                                        <Text b color="white" size="$sm">Account Status</Text>
-                                        <Text size="$xs" color="white">This account is currently in good standing with no active reports.</Text>
                                    </Card.Body>
                               </Card>
                          </Flex>
