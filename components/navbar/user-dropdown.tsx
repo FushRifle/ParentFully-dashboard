@@ -73,9 +73,9 @@ export const UserDropdown = () => {
             disabledKeys={isLoggingOut ? ['logout'] : []}
             css={{
                '$$dropdownMenuWidth': '260px',
-               'bg': 'rgba(14, 14, 18, 0.9) !important',
+               'bg': 'var(--pf-glass-strong) !important',
                'backdropFilter': 'blur(20px)',
-               'border': '1px solid rgba(255, 255, 255, 0.08)',
+               'border': '1px solid var(--pf-border)',
                'borderRadius': '16px',
                'p': '$2',
                'boxShadow': '0 20px 40px -15px rgba(0,0,0,0.7)',
@@ -83,11 +83,11 @@ export const UserDropdown = () => {
                   'py': '$3',
                   'px': '$3',
                   'borderRadius': '10px',
-                  'color': 'rgba(255, 255, 255, 0.8)',
+                  'color': 'var(--pf-text)',
                   'transition': 'all 0.2s ease',
                   '&:hover': {
-                     bg: 'rgba(255, 255, 255, 0.05) !important',
-                     color: '$white',
+                     bg: 'var(--pf-hover) !important',
+                     color: 'var(--pf-text)',
                   },
                },
             }}
@@ -96,7 +96,7 @@ export const UserDropdown = () => {
             <Dropdown.Item key="profile" textValue="Profile Header" css={{ height: 'auto', py: '$3', cursor: 'default' }}>
                <Box css={{ pb: '$1' }}>
                   <Flex align="center" justify="between" css={{ mb: '$1' }}>
-                     <Text weight="semibold" css={{ color: '$white', m: 0, fontSize: '13px' }}>
+                     <Text weight="semibold" css={{ color: 'var(--pf-text)', m: 0, fontSize: '13px' }}>
                         {displayName}
                      </Text>
                      <span
@@ -123,7 +123,7 @@ export const UserDropdown = () => {
             <Dropdown.Item key="settings" withDivider textValue="My Settings">
                <NextLink href="/settings" style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}>
                   <Flex align="center" css={{ gap: '$3' }}>
-                     <Settings size={15} color="rgba(255,255,255,0.6)" />
+                     <Settings size={15} color="var(--pf-text-muted)" />
                      <Text size="13px" css={{ color: 'inherit', m: 0 }}>
                         My Settings
                      </Text>
@@ -134,7 +134,7 @@ export const UserDropdown = () => {
             <Dropdown.Item key="teams" textValue="Team Settings">
                <NextLink href="/team" style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}>
                   <Flex align="center" css={{ gap: '$3' }}>
-                     <Users size={15} color="rgba(255,255,255,0.6)" />
+                     <Users size={15} color="var(--pf-text-muted)" />
                      <Text size="13px" css={{ color: 'inherit', m: 0 }}>
                         Team Settings
                      </Text>
@@ -145,7 +145,7 @@ export const UserDropdown = () => {
             <Dropdown.Item key="analytics" textValue="Analytics">
                <NextLink href="/analytics" style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}>
                   <Flex align="center" css={{ gap: '$3' }}>
-                     <BarChart3 size={15} color="rgba(255,255,255,0.6)" />
+                     <BarChart3 size={15} color="var(--pf-text-muted)" />
                      <Text size="13px" css={{ color: 'inherit', m: 0 }}>
                         Analytics
                      </Text>
@@ -156,7 +156,7 @@ export const UserDropdown = () => {
             <Dropdown.Item key="switch" withDivider textValue="Dark Mode Switch">
                <Flex align="center" justify="between" css={{ width: '100%' }}>
                   <Flex align="center" css={{ gap: '$3' }}>
-                     <Moon size={15} color="rgba(255,255,255,0.6)" />
+                     <Moon size={15} color="var(--pf-text-muted)" />
                      <Text size="13px" css={{ color: 'inherit', m: 0 }}>
                         Dark Mode
                      </Text>

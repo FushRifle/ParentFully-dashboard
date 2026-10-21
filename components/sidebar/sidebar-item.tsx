@@ -10,10 +10,10 @@ interface Props {
 }
 
 export const SidebarItem = ({ icon, title, isActive, href = '#' }: Props) => {
-   const { setCollapsed, collapsed } = useSidebarContext();
+   const { setCollapsed, collapsed, mobileOpen } = useSidebarContext();
 
    const handleClick = () => {
-      if (typeof window !== 'undefined' && window.innerWidth < 768 && !collapsed) {
+      if (typeof window !== 'undefined' && window.innerWidth < 960 && mobileOpen) {
          setTimeout(() => {
             setCollapsed();
          }, 100);
@@ -43,21 +43,21 @@ export const SidebarItem = ({ icon, title, isActive, href = '#' }: Props) => {
                cursor: 'pointer',
                position: 'relative',
                userSelect: 'none',
-               transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-               background: isActive ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
+               transition: 'background 120ms ease, border-color 120ms ease, transform 120ms ease',
+               background: isActive ? 'var(--pf-nav-active)' : 'transparent',
                border: isActive
-                  ? '1px solid rgba(255, 255, 255, 0.12)'
+                  ? '1px solid var(--pf-border-hover)'
                   : '1px solid transparent',
                boxShadow: isActive ? '0 4px 15px -3px rgba(0, 0, 0, 0.5)' : 'none',
             }}
-            className="sidebar-item-pill"
+            className={`sidebar-item-pill${collapsed ? ' sidebar-item-compact' : ''}`}
          >
             {/* Keyframe & Micro-interactions */}
             <style>{`
           .sidebar-item-pill:hover {
             background: ${isActive
-                  ? 'rgba(255, 255, 255, 0.12)'
-                  : 'rgba(255, 255, 255, 0.04)'
+                  ? 'var(--pf-nav-active)'
+                  : 'var(--pf-hover)'
                } !important;
             transform: ${isActive ? 'none' : 'translateX(3px)'};
           }
@@ -89,7 +89,7 @@ export const SidebarItem = ({ icon, title, isActive, href = '#' }: Props) => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: isActive ? '#ffffff' : 'rgba(255, 255, 255, 0.5)',
+                  color: isActive ? 'var(--pf-nav-active-text)' : 'var(--pf-nav-icon)',
                   transition: 'color 0.2s ease, transform 0.2s ease',
                   filter: isActive
                      ? 'drop-shadow(0 0 6px rgba(255, 255, 255, 0.3))'
@@ -101,10 +101,11 @@ export const SidebarItem = ({ icon, title, isActive, href = '#' }: Props) => {
 
             {/* Title Text */}
             <span
+               className="sidebar-item-label"
                style={{
                   fontSize: '13px',
                   fontWeight: isActive ? 600 : 400,
-                  color: isActive ? '#ffffff' : 'rgba(255, 255, 255, 0.65)',
+                  color: isActive ? 'var(--pf-nav-active-text)' : 'var(--pf-nav-text)',
                   letterSpacing: '-0.01em',
                   transition: 'color 0.2s ease',
                   overflow: 'hidden',

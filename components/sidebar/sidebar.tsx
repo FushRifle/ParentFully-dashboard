@@ -18,6 +18,7 @@ import {
    Users,
    UsersRound,
    CalendarCheck,
+   Menu,
 } from 'lucide-react';
 import { Box } from '../styles/box';
 import { Flex } from '../styles/flex';
@@ -76,7 +77,7 @@ const navSections = [
 
 export const SidebarWrapper = () => {
    const router = useRouter();
-   const { collapsed, setCollapsed } = useSidebarContext();
+   const { collapsed, mobileOpen, setCollapsed } = useSidebarContext();
 
    const isActive = (href: string) => {
       if (href === '/overview') return ['/', '/dashboard', '/overview'].includes(router.pathname);
@@ -94,10 +95,8 @@ export const SidebarWrapper = () => {
             zIndex: 202,
             position: 'sticky',
             top: 0,
-            background: 'rgba(10, 10, 12, 0.85)',
-            backdropFilter: 'blur(24px)',
-            WebkitBackdropFilter: 'blur(24px)',
-            borderRight: '1px solid rgba(255, 255, 255, 0.06)',
+            background: 'var(--pf-sidebar-bg)',
+            borderRight: '1px solid var(--pf-border)',
          }}
       >
          {/* Global Custom Sidebar & Active Glow Animations */}
@@ -117,17 +116,38 @@ export const SidebarWrapper = () => {
             }
          `}</style>
 
-         {collapsed && <Sidebar.Overlay onClick={setCollapsed} />}
+         {mobileOpen && <Sidebar.Overlay onClick={setCollapsed} />}
 
-         <Sidebar collapsed={collapsed}>
+         {!mobileOpen && (
+            <button
+               type="button"
+               aria-label="Open sidebar"
+               onClick={setCollapsed}
+               className="sidebar-mobile-trigger"
+               style={{ position: 'fixed', top: 16, left: 14, zIndex: 203, width: 40, height: 40, borderRadius: 12, border: '1px solid rgba(255,255,255,.1)', background: 'rgba(12,12,16,.86)', backdropFilter: 'blur(18px)', color: 'white', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+            >
+               <Menu size={20} />
+            </button>
+         )}
+
+         <Sidebar open={mobileOpen} compact={collapsed}>
             {/* Header Brand / Company Select */}
             <Sidebar.Header
                css={{
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
-                  padding: '16px 20px',
+                  borderBottom: '1px solid var(--pf-border)',
+                  padding: '14px 10px 14px 18px',
                }}
             >
-               <CompaniesDropdown />
+               {!collapsed && <CompaniesDropdown />}
+               <button
+                  type="button"
+                  aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                  title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                  onClick={setCollapsed}
+                  style={{ marginLeft: collapsed ? 3 : 'auto', width: 36, height: 36, flex: '0 0 36px', borderRadius: 10, border: '1px solid var(--pf-border)', background: 'var(--pf-glass-soft)', color: 'var(--pf-text-muted)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'background 120ms ease, color 120ms ease' }}
+               >
+                  <Menu size={18} />
+               </button>
             </Sidebar.Header>
 
             <Flex
@@ -153,6 +173,7 @@ export const SidebarWrapper = () => {
                         key={section.title}
                         title={section.title}
                         defaultOpen={isSectionActive(section)}
+                        compact={collapsed}
                      >
                         {section.items.map((item) => {
                            const Icon = item.icon;
@@ -173,14 +194,14 @@ export const SidebarWrapper = () => {
                {/* Footer copyright */}
                <Sidebar.Footer
                   css={{
-                     borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                     borderTop: '1px solid var(--pf-border)',
                      padding: '16px 24px',
-                     background: 'rgba(12, 12, 16, 0.4)',
+                     background: 'var(--pf-glass-soft)',
                   }}
                >
-                  <Text size="11px" css={{ color: 'rgba(255, 255, 255, 0.35)', fontWeight: 500, letterSpacing: '0.03em' }}>
+                  {!collapsed && <Text size="11px" css={{ color: 'var(--pf-text-subtle)', fontWeight: 500, letterSpacing: '0.03em' }}>
                      © 2026 ParentFully
-                  </Text>
+                  </Text>}
                </Sidebar.Footer>
             </Flex>
          </Sidebar>

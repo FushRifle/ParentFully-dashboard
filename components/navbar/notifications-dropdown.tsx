@@ -18,13 +18,13 @@ export const NotificationsDropdown = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  background: 'var(--pf-glass-soft)',
+                  border: '1px solid var(--pf-border)',
                   transition: 'all 0.2s ease',
                }}
                className="nav-action-btn"
             >
-               <Bell size={18} color="rgba(255, 255, 255, 0.8)" />
+               <Bell size={18} color="var(--pf-text)" />
                {/* Unread Glow Badge Indicator */}
                <span
                   style={{
@@ -46,9 +46,9 @@ export const NotificationsDropdown = () => {
             css={{
                '$$dropdownMenuWidth': '360px',
                '$$dropdownItemHeight': 'auto',
-               'bg': 'rgba(14, 14, 18, 0.9) !important',
+               'bg': 'var(--pf-glass-strong) !important',
                'backdropFilter': 'blur(20px)',
-               'border': '1px solid rgba(255, 255, 255, 0.08)',
+               'border': '1px solid var(--pf-border)',
                'borderRadius': '16px',
                'p': '$3',
                'boxShadow': '0 20px 40px -15px rgba(0,0,0,0.7)',
@@ -58,7 +58,7 @@ export const NotificationsDropdown = () => {
                   'borderRadius': '10px',
                   'transition': 'all 0.2s ease',
                   '&:hover': {
-                     bg: 'rgba(255, 255, 255, 0.05) !important',
+                     bg: 'var(--pf-hover) !important',
                   },
                },
             }}
@@ -80,7 +80,7 @@ export const NotificationsDropdown = () => {
                      </Box>
                      <Box css={{ flex: 1 }}>
                         <Flex justify="between" align="center">
-                           <Text size="$xs" weight="semibold" css={{ color: '$white', m: 0 }}>
+                           <Text size="$xs" weight="semibold" css={{ color: 'var(--pf-text)', m: 0 }}>
                               Profile Updated
                            </Text>
                            <Text size="10px" css={{ color: '$accents6' }}>
@@ -110,7 +110,7 @@ export const NotificationsDropdown = () => {
                      </Box>
                      <Box css={{ flex: 1 }}>
                         <Flex justify="between" align="center">
-                           <Text size="$xs" weight="semibold" css={{ color: '$white', m: 0 }}>
+                           <Text size="$xs" weight="semibold" css={{ color: 'var(--pf-text)', m: 0 }}>
                               Digital Receipts Enabled
                            </Text>
                            <Text size="10px" css={{ color: '$accents6' }}>
@@ -140,7 +140,7 @@ export const NotificationsDropdown = () => {
                      </Box>
                      <Box css={{ flex: 1 }}>
                         <Flex justify="between" align="center">
-                           <Text size="$xs" weight="semibold" css={{ color: '$white', m: 0 }}>
+                           <Text size="$xs" weight="semibold" css={{ color: 'var(--pf-text)', m: 0 }}>
                               System Routine Alert
                            </Text>
                            <Text size="10px" css={{ color: '$accents6' }}>

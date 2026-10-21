@@ -35,6 +35,13 @@ interface BackendCollectionPageProps {
    createPayload?: Record<string, any>;
    allowDelete?: boolean;
    allowCreate?: boolean;
+   summaryMetrics?: Array<{
+      key: 'total' | 'visible' | 'page';
+      label: string;
+      color: string;
+      icon?: React.ReactNode;
+      description?: string;
+   }>;
 }
 
 interface CollectionMeta {
@@ -88,6 +95,7 @@ const formatValue = (value: any, type?: BackendColumn['type']) => {
 export const BackendCollectionPage = ({
    path, endpoint, columns, searchable = true, rowHref, formFields = [], resourceName,
    createLabel, mutationEndpoint = endpoint, listParams, createPayload, allowDelete = false, allowCreate = true,
+   summaryMetrics,
 }: BackendCollectionPageProps) => {
    const metaCopy = getPageMeta(path);
    const serializedListParams = JSON.stringify(listParams ?? {});
@@ -167,6 +175,16 @@ export const BackendCollectionPage = ({
    const tableColumns = formFields.length || rowHref || allowDelete
       ? [...columns, { key: '__actions', label: 'ACTIONS' }]
       : columns;
+   const metrics = summaryMetrics ?? [
+      { key: 'total' as const, label: 'Total records', color: '#635bff' },
+      { key: 'visible' as const, label: 'Visible now', color: '#10b981' },
+      { key: 'page' as const, label: 'Current page', color: '#f97316' },
+   ];
+   const metricValue = (key: 'total' | 'visible' | 'page') => key === 'total'
+      ? meta.total
+      : key === 'visible'
+         ? rows.length
+         : `${meta.current_page} / ${Math.max(meta.last_page, 1)}`;
 
    return (
       <Box className="admin-page">
@@ -190,16 +208,16 @@ export const BackendCollectionPage = ({
          </Box>
 
          <div className="metric-grid">
-            {[
-               { label: 'Total records', value: meta.total, color: '#635bff' },
-               { label: 'Visible now', value: rows.length, color: '#10b981' },
-               { label: 'Current page', value: `${meta.current_page} / ${Math.max(meta.last_page, 1)}`, color: '#f97316' },
-            ].map((item) => (
+            {metrics.map((item) => {
+               const value = metricValue(item.key);
+               return (
                <Box key={item.label} className="glass-panel metric-tile" css={{ '--tile-accent': item.color } as any}>
-                  <Flex align="center" css={{ gap: '$2', color: item.color }}><Database size={14} /><Text className="section-kicker">{item.label}</Text></Flex>
-                  <Text h3 css={{ m: 0, mt: '$3', fontSize: '1.45rem' }}>{loading ? '—' : typeof item.value === 'number' ? item.value.toLocaleString() : item.value}</Text>
+                  <Flex align="center" css={{ gap: '$2', color: item.color }}>{item.icon ?? <Database size={14} />}<Text className="section-kicker">{item.label}</Text></Flex>
+                  <Text h3 css={{ m: 0, mt: '$3', fontSize: '1.45rem' }}>{loading ? '—' : typeof value === 'number' ? value.toLocaleString() : value}</Text>
+                  {item.description && <Text size="$xs" css={{ color: '$accents7', mt: '$2' }}>{item.description}</Text>}
                </Box>
-            ))}
+               );
+            })}
          </div>
 
          <Box className="glass-panel glass-toolbar">

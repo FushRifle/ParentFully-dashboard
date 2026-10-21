@@ -1,14 +1,76 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Button, Loading, Table, Text } from '@nextui-org/react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Button, Input, Loading, Text } from '@nextui-org/react';
+import { CheckCircle2, Clock3, Inbox, MessageSquareText, RefreshCw, Search, Tag, UserRound } from 'lucide-react';
 import { api } from '../lib';
 import { Box } from '../components/styles/box';
 import { Flex } from '../components/styles/flex';
 
+const statusOptions = ['new', 'reviewed', 'resolved'];
+const initials = (name?: string) => (name || 'Unknown').split(' ').slice(0, 2).map((part) => part[0]).join('').toUpperCase();
+
 export default function FeedbackPage() {
-   const [rows, setRows] = useState<any[]>([]); const [loading, setLoading] = useState(true); const [error, setError] = useState<string | null>(null);
-   const [query, setQuery] = useState(''); const [category, setCategory] = useState(''); const [status, setStatus] = useState('');
-   const load = useCallback(async () => { setLoading(true); try { const { data } = await api.get('/v1/admin/feedback', { params: { per_page: 100, ...(query ? { search: query } : {}), ...(category ? { category } : {}), ...(status ? { status } : {}) } }); setRows(data.data ?? []); } catch (err: any) { setError(err?.response?.data?.message ?? 'Unable to load feedback.'); } finally { setLoading(false); } }, [query, category, status]);
+   const [rows, setRows] = useState<any[]>([]);
+   const [loading, setLoading] = useState(true);
+   const [updatingId, setUpdatingId] = useState<number | null>(null);
+   const [error, setError] = useState<string | null>(null);
+   const [query, setQuery] = useState('');
+   const [category, setCategory] = useState('');
+   const [status, setStatus] = useState('');
+
+   const load = useCallback(async () => {
+      setLoading(true); setError(null);
+      try {
+         const { data } = await api.get('/v1/admin/feedback', { params: { per_page: 100, ...(query ? { search: query } : {}), ...(category ? { category } : {}), ...(status ? { status } : {}) } });
+         setRows(Array.isArray(data?.data) ? data.data : Array.isArray(data?.data?.data) ? data.data.data : []);
+      } catch (err: any) { setError(err?.response?.data?.message ?? 'Unable to load feedback.'); }
+      finally { setLoading(false); }
+   }, [query, category, status]);
+
    useEffect(() => { const timer = setTimeout(load, query ? 300 : 0); return () => clearTimeout(timer); }, [load, query]);
-   const update = async (row: any, value: string) => { try { await api.patch(`/v1/admin/feedback/${row.id}`, { status: value }); await load(); } catch (err: any) { setError(err?.response?.data?.message ?? 'Unable to update feedback.'); } };
-   return <Box css={{ maxW: '1440px', mx: 'auto' }}><Flex justify="between" align="end" css={{ mb: '$6' }}><Box><Text h2 css={{ m: 0, fontSize: '1.35rem' }}>Feedback</Text><Text size="$sm" css={{ color: '$accents7' }}>Review submissions and update their status.</Text></Box><Flex css={{ gap: '$3' }}><input placeholder="Search feedback" value={query} onChange={(e) => setQuery(e.target.value)} /><input placeholder="Category" value={category} onChange={(e) => setCategory(e.target.value)} /><select value={status} onChange={(e) => setStatus(e.target.value)}><option value="">All statuses</option><option value="new">New</option><option value="reviewed">Reviewed</option><option value="resolved">Resolved</option></select><Button auto flat onPress={load}>Refresh</Button></Flex></Flex>{error && <Text color="error">{error}</Text>}{loading ? <Loading size="sm" /> : <Table aria-label="Feedback" bordered shadow={false}><Table.Header><Table.Column>SUBJECT</Table.Column><Table.Column>MESSAGE</Table.Column><Table.Column>CATEGORY</Table.Column><Table.Column>USER</Table.Column><Table.Column>STATUS</Table.Column><Table.Column>SUBMITTED</Table.Column></Table.Header><Table.Body items={rows}>{(r) => <Table.Row key={r.id}><Table.Cell>{r.subject}</Table.Cell><Table.Cell><Text size="$sm" css={{ maxW: '360px' }}>{r.message}</Text></Table.Cell><Table.Cell>{r.category ?? '—'}</Table.Cell><Table.Cell>{r.user?.name ?? '—'}<Text size="$xs">{r.user?.email ?? '—'}</Text></Table.Cell><Table.Cell><select value={r.status} onChange={(e) => update(r, e.target.value)}><option value="new">New</option><option value="reviewed">Reviewed</option><option value="resolved">Resolved</option></select></Table.Cell><Table.Cell>{r.created_at ? new Date(r.created_at).toLocaleDateString() : '—'}</Table.Cell></Table.Row>}</Table.Body></Table>}</Box>;
+
+   const update = async (row: any, value: string) => {
+      setUpdatingId(row.id); setError(null);
+      try {
+         await api.patch(`/v1/admin/feedback/${row.id}`, { status: value });
+         setRows((current) => current.map((item) => item.id === row.id ? { ...item, status: value } : item));
+      } catch (err: any) { setError(err?.response?.data?.message ?? 'Unable to update feedback.'); }
+      finally { setUpdatingId(null); }
+   };
+
+   const counts = useMemo(() => ({
+      total: rows.length,
+      new: rows.filter((item) => item.status === 'new').length,
+      reviewed: rows.filter((item) => item.status === 'reviewed').length,
+      resolved: rows.filter((item) => item.status === 'resolved').length,
+   }), [rows]);
+
+   return <Box className="admin-page feedback-page">
+      <Box className="glass-panel glass-hero"><Flex justify="between" align="center" css={{ gap: '$5', flexWrap: 'wrap' }}>
+         <Flex align="center" css={{ gap: '$4' }}><span className="feedback-hero-icon"><MessageSquareText size={20}/></span><Box><Text className="section-kicker">Customer voice</Text><Text h2 css={{ m: 0, mt: '$1', fontSize: '1.4rem' }}>Feedback</Text><Text size="$sm" css={{ color: '$accents7', mt: '$1' }}>Review customer submissions and move them through your response workflow.</Text></Box></Flex>
+         <Button auto flat icon={<RefreshCw size={15}/>} onPress={load} disabled={loading}>Refresh feedback</Button>
+      </Flex></Box>
+
+      {error && <div className="feedback-error">{error}</div>}
+
+      <div className="feedback-metrics">
+         <SummaryCard label="All feedback" value={counts.total} icon={<Inbox size={17}/>} color="#8b83ff" />
+         <SummaryCard label="New" value={counts.new} icon={<Clock3 size={17}/>} color="#f97316" />
+         <SummaryCard label="Reviewed" value={counts.reviewed} icon={<MessageSquareText size={17}/>} color="#3b82f6" />
+         <SummaryCard label="Resolved" value={counts.resolved} icon={<CheckCircle2 size={17}/>} color="#10b981" />
+      </div>
+
+      <Box className="glass-panel feedback-toolbar"><Box><Text b size="$sm">Feedback queue</Text><Text size="$xs" css={{ color: '$accents7', mt: '$1' }}>{loading ? 'Refreshing submissions…' : `${rows.length} submissions match the current filters`}</Text></Box><Flex css={{ gap: '$3', flexWrap: 'wrap' }}>
+         <Input bordered clearable aria-label="Search feedback" placeholder="Search feedback…" contentLeft={<Search size={15}/>} value={query} onChange={(event) => setQuery(event.target.value)} />
+         <div className="feedback-input-wrap"><Tag size={14}/><input className="feedback-category-input" aria-label="Filter by category" placeholder="Category" value={category} onChange={(event) => setCategory(event.target.value)} /></div>
+         <select value={status} onChange={(event) => setStatus(event.target.value)} aria-label="Filter by status"><option value="">All statuses</option>{statusOptions.map((item) => <option key={item} value={item}>{item}</option>)}</select>
+      </Flex></Box>
+
+      {loading ? <Box className="glass-panel feedback-loading"><Loading size="sm">Loading feedback…</Loading></Box> : rows.length ? <div className="feedback-grid">{rows.map((item) => <article className="feedback-card glass-panel" key={item.id}>
+         <header><div className="feedback-avatar">{initials(item.user?.name)}</div><div className="feedback-author"><strong>{item.user?.name ?? 'Unknown customer'}</strong><span>{item.user?.email ?? 'Email unavailable'}</span></div><span className={`feedback-status status-${item.status || 'new'}`}>{item.status || 'new'}</span></header>
+         <div className="feedback-card-content"><div className="feedback-card-meta"><span><Tag size={12}/>{item.category || 'General'}</span><time>{item.created_at ? new Date(item.created_at).toLocaleDateString([], { dateStyle: 'medium' }) : 'Date unavailable'}</time></div><h3>{item.subject || 'Customer feedback'}</h3><p>{item.message || 'No message was supplied.'}</p></div>
+         <footer><span><UserRound size={13}/> Submission #{item.id}</span><label>Status<select value={item.status || 'new'} disabled={updatingId === item.id} onChange={(event) => update(item, event.target.value)}>{statusOptions.map((option) => <option key={option} value={option}>{option}</option>)}</select></label></footer>
+      </article>)}</div> : <Box className="glass-panel feedback-empty"><Inbox size={24}/><Text b>No feedback found</Text><Text size="$sm" css={{ color: '$accents7' }}>Try clearing or changing the current filters.</Text></Box>}
+   </Box>;
 }
+
+const SummaryCard = ({ label, value, icon, color }: { label: string; value: number; icon: React.ReactNode; color: string }) => <div className="feedback-summary glass-panel"><span style={{ color, background: `${color}17` }}>{icon}</span><div><p>{label}</p><strong>{value.toLocaleString()}</strong></div></div>;

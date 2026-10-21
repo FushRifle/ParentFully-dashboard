@@ -20,7 +20,7 @@ export const GoalBackground = ({ children }: { children: React.ReactNode }) => {
                     backgroundImage: `url(${isDark ? GOAL_BACKGROUND_DARK : GOAL_BACKGROUND})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
-                    opacity: 0.09,
+                    opacity: isDark ? 0.09 : 0.14,
                     pointerEvents: 'none',
                 }}
             />

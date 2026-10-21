@@ -13,11 +13,18 @@ interface Props {
 
 export const Layout = ({ children }: Props) => {
    const [sidebarOpen, setSidebarOpen] = React.useState(false);
+   const [mobileOpen, setMobileOpen] = React.useState(false);
    const [_, setLocked] = useLockedBody(false);
 
    const handleToggleSidebar = () => {
-      setSidebarOpen(!sidebarOpen);
-      setLocked(!sidebarOpen);
+      if (typeof window !== 'undefined' && window.innerWidth < 960) {
+         setMobileOpen((open) => {
+            setLocked(!open);
+            return !open;
+         });
+         return;
+      }
+      setSidebarOpen((open) => !open);
    };
 
    const [toast, setToast] = React.useState({
@@ -38,6 +45,7 @@ export const Layout = ({ children }: Props) => {
       <SidebarContext.Provider
          value={{
             collapsed: sidebarOpen,
+            mobileOpen,
             setCollapsed: handleToggleSidebar,
             showToast,
          }}

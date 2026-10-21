@@ -2,7 +2,8 @@ import { styled } from '@nextui-org/react';
 
 export const SidebarWrapper = styled('div', {
    'backgroundColor': '$background',
-   'transition': 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+   'transition': 'width 140ms ease-out, transform 140ms ease-out',
+   'willChange': 'width, transform',
    'height': '100%',
    'position': 'fixed',
    'transform': 'translateX(-100%)',
@@ -24,12 +25,18 @@ export const SidebarWrapper = styled('div', {
       'top': 0,
       'height': '100vh',
       'transform': 'translateX(0)',
+      'width': '15rem',
    },
    'variants': {
-      collapsed: {
+      open: {
          true: {
             transform: 'translateX(0)',
             display: 'flex',
+         },
+      },
+      compact: {
+         true: {
+            '@md': { width: '4.75rem' },
          },
       },
    },
@@ -37,11 +44,10 @@ export const SidebarWrapper = styled('div', {
 
 export const Overlay = styled('div', {
    'backgroundColor': 'rgba(0, 0, 0, 0.15)',
-   'backdropFilter': 'blur(4px)',
    'position': 'fixed',
    'inset': 0,
    'zIndex': '201',
-   'transition': 'opacity 0.3s ease',
+   'transition': 'opacity 120ms ease-out',
    'opacity': 1,
    '@md': {
       display: 'none',

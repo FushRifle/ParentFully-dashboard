@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import NextLink from 'next/link';
 import { Navbar, Text, Input } from '@nextui-org/react';
 import { useRouter } from 'next/router';
-import { MessageSquare, HelpCircle, Search, Menu, X, ChevronRight } from 'lucide-react';
+import { MessageSquare, HelpCircle, Search } from 'lucide-react';
 
 import { Box } from '../styles/box';
 import { Flex } from '../styles/flex';
-import { BurguerButton } from './burguer-button';
 import { NotificationsDropdown } from './notifications-dropdown';
 import { UserDropdown } from './user-dropdown';
 import { getPageMeta } from '../../lib/pageMeta';
@@ -18,8 +17,6 @@ interface Props {
 export const NavbarWrapper = ({ children }: Props) => {
    const router = useRouter();
    const meta = getPageMeta(router.pathname);
-   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
    const collapseItems = [
       'Profile',
       'Dashboard',
@@ -37,9 +34,9 @@ export const NavbarWrapper = ({ children }: Props) => {
             isBordered
             variant="sticky"
             css={{
-               borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+               borderBottom: '1px solid var(--pf-border)',
                height: '70px',
-               background: 'rgba(12, 12, 15, 0.75) !important',
+               background: 'var(--pf-navbar-bg) !important',
                backdropFilter: 'blur(20px)',
                '& .nextui-navbar-container': {
                   maxWidth: '100%',
@@ -49,13 +46,10 @@ export const NavbarWrapper = ({ children }: Props) => {
             }}
          >
             {/* Left Section: Brand & Page Title */}
-            <Navbar.Content css={{ minWidth: '220px', gap: '$4' }}>
-               <Navbar.Item>
-                  <BurguerButton />
-               </Navbar.Item>
+            <Navbar.Content css={{ minWidth: '220px', gap: '$4', '@mdMax': { pl: '$12' } }}>
                <Navbar.Item>
                   <Box>
-                     <Text h4 css={{ m: 0, lineHeight: '$sm', fontSize: '1rem', color: '$white' }}>
+                     <Text h4 css={{ m: 0, lineHeight: '$sm', fontSize: '1rem', color: 'var(--pf-text)' }}>
                         {meta.title}
                      </Text>
                      <Text size="$xs" css={{ color: '$accents6', '@xsMax': { display: 'none' } }}>
@@ -70,17 +64,17 @@ export const NavbarWrapper = ({ children }: Props) => {
                <Navbar.Item css={{ width: '100%', maxWidth: '420px' }}>
                   <Input
                      clearable
-                     contentLeft={<Search size={16} color="rgba(255,255,255,0.4)" />}
+                     contentLeft={<Search size={16} color="var(--pf-text-muted)" />}
                      placeholder="Quick search... (Cmd + K)"
                      bordered
                      width="100%"
                      css={{
                         '& .nextui-input-wrapper': {
-                           bg: 'rgba(20, 20, 26, 0.65)',
+                           bg: 'var(--pf-glass-soft)',
                            borderRadius: '$pill',
                            px: '$6',
                            py: '$3',
-                           border: '1px solid rgba(255, 255, 255, 0.08)',
+                           border: '1px solid var(--pf-border)',
                         },
                      }}
                   />
@@ -93,8 +87,8 @@ export const NavbarWrapper = ({ children }: Props) => {
                <Navbar.Item css={{ '@mdMax': { display: 'none' } }}>
                   <NextLink href="/feedback" passHref legacyBehavior>
                      <Flex align="center" css={{ gap: '$2', cursor: 'pointer', opacity: 0.8, '&:hover': { opacity: 1 } }}>
-                        <MessageSquare size={16} color="white" />
-                        <Text span size="$xs" b css={{ color: '$white' }}>
+                        <MessageSquare size={16} color="var(--pf-text)" />
+                        <Text span size="$xs" b css={{ color: 'var(--pf-text)' }}>
                            Feedback
                         </Text>
                      </Flex>
@@ -110,7 +104,7 @@ export const NavbarWrapper = ({ children }: Props) => {
                <Navbar.Item css={{ '@mdMax': { display: 'none' } }}>
                   <NextLink href="#" passHref legacyBehavior>
                      <Flex align="center" css={{ cursor: 'pointer', opacity: 0.8, '&:hover': { opacity: 1 } }}>
-                        <HelpCircle size={18} color="white" />
+                        <HelpCircle size={18} color="var(--pf-text)" />
                      </Flex>
                   </NextLink>
                </Navbar.Item>

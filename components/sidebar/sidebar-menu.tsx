@@ -6,15 +6,16 @@ import { ChevronDown } from 'lucide-react';
 interface SidebarMenuProps {
    title: string;
    defaultOpen?: boolean;
+   compact?: boolean;
    children: React.ReactNode;
 }
 
-export const SidebarMenu = ({ title, defaultOpen = false, children }: SidebarMenuProps) => {
+export const SidebarMenu = ({ title, defaultOpen = false, compact = false, children }: SidebarMenuProps) => {
    const [open, setOpen] = useState(defaultOpen);
 
    return (
       <Flex direction="column" css={{ mb: '$3' }}>
-         <Flex
+         {!compact && <Flex
             align="center"
             justify="between"
             css={{
@@ -25,7 +26,7 @@ export const SidebarMenu = ({ title, defaultOpen = false, children }: SidebarMen
                userSelect: 'none',
                transition: 'background 0.2s ease',
                '&:hover': {
-                  background: 'rgba(255, 255, 255, 0.03)',
+                  background: 'var(--pf-hover)',
                },
             }}
             onClick={() => setOpen((v) => !v)}
@@ -34,7 +35,7 @@ export const SidebarMenu = ({ title, defaultOpen = false, children }: SidebarMen
                size="11px"
                weight="semibold"
                css={{
-                  color: 'rgba(255, 255, 255, 0.4)',
+                  color: 'var(--pf-text-subtle)',
                   textTransform: 'uppercase',
                   letterSpacing: '0.08em',
                }}
@@ -43,14 +44,14 @@ export const SidebarMenu = ({ title, defaultOpen = false, children }: SidebarMen
             </Text>
             <ChevronDown
                size={13}
-               color="rgba(255, 255, 255, 0.3)"
+               color="var(--pf-text-subtle)"
                style={{
                   transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
                   transition: 'transform 200ms cubic-bezier(0.4, 0, 0.2, 1)',
                }}
             />
-         </Flex>
-         {open && (
+         </Flex>}
+         {(open || compact) && (
             <Flex direction="column" css={{ mt: '2px', gap: '2px' }}>
                {children}
             </Flex>
