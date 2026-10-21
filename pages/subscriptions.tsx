@@ -20,6 +20,7 @@ import {
    AlertCircle,
    Ban,
    Sliders,
+   Inbox,
 } from 'lucide-react';
 import { api } from '../lib';
 import { API_V2_BASE_URL } from '../config';
@@ -43,7 +44,15 @@ export interface SubscriptionRecord {
    plan_type?: string;
    gateway?: string;
    source?: string;
+   provider?: string;
+   store?: string;
    payment_method?: string;
+   payment_status?: string;
+   product_id?: string;
+   revenuecat_app_user_id?: string;
+   original_app_user_id?: string;
+   is_manual?: boolean;
+   is_trial?: boolean;
    amount?: number | string;
    currency?: string;
    country?: string;
@@ -55,7 +64,7 @@ export interface SubscriptionRecord {
 }
 
 type CategoryKey = 'paid' | 'manual' | 'trial' | 'inactive' | 'free';
-type StatusKey = 'active' | 'cancelled' | 'expired';
+type StatusKey = 'active' | 'cancelled' | 'expired' | 'billing_issue';
 
 // ==========================================
 // Helpers
@@ -67,33 +76,37 @@ const sanitizeText = (value: unknown): string =>
       .replace(/[\s-]+/g, '_');
 
 const getStatus = (r: SubscriptionRecord): StatusKey => {
-   if (r.cancelled_at || sanitizeText(r.status).includes('cancel')) {
-      return 'cancelled';
-   }
-   if (sanitizeText(r.status).includes('expire')) {
-      return 'expired';
-   }
+   const rawStatus = sanitizeText(r.payment_status ?? r.status);
+   const expiryValue = r.expires_at ?? r.end_date;
+   const expiry = expiryValue ? new Date(expiryValue) : null;
+   if (rawStatus.includes('billing') || rawStatus.includes('past_due') || rawStatus.includes('grace')) return 'billing_issue';
+   if (rawStatus.includes('expire') || (expiry && !Number.isNaN(expiry.getTime()) && expiry.getTime() < Date.now())) return 'expired';
+   if (r.cancelled_at || rawStatus.includes('cancel')) return 'cancelled';
    return 'active';
 };
+
+const isManualGrant = (r: SubscriptionRecord) => {
+   const source = sanitizeText([r.gateway, r.source, r.provider, r.payment_method].filter(Boolean).join(' '));
+   const plan = sanitizeText(r.plan_code ?? r.plan_type);
+   return r.is_manual === true || source.includes('manual') || source.includes('override') ||
+      plan.includes('manual_grant') || (source.includes('system') && plan.includes('premium'));
+};
+
+const isRevenueCat = (r: SubscriptionRecord) => {
+   const billingSource = sanitizeText([r.gateway, r.source, r.provider].filter(Boolean).join(' '));
+   return billingSource.includes('revenuecat') || Boolean(r.revenuecat_app_user_id || r.original_app_user_id);
+};
+
+const isLinked = (r: SubscriptionRecord) => Boolean(r.user?.id || r.user?.email);
 
 const getCategory = (r: SubscriptionRecord): CategoryKey => {
    const status = getStatus(r);
    const plan = sanitizeText(r.plan_code ?? r.plan_type);
-   const gateway = sanitizeText(r.gateway ?? r.source);
-   const payment = sanitizeText(r.payment_method);
 
    if (['cancelled', 'expired'].includes(status)) return 'inactive';
-   if (sanitizeText(r.status).includes('trial') || plan.includes('trial')) return 'trial';
-   if (
-      payment.includes('manual_premium_grant') ||
-      plan.includes('manual_grant') ||
-      (gateway === 'system' && plan.includes('premium'))
-   ) {
-      return 'manual';
-   }
-   if (gateway === 'revenuecat' || (Number(r.amount ?? 0) > 0 && status === 'active')) {
-      return 'paid';
-   }
+   if (isManualGrant(r)) return 'manual';
+   if (r.is_trial === true || sanitizeText(r.status).includes('trial') || plan.includes('trial')) return 'trial';
+   if (isRevenueCat(r)) return 'paid';
    return 'free';
 };
 
@@ -130,6 +143,7 @@ export default function SubscriptionsPage() {
    const [query, setQuery] = useState('');
    const [category, setCategory] = useState<string>('all');
    const [statusFilter, setStatusFilter] = useState<string>('all');
+   const [linkFilter, setLinkFilter] = useState<'all' | 'linked' | 'unmatched'>('all');
 
    // Modal State
    const [modalOpen, setModalOpen] = useState(false);
@@ -148,7 +162,7 @@ export default function SubscriptionsPage() {
          });
          let rows = extractRows(firstRes.data);
          const lastPage = Number(
-            firstRes.data?.meta?.last_page ?? firstRes.data?.data?.meta?.last_page ?? 1
+            firstRes.data?.meta?.last_page ?? firstRes.data?.data?.meta?.last_page ?? firstRes.data?.data?.last_page ?? 1
          );
 
          if (lastPage > 1) {
@@ -164,7 +178,8 @@ export default function SubscriptionsPage() {
                rows = rows.concat(extractRows(res.data));
             });
          }
-         setRecords(rows);
+         const uniqueRows = Array.from(new Map(rows.map((row) => [String(row.id), row])).values());
+         setRecords(uniqueRows);
       } catch (err: any) {
          setError(err?.response?.data?.message ?? 'Unable to load subscriptions.');
       } finally {
@@ -185,14 +200,19 @@ export default function SubscriptionsPage() {
             (r.user?.name ?? '').toLowerCase().includes(q) ||
             (r.user?.email ?? '').toLowerCase().includes(q) ||
             (r.plan_type ?? '').toLowerCase().includes(q) ||
-            (r.country ?? '').toLowerCase().includes(q);
+            (r.plan_code ?? '').toLowerCase().includes(q) ||
+            (r.product_id ?? '').toLowerCase().includes(q) ||
+            (r.country ?? '').toLowerCase().includes(q) ||
+            (r.revenuecat_app_user_id ?? '').toLowerCase().includes(q) ||
+            (r.original_app_user_id ?? '').toLowerCase().includes(q);
 
          const categoryMatch = category === 'all' || getCategory(r) === category;
          const statusMatch = statusFilter === 'all' || getStatus(r) === statusFilter;
+         const linkMatch = linkFilter === 'all' || (linkFilter === 'linked' ? isLinked(r) : !isLinked(r));
 
-         return (q === '' || userMatch) && categoryMatch && statusMatch;
+         return (q === '' || userMatch) && categoryMatch && statusMatch && linkMatch;
       });
-   }, [records, query, category, statusFilter]);
+   }, [records, query, category, statusFilter, linkFilter]);
 
    // Counts Calculation
    const counts = useMemo(() => {
@@ -209,6 +229,9 @@ export default function SubscriptionsPage() {
       });
       return initial;
    }, [records]);
+   const unmatchedCount = useMemo(() => records.filter((record) => isRevenueCat(record) && !isLinked(record)).length, [records]);
+   const hasFilters = Boolean(query.trim()) || category !== 'all' || statusFilter !== 'all' || linkFilter !== 'all';
+   const clearFilters = () => { setQuery(''); setCategory('all'); setStatusFilter('all'); setLinkFilter('all'); };
 
    // Modal Handlers
    const resetModal = () => {
@@ -296,7 +319,6 @@ export default function SubscriptionsPage() {
                   <Button
                      auto
                      color="secondary"
-                     icon={<Sparkles size={16} />}
                      onPress={() => setModalOpen(true)}
                   >
                      Add Manual Subscription
@@ -352,6 +374,10 @@ export default function SubscriptionsPage() {
                         <Text className="section-kicker" css={{ color: '$accents7', fontSize: '$xs' }}>Manual Grants</Text>
                         <Text h4 css={{ m: 0, mt: '$1' }}>{counts.manual.toLocaleString()}</Text>
                      </Box>
+                     <Box css={{ textAlign: 'right' }}>
+                        <Text className="section-kicker" css={{ color: '$accents7', fontSize: '$xs' }}>Unmatched RC</Text>
+                        <Text h4 css={{ m: 0, mt: '$1', color: unmatchedCount ? '$warning' : '$success' }}>{unmatchedCount.toLocaleString()}</Text>
+                     </Box>
                   </Flex>
                </Flex>
             </Card.Body>
@@ -387,7 +413,6 @@ export default function SubscriptionsPage() {
                      placeholder="Search user, email, plan..."
                      value={query}
                      onChange={(e) => setQuery(e.target.value)}
-                     onClear={() => setQuery('')}
                   />
 
                   {/* Category Filter */}
@@ -431,8 +456,29 @@ export default function SubscriptionsPage() {
                         <Dropdown.Item key="active">Active</Dropdown.Item>
                         <Dropdown.Item key="cancelled">Cancelled</Dropdown.Item>
                         <Dropdown.Item key="expired">Expired</Dropdown.Item>
+                        <Dropdown.Item key="billing_issue">Billing Issue</Dropdown.Item>
                      </Dropdown.Menu>
                   </Dropdown>
+
+                  <Dropdown>
+                     <Dropdown.Button flat auto>
+                        Account: {linkFilter === 'all' ? 'All' : linkFilter === 'linked' ? 'Linked' : 'Unmatched'}
+                     </Dropdown.Button>
+                     <Dropdown.Menu
+                        aria-label="Account Link Filter"
+                        selectionMode="single"
+                        selectedKeys={new Set([linkFilter])}
+                        onSelectionChange={(keys) => {
+                           const selected = Array.from(keys)[0] as 'all' | 'linked' | 'unmatched';
+                           if (selected) setLinkFilter(selected);
+                        }}
+                     >
+                        <Dropdown.Item key="all">All accounts</Dropdown.Item>
+                        <Dropdown.Item key="linked">Linked accounts</Dropdown.Item>
+                        <Dropdown.Item key="unmatched">Unmatched subscribers</Dropdown.Item>
+                     </Dropdown.Menu>
+                  </Dropdown>
+                  {hasFilters && <Button auto flat size="sm" onPress={clearFilters}>Clear filters</Button>}
                </Flex>
             </Flex>
          </Box>
@@ -441,6 +487,13 @@ export default function SubscriptionsPage() {
          {loading ? (
             <Box className="glass-panel" css={{ p: '$12', textAlign: 'center' }}>
                <Loading size="md">Loading subscription data...</Loading>
+            </Box>
+         ) : filteredRecords.length === 0 ? (
+            <Box className="glass-panel admin-empty-state">
+               <span><Inbox size={22} /></span>
+               <Text b>No subscriptions found</Text>
+               <Text size="$sm" css={{ color: '$accents7' }}>{hasFilters ? 'No subscriber matches all selected filters.' : 'Subscription records will appear here after synchronization.'}</Text>
+               {hasFilters && <Button auto flat size="sm" onPress={clearFilters}>Clear filters</Button>}
             </Box>
          ) : (
             <Box className="glass-panel glass-table">
@@ -456,7 +509,7 @@ export default function SubscriptionsPage() {
                      <Table.Column width="8%" align="center">OVERRIDE</Table.Column>
                      <Table.Column width="8%" align="center">CANCEL</Table.Column>
                   </Table.Header>
-                  <Table.Body items={filteredRecords} emptyContent={"No subscriptions match your current filter settings."}>
+                  <Table.Body items={filteredRecords}>
                      {(item: SubscriptionRecord) => {
                         const categoryKey = getCategory(item);
                         const meta = CATEGORY_META[categoryKey];
@@ -473,6 +526,7 @@ export default function SubscriptionsPage() {
                                     <Text size="$xs" css={{ color: '$accents7', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                        {item.user?.email ?? '—'}
                                     </Text>
+                                    {!isLinked(item) && isRevenueCat(item) && <Badge color="warning" variant="flat">Unmatched account</Badge>}
                                  </Box>
                               </Table.Cell>
                               <Table.Cell>
@@ -519,7 +573,6 @@ export default function SubscriptionsPage() {
                                        bordered
                                        size="xs"
                                        color="secondary"
-                                       icon={<Sliders size={14} />}
                                        onPress={() => {
                                           setEmail(item.user?.email ?? '');
                                           setModalOpen(true);
@@ -539,7 +592,7 @@ export default function SubscriptionsPage() {
                                        size="xs"
                                        color="error"
                                        icon={<Ban size={14} />}
-                                       disabled={status === 'cancelled'}
+                                       disabled={status !== 'active'}
                                        onPress={() => handleCancel(item)}
                                     >
                                        Cancel

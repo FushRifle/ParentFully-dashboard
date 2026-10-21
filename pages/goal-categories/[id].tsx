@@ -5,7 +5,7 @@ export default function CategoryGoalsPage() {
    const router = useRouter();
    const id = Number(router.query.id);
    if (!router.isReady || !id) return null;
-   return <BackendCollectionPage path="/goal-categories" endpoint="/v1/admin/goals" mutationEndpoint="/v1/admin/goals" listParams={{ category_id: id, per_page: 200 }} createPayload={{ goal_category_id: id }} resourceName="goal" createLabel="Add goal" allowDelete formFields={[
+   return <BackendCollectionPage path="/goal-categories" backHref="/goal-categories" backLabel="Back to goal library" endpoint="/v1/admin/goals" mutationEndpoint="/v1/admin/goals" listParams={{ category_id: id, per_page: 200 }} createPayload={{ goal_category_id: id }} resourceName="goal" createLabel="Add goal" allowDelete formFields={[
       { key: 'title', label: 'Title', required: true }, { key: 'description', label: 'Description', type: 'textarea' },
       { key: 'status', label: 'Status', type: 'select', options: [{ value: 'active', label: 'Active' }, { value: 'inactive', label: 'Inactive' }] },
       { key: 'smart_specific', label: 'Specific', type: 'textarea' }, { key: 'smart_measurable', label: 'Measurable', type: 'textarea' },

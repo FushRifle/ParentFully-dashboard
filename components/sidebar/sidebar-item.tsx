@@ -14,9 +14,7 @@ export const SidebarItem = ({ icon, title, isActive, href = '#' }: Props) => {
 
    const handleClick = () => {
       if (typeof window !== 'undefined' && window.innerWidth < 960 && mobileOpen) {
-         setTimeout(() => {
-            setCollapsed();
-         }, 100);
+         setCollapsed();
       }
    };
 
@@ -43,12 +41,12 @@ export const SidebarItem = ({ icon, title, isActive, href = '#' }: Props) => {
                cursor: 'pointer',
                position: 'relative',
                userSelect: 'none',
-               transition: 'background 120ms ease, border-color 120ms ease, transform 120ms ease',
+               transition: 'background 80ms ease, border-color 80ms ease, transform 80ms ease, box-shadow 80ms ease',
                background: isActive ? 'var(--pf-nav-active)' : 'transparent',
                border: isActive
                   ? '1px solid var(--pf-border-hover)'
                   : '1px solid transparent',
-               boxShadow: isActive ? '0 4px 15px -3px rgba(0, 0, 0, 0.5)' : 'none',
+               boxShadow: isActive ? '0 8px 22px -15px rgba(242, 140, 24, 0.9)' : 'none',
             }}
             className={`sidebar-item-pill${collapsed ? ' sidebar-item-compact' : ''}`}
          >
@@ -59,7 +57,7 @@ export const SidebarItem = ({ icon, title, isActive, href = '#' }: Props) => {
                   ? 'var(--pf-nav-active)'
                   : 'var(--pf-hover)'
                } !important;
-            transform: ${isActive ? 'none' : 'translateX(3px)'};
+            transform: ${isActive || collapsed ? 'none' : 'translateX(2px)'};
           }
           .sidebar-item-pill:active {
             transform: scale(0.98);
@@ -77,8 +75,8 @@ export const SidebarItem = ({ icon, title, isActive, href = '#' }: Props) => {
                      width: '3.5px',
                      height: '18px',
                      borderRadius: '0 4px 4px 0',
-                     background: '#3b82f6',
-                     boxShadow: '0 0 10px #3b82f6',
+                     background: '#f28c18',
+                     boxShadow: '0 0 11px rgba(242, 140, 24, 0.8)',
                   }}
                />
             )}
@@ -90,9 +88,14 @@ export const SidebarItem = ({ icon, title, isActive, href = '#' }: Props) => {
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: isActive ? 'var(--pf-nav-active-text)' : 'var(--pf-nav-icon)',
-                  transition: 'color 0.2s ease, transform 0.2s ease',
+                  width: '26px',
+                  height: '26px',
+                  flex: '0 0 26px',
+                  borderRadius: '8px',
+                  background: isActive ? 'rgba(242, 140, 24, 0.13)' : 'transparent',
+                  transition: 'color 80ms ease, background 80ms ease',
                   filter: isActive
-                     ? 'drop-shadow(0 0 6px rgba(255, 255, 255, 0.3))'
+                     ? 'drop-shadow(0 0 5px rgba(242, 140, 24, 0.22))'
                      : 'none',
                }}
             >

@@ -97,6 +97,16 @@ export const SidebarWrapper = () => {
             top: 0,
             background: 'var(--pf-sidebar-bg)',
             borderRight: '1px solid var(--pf-border)',
+            '&::after': {
+               content: '',
+               position: 'absolute',
+               top: 0,
+               right: '-1px',
+               width: '1px',
+               height: '28%',
+               background: 'linear-gradient(180deg, rgba(242,140,24,.7), transparent)',
+               pointerEvents: 'none',
+            },
          }}
       >
          {/* Global Custom Sidebar & Active Glow Animations */}
@@ -144,7 +154,7 @@ export const SidebarWrapper = () => {
                   aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                   title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                   onClick={setCollapsed}
-                  style={{ marginLeft: collapsed ? 3 : 'auto', width: 36, height: 36, flex: '0 0 36px', borderRadius: 10, border: '1px solid var(--pf-border)', background: 'var(--pf-glass-soft)', color: 'var(--pf-text-muted)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'background 120ms ease, color 120ms ease' }}
+                  style={{ marginLeft: collapsed ? 3 : 'auto', width: 34, height: 34, flex: '0 0 34px', borderRadius: 10, border: '1px solid var(--pf-border)', background: 'var(--pf-glass-soft)', color: 'var(--pf-text-muted)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'background 80ms ease, color 80ms ease' }}
                >
                   <Menu size={18} />
                </button>
@@ -168,7 +178,14 @@ export const SidebarWrapper = () => {
                      flex: 1,
                   }}
                >
-                  {navSections.map((section) => (
+                  {navSections.map((section) => section.title === 'Dashboard' ? (
+                     <Box key={section.title} css={{ mb: '$3' }}>
+                        {section.items.map((item) => {
+                           const Icon = item.icon;
+                           return <SidebarItem key={item.href} title={item.title} icon={<Icon size={16} strokeWidth={2} />} href={item.href} isActive={isActive(item.href)} />;
+                        })}
+                     </Box>
+                  ) : (
                      <SidebarMenu
                         key={section.title}
                         title={section.title}

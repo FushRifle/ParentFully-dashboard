@@ -4,7 +4,6 @@ import { AcmeIcon } from '../icons/acme-icon';
 import { AcmeLogo } from '../icons/acmelogo';
 
 import { ParentfullyIcon } from '../icons/parentfully-icon';
-import { BottomIcon } from '../icons/sidebar/bottom-icon';
 import { Box } from '../styles/box';
 import { Flex } from '../styles/flex';
 

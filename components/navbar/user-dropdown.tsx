@@ -1,6 +1,5 @@
 import { Dropdown, Text } from '@nextui-org/react';
 import React, { useEffect, useState } from 'react';
-import { DarkModeSwitch } from './darkmodeswitch';
 import NextLink from 'next/link';
 import { Flex } from '../styles/flex';
 import { Box } from '../styles/box';
@@ -8,7 +7,7 @@ import { useProfileData } from '@/hooks/auth/useProfileData';
 import ChatAvatarWrapper from '../Avatar/ChatAvatarWrapper';
 import { useAuth } from '@/lib/context/authContext';
 import { useRouter } from 'next/router';
-import { Settings, Users, BarChart3, LogOut, Moon } from 'lucide-react';
+import { Settings, Users, BarChart3, LogOut } from 'lucide-react';
 
 export const UserDropdown = () => {
    const { logout } = useAuth();
@@ -151,18 +150,6 @@ export const UserDropdown = () => {
                      </Text>
                   </Flex>
                </NextLink>
-            </Dropdown.Item>
-
-            <Dropdown.Item key="switch" withDivider textValue="Dark Mode Switch">
-               <Flex align="center" justify="between" css={{ width: '100%' }}>
-                  <Flex align="center" css={{ gap: '$3' }}>
-                     <Moon size={15} color="var(--pf-text-muted)" />
-                     <Text size="13px" css={{ color: 'inherit', m: 0 }}>
-                        Dark Mode
-                     </Text>
-                  </Flex>
-                  <DarkModeSwitch />
-               </Flex>
             </Dropdown.Item>
 
             <Dropdown.Item

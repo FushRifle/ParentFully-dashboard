@@ -31,6 +31,7 @@ export interface SessionStats {
 export const getSessionStats = async (params?: {
     date_from?: string;
     date_to?: string;
+    platform?: string;
 }): Promise<SessionStats> => {
     const res = await api.get('/v1/admin/sessions/stats', { params });
     return res.data.data;

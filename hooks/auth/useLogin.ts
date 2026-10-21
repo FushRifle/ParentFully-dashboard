@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react';
-import { useRouter } from 'next/router';
 import { login as loginService } from '@/services/authService';
 import { useAuth } from '@/lib/context/authContext';
 import { AuthResponse } from '@/types/api';
@@ -19,7 +18,6 @@ interface UseLoginReturn {
 export const useLogin = (): UseLoginReturn => {
      const [isLoading, setIsLoading] = useState(false);
      const [error, setError] = useState<string | null>(null);
-     const router = useRouter();
      const { login: authLogin } = useAuth();
 
      const login = useCallback(async (credentials: LoginCredentials): Promise<boolean> => {
@@ -38,8 +36,6 @@ export const useLogin = (): UseLoginReturn => {
                // Use the auth context to store the token and user
                authLogin(authData.access_token, authData.user);
 
-               // Redirect to dashboard
-               router.push('/dashboard');
                return true;
 
           } catch (err: any) {
@@ -66,7 +62,7 @@ export const useLogin = (): UseLoginReturn => {
           } finally {
                setIsLoading(false);
           }
-     }, [authLogin, router]);
+     }, [authLogin]);
 
      const clearError = useCallback(() => {
           setError(null);

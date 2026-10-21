@@ -9,6 +9,7 @@ export default function CustomersPage() {
       resourceName="customer"
       allowCreate={false}
       allowDelete
+      compactTableHeaders
       formFields={[{ key: 'name', label: 'Name', required: true }, { key: 'email', label: 'Email', type: 'email', required: true }]}
       columns={[
          { key: 'name', label: 'CUSTOMER' }, { key: 'email', label: 'EMAIL' }, { key: 'country', label: 'COUNTRY' },

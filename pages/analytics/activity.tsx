@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Grid, Text, Button, Card, Table, Loading } from '@nextui-org/react';
 
 import { Select } from '../../components/styles/select';
@@ -73,12 +73,12 @@ const ActivityPage = () => {
     const [sessionsMeta, setSessionsMeta] = useState<any>(null);
     const [page, setPage] = useState(1);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         setIsLoading(true);
         const { date_from, date_to } = getDateRange(dateRange);
         try {
             const [statsRes, sessionsRes] = await Promise.all([
-                getSessionStats({ date_from, date_to }),
+                getSessionStats({ date_from, date_to, platform: platform || undefined }),
                 getSessions({ date_from, date_to, platform: platform || undefined, page, per_page: 20 }),
             ]);
             setStats(statsRes);
@@ -89,11 +89,11 @@ const ActivityPage = () => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [dateRange, page, platform]);
 
     useEffect(() => {
         fetchData();
-    }, [dateRange, platform, page]);
+    }, [fetchData]);
 
     const dailyChartData = stats
         ? [
@@ -160,14 +160,14 @@ const ActivityPage = () => {
                     <Select
                         placeholder="Platform"
                         value={platform}
-                        onChange={setPlatform}
+                        onChange={(value) => { setPlatform(value); setPage(1); }}
                         css={{ minWidth: '150px' }}
                         options={platformOptions}
                     />
                     <Select
                         placeholder="Date Range"
                         value={dateRange}
-                        onChange={setDateRange}
+                        onChange={(value) => { setDateRange(value); setPage(1); }}
                         css={{ minWidth: '150px' }}
                         options={dateRangeOptions}
                     />

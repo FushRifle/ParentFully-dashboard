@@ -1,7 +1,7 @@
 import React from 'react';
 import NextLink from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Baby, CalendarCheck, Home, LucideIcon, ScrollText, Target, Users } from 'lucide-react';
+import { ArrowRight, Baby, CircleDollarSign, Home, LucideIcon, ScrollText, Target, Users } from 'lucide-react';
 import type { AdminDashboardStats } from '../../types/api';
 
 type StatItem = {
@@ -23,7 +23,7 @@ export const OverviewStats = ({ dashboardStats, loading, error }: { dashboardSta
       { id: 'families', label: 'Active Families', description: 'Families currently active', value: dashboardStats?.active_families ?? 0, icon: Home, href: '/families', color: '#10b981', tint: 'rgba(16,185,129,.1)', illustration: '/illustrations/overview/families.webp', illustrationAlt: 'A family together at home' },
       { id: 'children', label: 'Total Children', description: 'Children across all families', value: dashboardStats?.total_children ?? 0, icon: Baby, href: '/customers', color: '#ec4899', tint: 'rgba(236,72,153,.1)', illustration: '/illustrations/overview/children.svg', illustrationAlt: 'Children learning together' },
       { id: 'goals', label: 'Goals Created', description: 'Goals created by families', value: dashboardStats?.total_goals ?? 0, icon: Target, href: '/goal-categories', color: '#3b82f6', tint: 'rgba(59,130,246,.1)', illustration: '/illustrations/overview/goals.svg', illustrationAlt: 'Personal goals' },
-      { id: 'routines', label: 'Active Routines', description: 'Available routine templates', value: dashboardStats?.total_system_routines ?? 0, icon: CalendarCheck, href: '/routines', color: '#14b8a6', tint: 'rgba(20,184,166,.1)', illustration: '/illustrations/overview/routines.svg', illustrationAlt: 'Routine scheduling' },
+      { id: 'premium', label: 'Total Premium Users', description: 'Accounts with active premium access', value: dashboardStats?.active_subscriptions ?? 0, icon: CircleDollarSign, href: '/subscriptions', color: '#14b8a6', tint: 'rgba(20,184,166,.1)', illustration: '', illustrationAlt: 'Premium subscriptions' },
       { id: 'plans', label: 'Discipline Plans', description: 'Active discipline templates', value: dashboardStats?.total_plans_active ?? 0, icon: ScrollText, href: '/discipline-plans', color: '#a855f7', tint: 'rgba(168,85,247,.1)', illustration: '/illustrations/overview/discipline.svg', illustrationAlt: 'Supportive conversation' },
    ];
 
@@ -42,7 +42,7 @@ export const OverviewStats = ({ dashboardStats, loading, error }: { dashboardSta
                   <h3>{item.label}</h3>
                   <p>{item.description}</p>
                </div>
-               <span className="overview-stat-illustration"><Image src={item.illustration} alt={item.illustrationAlt} layout="fill" objectFit="contain" objectPosition="right bottom" loading="lazy" /></span>
+               <span className="overview-stat-illustration">{item.illustration ? <Image src={item.illustration} alt={item.illustrationAlt} layout="fill" objectFit="contain" objectPosition="right bottom" loading="lazy" /> : <CircleDollarSign className="overview-dollar-illustration" aria-label={item.illustrationAlt} />}</span>
             </a></NextLink>;
          })}
       </div>

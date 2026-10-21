@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import NextLink from 'next/link';
 import { Navbar, Text, Input } from '@nextui-org/react';
 import { useRouter } from 'next/router';
@@ -8,6 +8,7 @@ import { Box } from '../styles/box';
 import { Flex } from '../styles/flex';
 import { NotificationsDropdown } from './notifications-dropdown';
 import { UserDropdown } from './user-dropdown';
+import { DarkModeSwitch } from './darkmodeswitch';
 import { getPageMeta } from '../../lib/pageMeta';
 
 interface Props {
@@ -16,7 +17,36 @@ interface Props {
 
 export const NavbarWrapper = ({ children }: Props) => {
    const router = useRouter();
+   const [quickSearch, setQuickSearch] = useState('');
    const meta = getPageMeta(router.pathname);
+   const searchablePages = [
+      ['/overview', 'overview dashboard'], ['/admin-users', 'admin users'], ['/customers', 'customers users'],
+      ['/families', 'families'], ['/goal-categories', 'goal categories'], ['/routines', 'routines tasks'],
+      ['/discipline-plans', 'discipline plans'], ['/subscriptions', 'subscriptions billing'], ['/rewards', 'rewards'],
+      ['/referrals', 'referrals'], ['/affiliates', 'affiliates'], ['/feedback', 'feedback'],
+      ['/analytics', 'analytics'], ['/faqs', 'faqs'], ['/settings', 'settings'], ['/profile', 'profile'],
+   ] as const;
+
+   const openQuickSearchResult = () => {
+      const query = quickSearch.trim().toLowerCase();
+      if (!query) return;
+      const match = searchablePages.find(([, keywords]) => keywords.includes(query));
+      if (match) {
+         setQuickSearch('');
+         router.push(match[0]);
+      }
+   };
+
+   useEffect(() => {
+      const focusQuickSearch = (event: KeyboardEvent) => {
+         if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+            event.preventDefault();
+            document.querySelector<HTMLInputElement>('[aria-label="Find a dashboard page"]')?.focus();
+         }
+      };
+      window.addEventListener('keydown', focusQuickSearch);
+      return () => window.removeEventListener('keydown', focusQuickSearch);
+   }, []);
    const collapseItems = [
       'Profile',
       'Dashboard',
@@ -66,6 +96,12 @@ export const NavbarWrapper = ({ children }: Props) => {
                      clearable
                      contentLeft={<Search size={16} color="var(--pf-text-muted)" />}
                      placeholder="Quick search... (Cmd + K)"
+                     aria-label="Find a dashboard page"
+                     value={quickSearch}
+                     onChange={(event) => setQuickSearch(event.target.value)}
+                     onKeyDown={(event) => {
+                        if (event.key === 'Enter') openQuickSearchResult();
+                     }}
                      bordered
                      width="100%"
                      css={{
@@ -83,6 +119,10 @@ export const NavbarWrapper = ({ children }: Props) => {
 
             {/* Right Section: Actions */}
             <Navbar.Content css={{ gap: '$4', alignItems: 'center' }}>
+               <Navbar.Item>
+                  <DarkModeSwitch />
+               </Navbar.Item>
+
                {/* Feedback */}
                <Navbar.Item css={{ '@mdMax': { display: 'none' } }}>
                   <NextLink href="/feedback" passHref legacyBehavior>

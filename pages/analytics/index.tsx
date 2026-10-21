@@ -47,8 +47,8 @@ export default function AnalyticsPage() {
       setLoading(true); setError(null);
       try {
          const [activityResponse, demographicsResponse, sessionsResponse] = await Promise.all([
-            api.get('/v1/admin/analytics/activity', { params: { period } }),
-            api.get('/v1/admin/analytics/demographics', { params: { period } }),
+            api.get('/v1/admin/analytics/activity', { params: { period, ...(platform !== 'all' ? { platform } : {}) } }),
+            api.get('/v1/admin/analytics/demographics', { params: { period, ...(platform !== 'all' ? { platform } : {}) } }),
             api.get('/v1/admin/analytics/sessions', { params: { period, per_page: 100, ...(platform !== 'all' ? { platform } : {}) } }),
          ]);
          setActivity(activityResponse.data.data);

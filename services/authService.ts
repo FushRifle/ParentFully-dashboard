@@ -1,6 +1,5 @@
 import { api } from '@/lib';
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
      AuthResponse, User,
      GoogleSignInPayload, AppleSignInPayload
@@ -19,6 +18,17 @@ interface VerifyResetCodeResponse {
      message?: string
      status?: string
 }
+
+const browserStorage = {
+     getItem: (key: string) => typeof window === 'undefined' ? null : window.localStorage.getItem(key),
+     setItem: (key: string, value: string) => {
+          if (typeof window !== 'undefined') window.localStorage.setItem(key, value);
+     },
+     removeItem: (key: string) => {
+          if (typeof window !== 'undefined') window.localStorage.removeItem(key);
+     },
+     multiRemove: (keys: string[]) => keys.forEach((key) => browserStorage.removeItem(key)),
+};
 
 /* ----------------------------- AUTHENTICATION ----------------------------- */
 export const register = async (data: {
@@ -39,8 +49,8 @@ export const register = async (data: {
           const authData = res.data?.data;
 
           if (authData?.access_token) {
-               await AsyncStorage.setItem('auth_token', authData.access_token);
-               if (authData.user) await AsyncStorage.setItem('user', JSON.stringify(authData.user));
+               browserStorage.setItem('auth_token', authData.access_token);
+               if (authData.user) browserStorage.setItem('user', JSON.stringify(authData.user));
                return authData;
           } else {
                console.warn('No token returned from API', JSON.stringify(res.data, null, 2));
@@ -68,8 +78,8 @@ export const login = async (data: { email: string; password: string }): Promise<
           const authData = await loginAdmin(data);
 
           if (authData?.access_token) {
-               await AsyncStorage.setItem('auth_token', authData.access_token);
-               if (authData.user) await AsyncStorage.setItem('user', JSON.stringify(authData.user));
+               browserStorage.setItem('auth_token', authData.access_token);
+               if (authData.user) browserStorage.setItem('user', JSON.stringify(authData.user));
                return authData;
           } else {
                console.warn('No token returned from admin API');
@@ -87,7 +97,7 @@ export const logout = async (): Promise<void> => {
      } catch (err: any) {
           console.error('Logout API failed:', err.response?.data || err.message || err);
      } finally {
-          await AsyncStorage.multiRemove(['auth_token', 'user']);
+          browserStorage.multiRemove(['auth_token', 'user']);
      }
 };
 
@@ -131,8 +141,8 @@ export const loginWithGoogleCallback = async (code: string): Promise<AuthRespons
           const authData = res.data?.data;
 
           if (authData?.access_token) {
-               await AsyncStorage.setItem('auth_token', authData.access_token);
-               if (authData.user) await AsyncStorage.setItem('user', JSON.stringify(authData.user));
+               browserStorage.setItem('auth_token', authData.access_token);
+               if (authData.user) browserStorage.setItem('user', JSON.stringify(authData.user));
                return authData;
           } else {
                console.warn('No token returned from Google callback', JSON.stringify(res.data, null, 2));
@@ -165,8 +175,8 @@ export const loginWithApple = async (identityToken: string): Promise<AuthRespons
           const authData = res.data?.data;
 
           if (authData?.access_token) {
-               await AsyncStorage.setItem('auth_token', authData.access_token);
-               if (authData.user) await AsyncStorage.setItem('user', JSON.stringify(authData.user));
+               browserStorage.setItem('auth_token', authData.access_token);
+               if (authData.user) browserStorage.setItem('user', JSON.stringify(authData.user));
                return authData;
           } else {
                console.warn('No token returned from Apple callback', JSON.stringify(res.data, null, 2));
@@ -195,7 +205,7 @@ export const getUser = async (): Promise<User | null> => {
           const userData = await getAdminProfile();
 
           if (userData) {
-               await AsyncStorage.setItem('user', JSON.stringify(userData));
+               browserStorage.setItem('user', JSON.stringify(userData));
           }
 
           return userData ?? null;
@@ -209,7 +219,7 @@ export const getUser = async (): Promise<User | null> => {
                )
           );
 
-          await AsyncStorage.removeItem('auth_token');
+          browserStorage.removeItem('auth_token');
           return null;
      }
 };
@@ -219,7 +229,7 @@ export const getAllUsers = async (): Promise<User[] | null> => {
      try {
           const allUsers = await getAllAppUsers();
 
-          await AsyncStorage.setItem('users', JSON.stringify(allUsers));
+          browserStorage.setItem('users', JSON.stringify(allUsers));
 
           return allUsers;
      } catch (err: any) {
@@ -249,7 +259,7 @@ export const updateProfile = async (
                email: data.email || '',
           });
           if (updatedUser) {
-               await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+               browserStorage.setItem('user', JSON.stringify(updatedUser));
           }
 
           return updatedUser ?? null;
@@ -264,7 +274,7 @@ export const updateProfile = async (
 
 export const getStoredUser = async (): Promise<User | null> => {
      try {
-          const userJson = await AsyncStorage.getItem('/v1/user');
+          const userJson = browserStorage.getItem('/v1/user');
           return userJson ? JSON.parse(userJson) : null;
      } catch (err) {
           console.error('Error getting stored user:', err);
@@ -281,7 +291,7 @@ export const updateUserFlags = async (flags: {
           const res = await api.put<{ success: boolean; data: User }>('/v1/user', flags);
           const updatedUser = res.data?.data;
 
-          if (updatedUser) await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+          if (updatedUser) browserStorage.setItem('user', JSON.stringify(updatedUser));
           return updatedUser ?? null;
      } catch (err: any) {
           console.error('Update user flags failed:', err.response?.data || err.message || err);

@@ -22,7 +22,7 @@ const options: Props['options'] = {
       toolbar: {
          show: false,
       },
-      fontFamily: 'Inter, sans-serif',
+      fontFamily: 'var(--pf-font-family)',
       foreColor: 'var(--nextui-colors-accents7)',
       sparkline: {
          enabled: false,
@@ -85,7 +85,7 @@ const options: Props['options'] = {
       theme: 'light',
       style: {
          fontSize: '12px',
-         fontFamily: 'Inter, sans-serif',
+         fontFamily: 'var(--pf-font-family)',
       },
       y: {
          formatter: (val) => `${val} users`

@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Badge, Button, Input, Modal, Pagination, Table, Text, Textarea } from '@nextui-org/react';
-import { Database, Edit2, Eye, Layers3, Plus, RefreshCw, Search, Trash2 } from 'lucide-react';
+import { ArrowLeft, Database, Edit2, Eye, Inbox, Layers3, Plus, RefreshCw, Search, Trash2 } from 'lucide-react';
 import NextLink from 'next/link';
 import { api } from '../../lib';
 import { getPageMeta, PagePath } from '../../lib/pageMeta';
@@ -19,6 +19,7 @@ export interface BackendFormField {
    type?: 'text' | 'email' | 'password' | 'number' | 'textarea' | 'select';
    required?: boolean;
    options?: Array<{ value: string; label: string }>;
+   createOnly?: boolean;
 }
 
 interface BackendCollectionPageProps {
@@ -35,6 +36,15 @@ interface BackendCollectionPageProps {
    createPayload?: Record<string, any>;
    allowDelete?: boolean;
    allowCreate?: boolean;
+   compactTableHeaders?: boolean;
+   backHref?: string;
+   backLabel?: string;
+   filters?: Array<{
+      key: string;
+      label: string;
+      defaultValue?: string;
+      options: Array<{ value: string; label: string }>;
+   }>;
    summaryMetrics?: Array<{
       key: 'total' | 'visible' | 'page';
       label: string;
@@ -95,7 +105,7 @@ const formatValue = (value: any, type?: BackendColumn['type']) => {
 export const BackendCollectionPage = ({
    path, endpoint, columns, searchable = true, rowHref, formFields = [], resourceName,
    createLabel, mutationEndpoint = endpoint, listParams, createPayload, allowDelete = false, allowCreate = true,
-   summaryMetrics,
+   summaryMetrics, backHref, backLabel = 'Back to library', filters = [], compactTableHeaders = false,
 }: BackendCollectionPageProps) => {
    const metaCopy = getPageMeta(path);
    const serializedListParams = JSON.stringify(listParams ?? {});
@@ -109,13 +119,29 @@ export const BackendCollectionPage = ({
    const [editing, setEditing] = useState<Record<string, any> | null>(null);
    const [form, setForm] = useState<Record<string, any>>({});
    const [saving, setSaving] = useState(false);
+   const [filterValues, setFilterValues] = useState<Record<string, string>>(() =>
+      Object.fromEntries(filters.map((filter) => [filter.key, filter.defaultValue ?? '']))
+   );
+   const visibleRows = useMemo(() => {
+      const query = search.trim().toLowerCase();
+      return rows.filter((row) => {
+         const matchesSearch = !searchable || !query || columns.some((column) =>
+            formatValue(getValue(row, column.key), column.type).toLowerCase().includes(query)
+         );
+         const matchesFilters = filters.every((filter) => {
+            const selected = filterValues[filter.key];
+            return !selected || String(getValue(row, filter.key) ?? '') === selected;
+         });
+         return matchesSearch && matchesFilters;
+      });
+   }, [columns, filterValues, filters, rows, search, searchable]);
 
    const load = useCallback(async () => {
       setLoading(true);
       setError(null);
       try {
          const response = await api.get(endpoint, {
-            params: { page, per_page: 25, ...JSON.parse(serializedListParams), ...(searchable && search.trim() ? { search: search.trim() } : {}) },
+            params: { page, per_page: 25, ...JSON.parse(serializedListParams), ...Object.fromEntries(Object.entries(filterValues).filter(([, value]) => value !== '')), ...(searchable && search.trim() ? { search: search.trim() } : {}) },
          });
          const normalized = normalizeCollection(response.data);
          setRows(normalized.rows);
@@ -126,7 +152,7 @@ export const BackendCollectionPage = ({
       } finally {
          setLoading(false);
       }
-   }, [endpoint, metaCopy.title, page, search, searchable, serializedListParams]);
+   }, [endpoint, filterValues, metaCopy.title, page, search, searchable, serializedListParams]);
 
    useEffect(() => {
       const timeout = setTimeout(load, search ? 250 : 0);
@@ -146,6 +172,10 @@ export const BackendCollectionPage = ({
    };
 
    const save = async () => {
+      if (!editing && Object.prototype.hasOwnProperty.call(form, 'password_confirmation') && form.password !== form.password_confirmation) {
+         setError('Password and confirm password must match.');
+         return;
+      }
       setSaving(true);
       setError(null);
       try {
@@ -183,11 +213,16 @@ export const BackendCollectionPage = ({
    const metricValue = (key: 'total' | 'visible' | 'page') => key === 'total'
       ? meta.total
       : key === 'visible'
-         ? rows.length
+         ? visibleRows.length
          : `${meta.current_page} / ${Math.max(meta.last_page, 1)}`;
 
    return (
-      <Box className="admin-page">
+      <Box className={`admin-page${compactTableHeaders ? ' customers-compact-table' : ''}`}>
+         {backHref && (
+            <NextLink href={backHref} passHref legacyBehavior>
+               <a className="admin-back-link"><ArrowLeft size={15} />{backLabel}</a>
+            </NextLink>
+         )}
          <Box className="glass-panel glass-hero">
             <Flex justify="between" align="center" css={{ gap: '$6', flexWrap: 'wrap', position: 'relative', zIndex: 1 }}>
                <Flex align="center" css={{ gap: '$4' }}>
@@ -227,6 +262,21 @@ export const BackendCollectionPage = ({
                   <Text size="$xs" css={{ color: '$accents7', mt: '$1' }}>Browse, search and manage backend records.</Text>
                </Box>
             <Flex css={{ gap: '$3' }} align="center">
+               {filters.map((filter) => (
+                  <label className="collection-filter" key={filter.key}>
+                     <span>{filter.label}</span>
+                     <select
+                        aria-label={`Filter by ${filter.label}`}
+                        value={filterValues[filter.key] ?? ''}
+                        onChange={(event) => {
+                           setFilterValues((current) => ({ ...current, [filter.key]: event.target.value }));
+                           setPage(1);
+                        }}
+                     >
+                        {filter.options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                     </select>
+                  </label>
+               ))}
                {searchable && (
                   <Input
                      bordered
@@ -247,9 +297,12 @@ export const BackendCollectionPage = ({
             <Box className="glass-panel" css={{ p: '$10', border: '1px solid $red300 !important', bg: 'rgba(239,68,68,.08) !important' }}>
                <Text color="error" size="$sm">{error}</Text>
             </Box>
-         ) : !loading && rows.length === 0 ? (
-            <Box className="glass-panel" css={{ p: '$10', textAlign: 'center' }}>
-               <Text size="$sm" css={{ color: '$accents7' }}>No {metaCopy.title.toLowerCase()} found.</Text>
+         ) : !loading && visibleRows.length === 0 ? (
+            <Box className="glass-panel admin-empty-state">
+               <span><Inbox size={22} /></span>
+               <Text b>No {metaCopy.title.toLowerCase()} found</Text>
+               <Text size="$sm" css={{ color: '$accents7' }}>{search || Object.values(filterValues).some(Boolean) ? 'Try another search or clear the current filters.' : 'Records will appear here when they become available.'}</Text>
+               {(search || Object.values(filterValues).some(Boolean)) && <Button auto flat size="sm" onPress={() => { setSearch(''); setFilterValues(Object.fromEntries(filters.map((filter) => [filter.key, '']))); setPage(1); }}>Clear filters</Button>}
             </Box>
          ) : (
             <Box className="glass-panel glass-table">
@@ -258,7 +311,7 @@ export const BackendCollectionPage = ({
                   {tableColumns.map((column) => <Table.Column key={column.key}>{column.label}</Table.Column>)}
                </Table.Header>
                <Table.Body
-                  items={rows}
+                  items={visibleRows}
                   loadingState={loading ? 'loading' : 'idle'}
                >
                   {(row) => (
@@ -308,7 +361,7 @@ export const BackendCollectionPage = ({
          <Modal closeButton open={formOpen} onClose={() => setFormOpen(false)} width="560px">
             <Modal.Header><Text h4 css={{ m: 0 }}>{editing ? 'Edit' : 'Add'} {resourceName ?? 'record'}</Text></Modal.Header>
             <Modal.Body>
-               {formFields.map((field) => field.type === 'textarea' ? (
+               {formFields.filter((field) => !field.createOnly || !editing).map((field) => field.type === 'textarea' ? (
                   <Textarea key={field.key} bordered fullWidth label={field.label} value={form[field.key] ?? ''} onChange={(event) => setForm({ ...form, [field.key]: event.target.value })} />
                ) : field.type === 'select' ? (
                   <label key={field.key} style={{ display: 'grid', gap: 6, fontSize: 12 }}>
@@ -318,6 +371,8 @@ export const BackendCollectionPage = ({
                         {field.options?.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
                      </select>
                   </label>
+               ) : field.type === 'password' ? (
+                  <Input.Password key={field.key} bordered fullWidth label={field.label} value={form[field.key] ?? ''} required={!editing && field.required} onChange={(event) => setForm({ ...form, [field.key]: event.target.value })} />
                ) : (
                   <Input key={field.key} bordered fullWidth label={field.label} type={field.type ?? 'text'} value={form[field.key] ?? ''} required={field.required} onChange={(event) => setForm({ ...form, [field.key]: field.type === 'number' ? Number(event.target.value) : event.target.value })} />
                ))}

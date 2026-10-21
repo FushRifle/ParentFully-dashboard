@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Flex } from '../styles/flex';
 import { Text } from '@nextui-org/react';
 import { ChevronDown } from 'lucide-react';
@@ -13,6 +13,10 @@ interface SidebarMenuProps {
 export const SidebarMenu = ({ title, defaultOpen = false, compact = false, children }: SidebarMenuProps) => {
    const [open, setOpen] = useState(defaultOpen);
 
+   useEffect(() => {
+      if (defaultOpen) setOpen(true);
+   }, [defaultOpen]);
+
    return (
       <Flex direction="column" css={{ mb: '$3' }}>
          {!compact && <Flex
@@ -24,7 +28,7 @@ export const SidebarMenu = ({ title, defaultOpen = false, compact = false, child
                py: '$2',
                borderRadius: '8px',
                userSelect: 'none',
-               transition: 'background 0.2s ease',
+               transition: 'background 80ms ease',
                '&:hover': {
                   background: 'var(--pf-hover)',
                },
@@ -47,7 +51,7 @@ export const SidebarMenu = ({ title, defaultOpen = false, compact = false, child
                color="var(--pf-text-subtle)"
                style={{
                   transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 200ms cubic-bezier(0.4, 0, 0.2, 1)',
+                  transition: 'transform 100ms cubic-bezier(0.4, 0, 0.2, 1)',
                }}
             />
          </Flex>}

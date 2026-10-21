@@ -16,6 +16,18 @@ export default function FeedbackPage() {
    const [query, setQuery] = useState('');
    const [category, setCategory] = useState('');
    const [status, setStatus] = useState('');
+   const visibleRows = useMemo(() => {
+      const search = query.trim().toLowerCase();
+      const categoryQuery = category.trim().toLowerCase();
+      return rows.filter((item) => {
+         const searchableText = [item.subject, item.message, item.category, item.user?.name, item.user?.email]
+            .filter(Boolean).join(' ').toLowerCase();
+         const matchesSearch = !search || searchableText.includes(search);
+         const matchesCategory = !categoryQuery || String(item.category ?? '').toLowerCase().includes(categoryQuery);
+         const matchesStatus = !status || item.status === status;
+         return matchesSearch && matchesCategory && matchesStatus;
+      });
+   }, [category, query, rows, status]);
 
    const load = useCallback(async () => {
       setLoading(true); setError(null);
@@ -38,11 +50,11 @@ export default function FeedbackPage() {
    };
 
    const counts = useMemo(() => ({
-      total: rows.length,
-      new: rows.filter((item) => item.status === 'new').length,
-      reviewed: rows.filter((item) => item.status === 'reviewed').length,
-      resolved: rows.filter((item) => item.status === 'resolved').length,
-   }), [rows]);
+      total: visibleRows.length,
+      new: visibleRows.filter((item) => item.status === 'new').length,
+      reviewed: visibleRows.filter((item) => item.status === 'reviewed').length,
+      resolved: visibleRows.filter((item) => item.status === 'resolved').length,
+   }), [visibleRows]);
 
    return <Box className="admin-page feedback-page">
       <Box className="glass-panel glass-hero"><Flex justify="between" align="center" css={{ gap: '$5', flexWrap: 'wrap' }}>
@@ -65,7 +77,7 @@ export default function FeedbackPage() {
          <select value={status} onChange={(event) => setStatus(event.target.value)} aria-label="Filter by status"><option value="">All statuses</option>{statusOptions.map((item) => <option key={item} value={item}>{item}</option>)}</select>
       </Flex></Box>
 
-      {loading ? <Box className="glass-panel feedback-loading"><Loading size="sm">Loading feedback…</Loading></Box> : rows.length ? <div className="feedback-grid">{rows.map((item) => <article className="feedback-card glass-panel" key={item.id}>
+      {loading ? <Box className="glass-panel feedback-loading"><Loading size="sm">Loading feedback…</Loading></Box> : visibleRows.length ? <div className="feedback-grid">{visibleRows.map((item) => <article className="feedback-card glass-panel" key={item.id}>
          <header><div className="feedback-avatar">{initials(item.user?.name)}</div><div className="feedback-author"><strong>{item.user?.name ?? 'Unknown customer'}</strong><span>{item.user?.email ?? 'Email unavailable'}</span></div><span className={`feedback-status status-${item.status || 'new'}`}>{item.status || 'new'}</span></header>
          <div className="feedback-card-content"><div className="feedback-card-meta"><span><Tag size={12}/>{item.category || 'General'}</span><time>{item.created_at ? new Date(item.created_at).toLocaleDateString([], { dateStyle: 'medium' }) : 'Date unavailable'}</time></div><h3>{item.subject || 'Customer feedback'}</h3><p>{item.message || 'No message was supplied.'}</p></div>
          <footer><span><UserRound size={13}/> Submission #{item.id}</span><label>Status<select value={item.status || 'new'} disabled={updatingId === item.id} onChange={(event) => update(item, event.target.value)}>{statusOptions.map((option) => <option key={option} value={option}>{option}</option>)}</select></label></footer>
