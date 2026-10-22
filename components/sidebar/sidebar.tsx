@@ -15,7 +15,6 @@ import {
    ShieldCheck,
    Target,
    UserCircle,
-   Users,
    UsersRound,
    CalendarCheck,
    Menu,
@@ -37,7 +36,6 @@ const navSections = [
       title: 'People',
       items: [
          { title: 'Admin Users', href: '/admin-users', icon: ShieldCheck },
-         { title: 'Customers', href: '/customers', icon: Users },
          { title: 'Families', href: '/families', icon: House },
       ],
    },

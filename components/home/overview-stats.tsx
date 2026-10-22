@@ -19,12 +19,10 @@ type StatItem = {
 
 export const OverviewStats = ({ dashboardStats, loading, error }: { dashboardStats: AdminDashboardStats | null; loading: boolean; error: string | null }) => {
    const items: StatItem[] = [
-      { id: 'users', label: 'Total Users', description: 'Registered customer accounts', value: dashboardStats?.total_users ?? 0, icon: Users, href: '/customers', color: '#f97316', tint: 'rgba(249,115,22,.1)', illustration: '/illustrations/overview/users.webp', illustrationAlt: 'ParentFully customer community' },
+      { id: 'users', label: 'Total Users', description: 'People registered across families', value: dashboardStats?.total_users ?? 0, icon: Users, href: '/families', color: '#f97316', tint: 'rgba(249,115,22,.1)', illustration: '/illustrations/overview/users.webp', illustrationAlt: 'ParentFully customer community' },
       { id: 'families', label: 'Active Families', description: 'Families currently active', value: dashboardStats?.active_families ?? 0, icon: Home, href: '/families', color: '#10b981', tint: 'rgba(16,185,129,.1)', illustration: '/illustrations/overview/families.webp', illustrationAlt: 'A family together at home' },
-      { id: 'children', label: 'Total Children', description: 'Children across all families', value: dashboardStats?.total_children ?? 0, icon: Baby, href: '/customers', color: '#ec4899', tint: 'rgba(236,72,153,.1)', illustration: '/illustrations/overview/children.svg', illustrationAlt: 'Children learning together' },
-      { id: 'goals', label: 'Goals Created', description: 'Goals created by families', value: dashboardStats?.total_goals ?? 0, icon: Target, href: '/goal-categories', color: '#3b82f6', tint: 'rgba(59,130,246,.1)', illustration: '/illustrations/overview/goals.svg', illustrationAlt: 'Personal goals' },
+      { id: 'children', label: 'Total Children', description: 'Children across all families', value: dashboardStats?.total_children ?? 0, icon: Baby, href: '/families', color: '#ec4899', tint: 'rgba(236,72,153,.1)', illustration: '/illustrations/overview/children.svg', illustrationAlt: 'Children learning together' },
       { id: 'premium', label: 'Total Premium Users', description: 'Accounts with active premium access', value: dashboardStats?.active_subscriptions ?? 0, icon: CircleDollarSign, href: '/subscriptions', color: '#14b8a6', tint: 'rgba(20,184,166,.1)', illustration: '', illustrationAlt: 'Premium subscriptions' },
-      { id: 'plans', label: 'Discipline Plans', description: 'Active discipline templates', value: dashboardStats?.total_plans_active ?? 0, icon: ScrollText, href: '/discipline-plans', color: '#a855f7', tint: 'rgba(168,85,247,.1)', illustration: '/illustrations/overview/discipline.svg', illustrationAlt: 'Supportive conversation' },
    ];
 
    return <section aria-label="Platform statistics">

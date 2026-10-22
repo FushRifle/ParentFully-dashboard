@@ -20,8 +20,8 @@ export const NavbarWrapper = ({ children }: Props) => {
    const [quickSearch, setQuickSearch] = useState('');
    const meta = getPageMeta(router.pathname);
    const searchablePages = [
-      ['/overview', 'overview dashboard'], ['/admin-users', 'admin users'], ['/customers', 'customers users'],
-      ['/families', 'families'], ['/goal-categories', 'goal categories'], ['/routines', 'routines tasks'],
+      ['/overview', 'overview dashboard'], ['/admin-users', 'admin users'],
+      ['/families', 'families customers users children'], ['/goal-categories', 'goal categories'], ['/routines', 'routines tasks'],
       ['/discipline-plans', 'discipline plans'], ['/subscriptions', 'subscriptions billing'], ['/rewards', 'rewards'],
       ['/referrals', 'referrals'], ['/affiliates', 'affiliates'], ['/feedback', 'feedback'],
       ['/analytics', 'analytics'], ['/faqs', 'faqs'], ['/settings', 'settings'], ['/profile', 'profile'],

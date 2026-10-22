@@ -43,7 +43,7 @@ export default function ReferralsPage() {
    return <Box className="admin-page" css={{ maxW: '1440px', mx: 'auto' }}>
       <Flex justify="between" align="end" css={{ mb: '$6', gap: '$4', flexWrap: 'wrap' }}>
          <Box><Text h2 css={{ m: 0, fontSize: '1.35rem' }}>Referrals</Text><Text size="$sm" css={{ color: '$accents7' }}>Parent Points reward claims and fulfilment.</Text></Box>
-         <Flex css={{ gap: '$3', flexWrap: 'wrap' }}><select value={status} onChange={(event) => setStatus(event.target.value)}><option value="">All statuses</option><option value="pending_fulfillment">Pending</option><option value="credited">Credited</option><option value="fulfilled">Fulfilled</option><option value="cancelled">Cancelled</option></select><input aria-label="Filter by reward option" placeholder="Reward option" value={option} onChange={(event) => setOption(event.target.value)} /><Button auto flat onPress={load}>Refresh</Button></Flex>
+         <Flex css={{ gap: '$3', flexWrap: 'wrap' }}><select value={status} onChange={(event) => setStatus(event.target.value)}><option value="">All statuses</option><option value="pending_fulfillment">Pending</option><option value="credited">Credited</option><option value="fulfilled">Fulfilled</option><option value="cancelled">Cancelled</option></select><input aria-label="Filter by reward option" placeholder="Search reward option…" value={option} onChange={(event) => setOption(event.target.value)} /></Flex>
       </Flex>
       {error && <Text color="error" size="$sm">{error}</Text>}
       {loading ? <Box className="glass-panel admin-empty-state"><Loading size="sm">Loading referral claims…</Loading></Box> : visibleRows.length === 0 ? (

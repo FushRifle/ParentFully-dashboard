@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Loading, Table, Text } from '@nextui-org/react';
-import { Activity, BarChart3, Clock3, Globe2, MonitorSmartphone, RefreshCw, Route, Users } from 'lucide-react';
+import { Loading, Table, Text } from '@nextui-org/react';
+import { Activity, BarChart3, Clock3, Globe2, MonitorSmartphone, Route, Users } from 'lucide-react';
 import { api } from '../../lib';
 import { Box } from '../../components/styles/box';
 import { Flex } from '../../components/styles/flex';
@@ -77,7 +77,7 @@ export default function AnalyticsPage() {
    return <Box className="admin-page analytics-page">
       <Box className="glass-panel glass-hero"><Flex justify="between" align="center" css={{ gap: '$5', flexWrap: 'wrap' }}>
          <Flex align="center" css={{ gap: '$4' }}><span className="analytics-hero-icon"><BarChart3 size={20}/></span><Box><Text className="section-kicker">Product intelligence</Text><Text h2 css={{ m: 0, mt: '$1', fontSize: '1.4rem' }}>Analytics</Text><Text size="$sm" css={{ color: '$accents7', mt: '$1' }}>Understand app usage, engagement and customer behaviour.</Text></Box></Flex>
-         <Flex align="center" css={{ gap: '$3', flexWrap: 'wrap' }}><div className="analytics-periods">{periods.map((item) => <button key={item.value} className={period === item.value ? 'active' : ''} onClick={() => setPeriod(item.value)} type="button">{item.label}</button>)}</div><select value={platform} onChange={(event) => setPlatform(event.target.value)} aria-label="Platform"><option value="all">All platforms</option><option value="ios">iOS</option><option value="android">Android</option></select><Button auto flat icon={<RefreshCw size={15}/>} onPress={load} disabled={loading}>Refresh</Button></Flex>
+         <Flex align="center" css={{ gap: '$3', flexWrap: 'wrap' }}><div className="analytics-periods">{periods.map((item) => <button key={item.value} className={period === item.value ? 'active' : ''} onClick={() => setPeriod(item.value)} type="button">{item.label}</button>)}</div><select value={platform} onChange={(event) => setPlatform(event.target.value)} aria-label="Platform"><option value="all">All platforms</option><option value="ios">iOS</option><option value="android">Android</option></select></Flex>
       </Flex></Box>
 
       {error && <div className="analytics-error">{error}</div>}

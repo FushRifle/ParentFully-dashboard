@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Input, Loading, Text } from '@nextui-org/react';
-import { CheckCircle2, Clock3, Inbox, MessageSquareText, RefreshCw, Search, Tag, UserRound } from 'lucide-react';
+import { CheckCircle2, Clock3, Inbox, MessageSquareText, Search, Tag, UserRound } from 'lucide-react';
 import { api } from '../lib';
 import { Box } from '../components/styles/box';
 import { Flex } from '../components/styles/flex';
@@ -59,7 +59,7 @@ export default function FeedbackPage() {
    return <Box className="admin-page feedback-page">
       <Box className="glass-panel glass-hero"><Flex justify="between" align="center" css={{ gap: '$5', flexWrap: 'wrap' }}>
          <Flex align="center" css={{ gap: '$4' }}><span className="feedback-hero-icon"><MessageSquareText size={20}/></span><Box><Text className="section-kicker">Customer voice</Text><Text h2 css={{ m: 0, mt: '$1', fontSize: '1.4rem' }}>Feedback</Text><Text size="$sm" css={{ color: '$accents7', mt: '$1' }}>Review customer submissions and move them through your response workflow.</Text></Box></Flex>
-         <Button auto flat icon={<RefreshCw size={15}/>} onPress={load} disabled={loading}>Refresh feedback</Button>
+         <Input bordered clearable aria-label="Search feedback" placeholder="Search feedback…" contentLeft={<Search size={15}/>} value={query} onChange={(event) => setQuery(event.target.value)} />
       </Flex></Box>
 
       {error && <div className="feedback-error">{error}</div>}
@@ -72,7 +72,6 @@ export default function FeedbackPage() {
       </div>
 
       <Box className="glass-panel feedback-toolbar"><Box><Text b size="$sm">Feedback queue</Text><Text size="$xs" css={{ color: '$accents7', mt: '$1' }}>{loading ? 'Refreshing submissions…' : `${rows.length} submissions match the current filters`}</Text></Box><Flex css={{ gap: '$3', flexWrap: 'wrap' }}>
-         <Input bordered clearable aria-label="Search feedback" placeholder="Search feedback…" contentLeft={<Search size={15}/>} value={query} onChange={(event) => setQuery(event.target.value)} />
          <div className="feedback-input-wrap"><Tag size={14}/><input className="feedback-category-input" aria-label="Filter by category" placeholder="Category" value={category} onChange={(event) => setCategory(event.target.value)} /></div>
          <select value={status} onChange={(event) => setStatus(event.target.value)} aria-label="Filter by status"><option value="">All statuses</option>{statusOptions.map((item) => <option key={item} value={item}>{item}</option>)}</select>
       </Flex></Box>

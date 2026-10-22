@@ -5,7 +5,7 @@ import { Box } from '../../components/styles/box';
 import { Flex } from '../../components/styles/flex';
 import { Tabs } from '../../components/styles/tabs';
 
-import { RefreshCw, Bell, Download, Settings } from 'lucide-react';
+import { Bell, Download, Settings } from 'lucide-react';
 
 import {
      systemMetrics,
@@ -22,15 +22,7 @@ import { IncidentCard } from '../../components/system/incident-card';
 import { LogEntryComponent } from '../../components/system/log-entry';
 
 const SystemHealthPage = () => {
-     const [isRefreshing, setIsRefreshing] = useState(false);
      const [selectedTab, setSelectedTab] = useState('overview');
-
-     const handleRefresh = () => {
-          setIsRefreshing(true);
-          setTimeout(() => {
-               setIsRefreshing(false);
-          }, 1000);
-     };
 
      const activeIncidents = incidents.filter(i => i.status !== 'resolved');
 
@@ -160,15 +152,6 @@ const SystemHealthPage = () => {
                               Alerts
                          </Button>
 
-                         <Button
-                              auto
-                              light
-                              icon={<RefreshCw size={16} className={isRefreshing ? 'spin' : ''} />}
-                              onPress={handleRefresh}
-                              disabled={isRefreshing}
-                         >
-                              {isRefreshing ? 'Refreshing...' : 'Refresh'}
-                         </Button>
                     </Flex>
                </Flex>
 

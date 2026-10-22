@@ -1,7 +1,6 @@
 export const pageMeta = {
    '/overview': { title: 'Overview', subtitle: 'Platform health at a glance' },
    '/admin-users': { title: 'Admin Users', subtitle: 'Manage internal dashboard access' },
-   '/customers': { title: 'Customers', subtitle: 'Manage app users, families & children' },
    '/families': { title: 'Families', subtitle: 'Manage family owners, members & children' },
    '/goal-categories': { title: 'Goal Categories', subtitle: 'Manage system goal categories' },
    '/routines': { title: 'Routines & Tasks', subtitle: 'All routines and their tasks' },
@@ -22,7 +21,7 @@ export type PagePath = keyof typeof pageMeta;
 const legacyRouteMap: Record<string, PagePath> = {
    '/': '/overview',
    '/dashboard': '/overview',
-   '/accounts': '/customers',
+   '/accounts': '/families',
    '/teams': '/admin-users',
    '/goals': '/goal-categories',
    '/disciplinex': '/discipline-plans',

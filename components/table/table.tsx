@@ -7,10 +7,11 @@ import {
    Table,
    Loading,
    Text,
-   Button,
+   Input,
    Grid,
    Spacer
 } from '@nextui-org/react';
+import { Search } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 10;
 const COLUMNS: { name: string; uid: string }[] = [
@@ -39,6 +40,7 @@ const prepareTableItems = (users: User[]) =>
 
 export const TableWrapper = () => {
    const [currentPage, setCurrentPage] = useState(1);
+   const [query, setQuery] = useState('');
 
    const {
       users = [],
@@ -46,7 +48,6 @@ export const TableWrapper = () => {
       loading,
       error,
       totalPages,
-      refresh,
    } = useUser(currentPage, ITEMS_PER_PAGE);
 
    const handlePageChange = useCallback(
@@ -57,15 +58,10 @@ export const TableWrapper = () => {
       []
    );
 
-   const handleRefresh = useCallback(() => {
-      setCurrentPage(1);
-      refresh();
-   }, [refresh]);
-
    const tableUsers = useMemo(() => {
-      console.log('Preparing table items for', users.length, 'users');
-      return prepareTableItems(users);
-   }, [users]);
+      const search = query.trim().toLowerCase();
+      return prepareTableItems(users).filter((user) => !search || [user.name, user.email].some((value) => String(value ?? '').toLowerCase().includes(search)));
+   }, [query, users]);
 
    const tableKey = useMemo(() => `table-${currentPage}`, [currentPage]);
 
@@ -80,15 +76,7 @@ export const TableWrapper = () => {
                </Text>
             </Grid>
             <Grid>
-               <Button
-                  auto
-                  flat
-                  color="primary"
-                  onClick={handleRefresh}
-                  disabled={loading}
-               >
-                  {loading ? <Loading size="xs" color="currentColor" /> : 'Refresh Data'}
-               </Button>
+               <Input bordered clearable aria-label="Search users" placeholder="Search name or email…" contentLeft={<Search size={15} />} value={query} onChange={(event) => setQuery(event.target.value)} />
             </Grid>
          </Grid.Container>
 

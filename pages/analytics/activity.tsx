@@ -4,7 +4,6 @@ import { Grid, Text, Button, Card, Table, Loading } from '@nextui-org/react';
 import { Select } from '../../components/styles/select';
 import { Box } from '../../components/styles/box';
 import { Flex } from '../../components/styles/flex';
-import { RefreshCw } from 'lucide-react';
 
 import { LineChart } from '../../components/charts/line-chart';
 import { MetricCard } from '../../components/analytics/metric-card';
@@ -171,15 +170,6 @@ const ActivityPage = () => {
                         css={{ minWidth: '150px' }}
                         options={dateRangeOptions}
                     />
-                    <Button
-                        auto
-                        light
-                        icon={<RefreshCw size={16} className={isLoading ? 'spin' : ''} />}
-                        onPress={fetchData}
-                        disabled={isLoading}
-                    >
-                        {isLoading ? 'Loading...' : 'Refresh'}
-                    </Button>
                 </Flex>
             </Flex>
 

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Badge, Button, Input, Modal, Pagination, Table, Text, Textarea } from '@nextui-org/react';
-import { ArrowLeft, Database, Edit2, Eye, Inbox, Layers3, Plus, RefreshCw, Search, Trash2 } from 'lucide-react';
+import { ArrowLeft, Database, Edit2, Eye, Inbox, Layers3, Plus, Search, Trash2 } from 'lucide-react';
 import NextLink from 'next/link';
 import { api } from '../../lib';
 import { getPageMeta, PagePath } from '../../lib/pageMeta';
@@ -236,7 +236,7 @@ export const BackendCollectionPage = ({
                   </Box>
                </Flex>
                <Flex css={{ gap: '$3', flexWrap: 'wrap' }} align="center">
-                  <Button auto flat icon={<RefreshCw size={15} />} onPress={load} disabled={loading}>Refresh</Button>
+                  {searchable && <Input bordered clearable aria-label={`Search ${metaCopy.title}`} placeholder={`Search ${metaCopy.title.toLowerCase()}...`} contentLeft={<Search size={15} />} value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} css={{ width: '250px' }} />}
                   {formFields.length > 0 && allowCreate && <Button auto color="primary" icon={<Plus size={15} />} onPress={openCreate}>{createLabel ?? `Add ${resourceName ?? 'record'}`}</Button>}
                </Flex>
             </Flex>
@@ -277,18 +277,6 @@ export const BackendCollectionPage = ({
                      </select>
                   </label>
                ))}
-               {searchable && (
-                  <Input
-                     bordered
-                     clearable
-                     aria-label={`Search ${metaCopy.title}`}
-                     placeholder={`Search ${metaCopy.title.toLowerCase()}...`}
-                     contentLeft={<Search size={15} />}
-                     value={search}
-                     onChange={(event) => { setSearch(event.target.value); setPage(1); }}
-                     css={{ width: '240px' }}
-                  />
-               )}
             </Flex>
             </Flex>
          </Box>
