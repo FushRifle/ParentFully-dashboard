@@ -967,10 +967,15 @@ textarea {
 
 .overview-activity-row {
    display: grid;
-   grid-template-columns: 18px minmax(0, 1fr) auto;
+   grid-template-columns: 18px minmax(0, 1fr) minmax(132px, 150px);
    gap: .75rem;
+   align-items: start;
    min-height: 61px;
    padding: .7rem .75rem;
+}
+
+.overview-activity-row > div {
+   min-width: 0;
 }
 
 .overview-activity-row strong {
@@ -985,8 +990,14 @@ textarea {
 }
 
 .overview-activity-row time {
+   display: block;
+   justify-self: end;
+   padding-top: .08rem;
    color: rgba(255, 255, 255, 0.5);
    font-size: .7rem;
+   font-variant-numeric: tabular-nums;
+   line-height: 1.4;
+   text-align: right;
    white-space: nowrap;
 }
 
@@ -1101,6 +1112,10 @@ textarea {
 
    .overview-activity-row time {
       grid-column: 2;
+      justify-self: start;
+      margin-top: .1rem;
+      padding-top: 0;
+      text-align: left;
    }
 }
 

@@ -14,7 +14,7 @@ export const useUserStats = () => {
           try {
                setStats(await getDashboardStats());
           } catch (e: any) {
-               setError(e?.message ?? 'Failed to load users');
+               setError(e?.response?.data?.message ?? e?.message ?? 'Failed to load dashboard data');
           } finally {
                setLoading(false);
           }

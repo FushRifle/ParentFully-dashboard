@@ -121,8 +121,25 @@ export const updateAdminProfile = async (data: Pick<User, 'name' | 'email'>): Pr
 };
 
 export const getDashboardStats = async (): Promise<AdminDashboardStats> => {
-     const response = await api.get<AdminDashboardStats>('/v1/admin/dashboard');
-     return response.data;
+     const response = await api.get<AdminDashboardStats | { data: AdminDashboardStats }>('/v1/admin/dashboard');
+     const payload = 'data' in response.data ? response.data.data : response.data;
+
+     return {
+          ...payload,
+          top_goal_categories: Array.isArray(payload.top_goal_categories) ? payload.top_goal_categories : [],
+          recent_activity: Array.isArray(payload.recent_activity)
+               ? payload.recent_activity
+                    .filter((activity) => activity && activity.id !== undefined)
+                    .map((activity) => ({
+                         id: Number(activity.id),
+                         action: activity.action ?? '',
+                         description: activity.description ?? null,
+                         model_type: activity.model_type ?? null,
+                         family_name: activity.family_name ?? null,
+                         created_at: activity.created_at ?? null,
+                    }))
+               : [],
+     };
 };
 
 export const getAllAppUsers = async (): Promise<User[]> => {

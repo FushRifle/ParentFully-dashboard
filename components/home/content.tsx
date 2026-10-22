@@ -5,8 +5,14 @@ import { Box } from '../styles/box';
 import { Flex } from '../styles/flex';
 import { OverviewStats } from './overview-stats';
 import { useUserStats } from '../../hooks/user/useUserStats';
+import type { AdminRecentActivity } from '../../types/api';
 
-const activityTitle = (activity: any) => activity.description || activity.action || activity.model_type || 'Platform activity';
+const activityTitle = (activity: AdminRecentActivity) => activity.description || activity.action || activity.model_type || 'Platform activity';
+const activityTime = (value: string | null) => {
+   if (!value) return '—';
+   const date = new Date(value);
+   return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+};
 
 export const Content = () => {
    const { stats, loading, error } = useUserStats();
@@ -25,7 +31,7 @@ export const Content = () => {
                and activity totals from ParentFully.
             </p>
          </Box>
-         <span className="overview-live"><i />Synced</span>
+         <span className="overview-live"><i />{loading ? 'Syncing' : error ? 'Unavailable' : 'Loaded'}</span>
       </Flex>
 
       <OverviewStats dashboardStats={stats} loading={loading} error={error} />
@@ -55,7 +61,7 @@ export const Content = () => {
                {visibleActivity.map((item, index) => <div className="overview-activity-row" key={item.id}>
                   <span className="overview-timeline"><i />{index < visibleActivity.length - 1 && <b />}</span>
                   <div><strong>{activityTitle(item)}</strong><p>{item.family_name || 'ParentFully account'}</p></div>
-                  <time>{item.created_at ? new Date(item.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : '—'}</time>
+                  <time>{activityTime(item.created_at)}</time>
                </div>)}
                {!loading && !activity.length && <EmptyState icon={<Clock3 size={18} />} text="No recent activity." />}
                {loading && <PanelSkeleton />}

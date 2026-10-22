@@ -95,6 +95,15 @@ export interface User {
      }>;
 }
 
+export interface AdminRecentActivity {
+     id: number;
+     action: 'created' | 'updated' | 'deleted' | string;
+     description: string | null;
+     model_type: string | null;
+     family_name: string | null;
+     created_at: string | null;
+}
+
 export interface AdminDashboardStats {
      total_users: number;
      total_families: number;
@@ -113,7 +122,7 @@ export interface AdminDashboardStats {
      rewards_claimed_this_month: number;
      rewards_month_label: string;
      top_goal_categories?: Array<{ id: number; name: string; goals_count: number }>;
-     recent_activity?: Array<{ id: number; action?: string; description?: string; model_type?: string; family_name?: string; created_at?: string }>;
+     recent_activity?: AdminRecentActivity[];
 }
 
 export interface AuthContextType {
