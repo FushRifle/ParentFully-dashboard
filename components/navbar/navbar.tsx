@@ -70,7 +70,7 @@ export const NavbarWrapper = ({ children }: Props) => {
                backdropFilter: 'blur(20px)',
                '& .nextui-navbar-container': {
                   maxWidth: '100%',
-                  gap: '$6',
+                  gap: '$8',
                   bg: 'transparent',
                },
             }}
@@ -118,7 +118,7 @@ export const NavbarWrapper = ({ children }: Props) => {
             </Navbar.Content>
 
             {/* Right Section: Actions */}
-            <Navbar.Content css={{ gap: '$4', alignItems: 'center' }}>
+            <Navbar.Content className="navbar-right-actions" css={{ gap: '$8', alignItems: 'center', pl: '$4', '@smMax': { gap: '$5', pl: '$1' } }}>
                <Navbar.Item>
                   <DarkModeSwitch />
                </Navbar.Item>
@@ -126,7 +126,7 @@ export const NavbarWrapper = ({ children }: Props) => {
                {/* Feedback */}
                <Navbar.Item css={{ '@mdMax': { display: 'none' } }}>
                   <NextLink href="/feedback" passHref legacyBehavior>
-                     <Flex align="center" css={{ gap: '$2', cursor: 'pointer', opacity: 0.8, '&:hover': { opacity: 1 } }}>
+                     <Flex align="center" css={{ gap: '$3', cursor: 'pointer', opacity: 0.8, '&:hover': { opacity: 1 } }}>
                         <MessageSquare size={16} color="var(--pf-text)" />
                         <Text span size="$xs" b css={{ color: 'var(--pf-text)' }}>
                            Feedback

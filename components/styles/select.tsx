@@ -225,7 +225,7 @@ export const Select: SelectComponent = ({
         css={{
           py: '$3',
           pl: '$4',
-          pr: '$3',
+          pr: '$6',
           bg: isOpen ? '$accents1' : '$accents0',
           borderRadius: '$lg',
           border: '1px solid',
@@ -278,7 +278,7 @@ export const Select: SelectComponent = ({
             transition: 'transform 0.2s ease',
             transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
             color: '$accents7',
-            mr: '$1',
+            mr: '$2',
 
             '&::before': {
               content: '""',
@@ -305,7 +305,7 @@ export const Select: SelectComponent = ({
             position: 'absolute',
             top: '100%',
             left: 0,
-            right: 40,
+            right: 0,
             mt: '$2',
             bg: '$background',
             borderRadius: '$lg',

@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Flex } from '../styles/flex';
 import { Text } from '@nextui-org/react';
-import { ChevronDown } from 'lucide-react';
 
 interface SidebarMenuProps {
    title: string;
@@ -10,30 +9,16 @@ interface SidebarMenuProps {
    children: React.ReactNode;
 }
 
-export const SidebarMenu = ({ title, defaultOpen = false, compact = false, children }: SidebarMenuProps) => {
-   const [open, setOpen] = useState(defaultOpen);
-
-   useEffect(() => {
-      if (defaultOpen) setOpen(true);
-   }, [defaultOpen]);
-
+export const SidebarMenu = ({ title, compact = false, children }: SidebarMenuProps) => {
    return (
-      <Flex direction="column" css={{ mb: '$3' }}>
+      <Flex direction="column" css={{ mb: '$4' }}>
          {!compact && <Flex
             align="center"
-            justify="between"
             css={{
-               cursor: 'pointer',
-               px: '$3',
-               py: '$2',
-               borderRadius: '8px',
+               px: '$4',
+               pb: '$2',
                userSelect: 'none',
-               transition: 'background 80ms ease',
-               '&:hover': {
-                  background: 'var(--pf-hover)',
-               },
             }}
-            onClick={() => setOpen((v) => !v)}
          >
             <Text
                size="11px"
@@ -41,25 +26,13 @@ export const SidebarMenu = ({ title, defaultOpen = false, compact = false, child
                css={{
                   color: 'var(--pf-text-subtle)',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.08em',
+                  letterSpacing: '0.1em',
                }}
             >
                {title}
             </Text>
-            <ChevronDown
-               size={13}
-               color="var(--pf-text-subtle)"
-               style={{
-                  transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 100ms cubic-bezier(0.4, 0, 0.2, 1)',
-               }}
-            />
          </Flex>}
-         {(open || compact) && (
-            <Flex direction="column" css={{ mt: '2px', gap: '2px' }}>
-               {children}
-            </Flex>
-         )}
+         <Flex direction="column" css={{ gap: '3px' }}>{children}</Flex>
       </Flex>
    );
 };

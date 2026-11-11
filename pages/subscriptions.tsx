@@ -19,7 +19,7 @@ interface SubscriptionRecord {
    effective_subscription?: { id: number | null; plan_type: string; plan_code: string; status: string; has_premium_access: boolean; expires_at: string | null };
 }
 type CategoryKey = 'paid' | 'manual' | 'trial' | 'inactive' | 'unverified';
-type StatusKey = 'active' | 'trial' | 'cancelled' | 'expired' | 'billing_issue';
+type StatusKey = 'active' | 'trial' | 'free' | 'cancelled' | 'expired' | 'billing_issue';
 
 const CATEGORY_META: Record<CategoryKey, { label: string; description: string; icon: typeof CreditCard; color: string }> = {
    paid: { label: 'Paid', description: 'Active billed subscriptions', icon: CreditCard, color: '#10b981' },
@@ -37,14 +37,15 @@ const dateHasPassed = (value: string | null) => {
 const getStatus = (record: SubscriptionRecord): StatusKey => {
    const status = normalize(record.effective_subscription?.status ?? record.status);
    if (status.includes('billing') || status.includes('past_due') || status.includes('grace')) return 'billing_issue';
-   if (record.cancelled_at || status.includes('cancel')) return 'cancelled';
-   if (status.includes('expire') || dateHasPassed(record.end_date)) return 'expired';
+   if (status === 'free') return 'free';
+   if (status.includes('cancel') || (!record.effective_subscription && record.cancelled_at)) return 'cancelled';
+   if (status.includes('expire') || dateHasPassed(record.effective_subscription?.expires_at ?? record.end_date)) return 'expired';
    if (status.includes('trial')) return 'trial';
    return 'active';
 };
 const isVerifiedPaid = (record: SubscriptionRecord) => {
    const paymentMethod = normalize(record.payment_method);
-   const plan = normalize(record.plan_type);
+   const plan = normalize(record.effective_subscription?.plan_type ?? record.plan_type);
    const paidMethods = ['revenuecat', 'app_store', 'apple', 'play_store', 'google_play', 'stripe', 'paddle', 'card'];
    const manualMethods = ['manual', 'override', 'system'];
    const recognizedPaidPlan = ['premium', 'monthly', 'yearly', 'annual'].some((paidPlan) => plan.includes(paidPlan));
@@ -59,12 +60,12 @@ const isManualGrant = (record: SubscriptionRecord) => {
 };
 const getCategory = (record: SubscriptionRecord): CategoryKey => {
    const status = getStatus(record);
-   if (status === 'cancelled' || status === 'expired') return 'inactive';
+   if (status === 'free' || status === 'cancelled' || status === 'expired' || status === 'billing_issue') return 'inactive';
    if (status === 'trial') return 'trial';
    if (isManualGrant(record)) return 'manual';
    if (record.effective_subscription?.has_premium_access && !isManualGrant(record)) return isVerifiedPaid(record) ? 'paid' : 'unverified';
    if (isVerifiedPaid(record)) return 'paid';
-   return 'unverified';
+   return 'inactive';
 };
 const extractRows = (payload: any): SubscriptionRecord[] => {
    if (Array.isArray(payload?.data)) return payload.data;
@@ -91,7 +92,6 @@ export default function SubscriptionsPage() {
    const [renewal, setRenewal] = useState<'all' | 'on' | 'off'>('all');
    const [updatingId, setUpdatingId] = useState<string | number | null>(null);
    const [page, setPage] = useState(1);
-   const [meta, setMeta] = useState<PaginationMeta>({ current_page: 1, per_page: 20, total: 0, last_page: 1 });
    const [manualOpen, setManualOpen] = useState(false);
    const [manualEmail, setManualEmail] = useState('');
    const [manualMonths, setManualMonths] = useState('12');
@@ -109,24 +109,35 @@ export default function SubscriptionsPage() {
    const load = useCallback(async () => {
       setLoading(true); setError(null);
       try {
-         const apiStatus = ['trial', 'cancelled', 'expired'].includes(status) ? status : undefined;
-         const response = await api.get('/v1/admin/subscriptions', { params: { page, per_page: 20, ...(apiStatus ? { status: apiStatus } : {}) } });
-         setRecords(extractRows(response.data));
-         setMeta(response.data?.meta ?? { current_page: page, per_page: 20, total: 0, last_page: 1 });
+         const first = await api.get('/v1/admin/subscriptions', { params: { page: 1, per_page: 100 } });
+         let rows = extractRows(first.data);
+         const lastPage = Number(first.data?.meta?.last_page ?? 1);
+         if (lastPage > 1) {
+            const remaining = await Promise.all(Array.from({ length: lastPage - 1 }, (_, index) => api.get('/v1/admin/subscriptions', { params: { page: index + 2, per_page: 100 } })));
+            rows = rows.concat(...remaining.map((response) => extractRows(response.data)));
+         }
+         setRecords(Array.from(new Map(rows.map((record) => [String(record.id), record])).values()));
       } catch (err: any) { setError(err?.response?.data?.message ?? 'Unable to load subscriptions.'); }
       finally { setLoading(false); }
-   }, [page, status]);
+   }, []);
    useEffect(() => { load(); }, [load]);
 
    const counts: Record<CategoryKey, number> = { paid: statistics.data?.paid ?? 0, manual: statistics.data?.manual_premium ?? 0, trial: statistics.data?.free_trials ?? 0, inactive: statistics.data?.inactive ?? 0, unverified: statistics.data?.unverified ?? 0 };
    const filteredRecords = useMemo(() => {
       const search = query.trim().toLowerCase();
       return records.filter((record) => {
-         const searchable = [record.user?.name, record.user?.email, record.plan_type, record.payment_method, record.id].join(' ').toLowerCase();
+         const owner = record.subscription_owner ?? record.user;
+         const searchable = [owner?.name, owner?.email, record.effective_subscription?.plan_type, record.plan_type, record.payment_method, record.id].join(' ').toLowerCase();
          return (!search || searchable.includes(search)) && (category === 'all' || getCategory(record) === category) &&
             (status === 'all' || getStatus(record) === status) && (renewal === 'all' || record.auto_renewal === (renewal === 'on'));
       });
    }, [records, query, category, status, renewal]);
+   const perPage = 20;
+   const lastPage = Math.max(1, Math.ceil(filteredRecords.length / perPage));
+   const visibleRecords = filteredRecords.slice((page - 1) * perPage, page * perPage);
+   const meta: PaginationMeta = { current_page: Math.min(page, lastPage), per_page: perPage, total: filteredRecords.length, last_page: lastPage };
+   useEffect(() => { if (page > lastPage) setPage(lastPage); }, [lastPage, page]);
+   useEffect(() => { setPage(1); }, [query, renewal]);
    const hasFilters = Boolean(query.trim()) || category !== 'all' || status !== 'all' || renewal !== 'all';
    const selectCategory = (nextCategory: 'all' | CategoryKey) => {
       setCategory(nextCategory); setStatus('all'); setRenewal('all'); setPage(1);
@@ -136,15 +147,17 @@ export default function SubscriptionsPage() {
       setStatus(nextStatus); setCategory('all'); setRenewal('all'); setPage(1);
       router.replace({ pathname: '/subscriptions', query: {} }, undefined, { shallow: true });
    };
-   const clearFilters = () => { setQuery(''); selectCategory('all'); };
+   const clearFilters = () => { setQuery(''); setPage(1); selectCategory('all'); };
 
    const updateSubscription = async (record: SubscriptionRecord) => {
       const currentStatus = getStatus(record);
       const action = currentStatus === 'cancelled' ? 'reactivate' : 'cancel';
       const verb = action === 'cancel' ? 'Cancel' : 'Reactivate';
-      if (!window.confirm(`${verb} the subscription for ${record.user?.name ?? 'this account'}?`)) return;
+      const owner = record.subscription_owner ?? record.user;
+      const effectiveId = record.effective_subscription?.id ?? record.id;
+      if (!window.confirm(`${verb} the subscription for ${owner?.name ?? 'this account'}?`)) return;
       setUpdatingId(record.id); setError(null);
-      try { await api.post(`/v1/admin/subscriptions/${record.id}/${action}`); await load(); }
+      try { await api.post(`/v1/admin/subscriptions/${effectiveId}/${action}`); await load(); }
       catch (err: any) { setError(err?.response?.data?.message ?? `Unable to ${action} this subscription.`); }
       finally { setUpdatingId(null); }
    };
@@ -177,29 +190,32 @@ export default function SubscriptionsPage() {
          return <button type="button" className={`glass-panel subscription-metric ${category === key ? 'active' : ''}`} style={{ '--subscription-accent': meta.color } as React.CSSProperties} key={key} onClick={() => selectCategory(category === key ? 'all' : key)}><span className="subscription-metric-icon"><Icon size={18} /></span><div><small>{meta.label}</small><strong>{statistics.isLoading ? '—' : counts[key].toLocaleString()}</strong><p>{meta.description}</p></div></button>;
       })}</div>
 
-      <Box className="glass-panel subscriptions-audit-note"><AlertCircle size={17} /><div><Text b size="$sm">Effective access view</Text><Text size="$xs" css={{ color: '$accents7' }}>Cards use mutually exclusive billing-owner totals from the API. Rows use each account&apos;s effective subscription instead of guessing from subscription history.</Text></div></Box>
+      <Box className="glass-panel subscriptions-audit-note"><AlertCircle size={17} /><div><Text b size="$sm">Effective access view</Text><Text size="$xs" css={{ color: '$accents7' }}>Cards use mutually exclusive billing-owner totals from the API. Filters run against the complete current-subscription result, and access fields use the backend-resolved effective subscription.</Text></div></Box>
       {error && <div className="feedback-error">{error}</div>}
 
-      <Box className="glass-panel subscriptions-toolbar"><div><Text b size="$sm">Subscription records</Text><Text size="$xs" css={{ color: '$accents7', mt: '$1' }}>{filteredRecords.length.toLocaleString()} shown · {meta.total.toLocaleString()} records</Text></div><div className="subscriptions-filters">
+      <Box className="glass-panel subscriptions-toolbar"><div><Text b size="$sm">Subscription records</Text><Text size="$xs" css={{ color: '$accents7', mt: '$1' }}>{visibleRecords.length.toLocaleString()} shown · {filteredRecords.length.toLocaleString()} matching · {records.length.toLocaleString()} total</Text></div><div className="subscriptions-filters">
          <label>Category<select value={category} onChange={(event) => selectCategory(event.target.value as 'all' | CategoryKey)}><option value="all">All categories</option><option value="paid">Paid</option><option value="manual">Manual premium</option><option value="trial">Free trials</option><option value="inactive">Inactive</option><option value="unverified">Unverified source</option></select></label>
-         <label>Status<select value={status} onChange={(event) => selectStatus(event.target.value as 'all' | StatusKey)}><option value="all">All statuses</option><option value="active">Active</option><option value="trial">Trial</option><option value="cancelled">Cancelled</option><option value="expired">Expired</option><option value="billing_issue">Billing issue</option></select></label>
+         <label>Status<select value={status} onChange={(event) => selectStatus(event.target.value as 'all' | StatusKey)}><option value="all">All statuses</option><option value="active">Active premium</option><option value="trial">Trial</option><option value="free">Free</option><option value="cancelled">Cancelled</option><option value="expired">Expired</option><option value="billing_issue">Billing issue</option></select></label>
          <label>Renewal<select value={renewal} onChange={(event) => setRenewal(event.target.value as 'all' | 'on' | 'off')}><option value="all">All renewal states</option><option value="on">Auto-renew on</option><option value="off">Auto-renew off</option></select></label>
          {hasFilters && <button type="button" className="subscriptions-clear" onClick={clearFilters}>Clear</button>}
       </div></Box>
 
       {loading ? <Box className="glass-panel admin-empty-state"><Loading size="sm">Loading subscriptions…</Loading></Box> : filteredRecords.length === 0 ? <Box className="glass-panel admin-empty-state"><span><Inbox size={22} /></span><Text b>No subscriptions found</Text><Text size="$sm" css={{ color: '$accents7' }}>{hasFilters ? 'No subscription matches the selected filters.' : 'No subscription records were returned by the API.'}</Text>{hasFilters && <Button auto flat size="sm" onPress={clearFilters}>Clear filters</Button>}</Box> : <Box className="glass-panel subscriptions-table-shell"><Table className="subscriptions-table" aria-label="Subscriptions" shadow={false} css={{ minWidth: '100%' }}>
          <Table.Header><Table.Column>SUBSCRIBER</Table.Column><Table.Column>ACCESS</Table.Column><Table.Column>PLAN</Table.Column><Table.Column>AMOUNT</Table.Column><Table.Column>PERIOD</Table.Column><Table.Column>PAYMENT</Table.Column><Table.Column>RENEWAL</Table.Column><Table.Column hideHeader>ACTIONS</Table.Column></Table.Header>
-         <Table.Body items={filteredRecords}>{(record) => {
+         <Table.Body items={visibleRecords}>{(record) => {
             const recordCategory = getCategory(record); const recordStatus = getStatus(record); const actionAvailable = recordStatus === 'active' || recordStatus === 'cancelled';
+            const owner = record.subscription_owner ?? record.user;
+            const effective = record.effective_subscription;
+            const detailId = effective?.id ?? record.id;
             return <Table.Row key={record.id}>
-               <Table.Cell><NextLink href={`/subscriptions/${record.id}`}><a className="subscription-cell-link"><div className="subscription-person"><span>{(record.user?.name || record.user?.email || '?').slice(0, 1).toUpperCase()}</span><div><strong>{record.user?.name || 'Unnamed account'}</strong><small>{record.user?.email || 'Account unavailable'}</small></div></div></a></NextLink></Table.Cell>
-               <Table.Cell><NextLink href={`/subscriptions/${record.id}`}><a className="subscription-cell-link"><div className={`subscription-access ${recordCategory}`}><strong>{CATEGORY_META[recordCategory].label}</strong><small>{recordStatus.replace('_', ' ')}</small></div></a></NextLink></Table.Cell>
-               <Table.Cell><NextLink href={`/subscriptions/${record.id}`}><a className="subscription-cell-link"><span className="subscription-plan">{record.plan_type || 'Not specified'}</span></a></NextLink></Table.Cell>
-               <Table.Cell><NextLink href={`/subscriptions/${record.id}`}><a className="subscription-cell-link"><strong className="subscription-amount">{formatAmount(record.amount)}</strong></a></NextLink></Table.Cell>
-               <Table.Cell><NextLink href={`/subscriptions/${record.id}`}><a className="subscription-cell-link"><div className="subscription-period"><strong>{formatDate(record.start_date)}</strong><small>to {formatDate(record.end_date)}</small></div></a></NextLink></Table.Cell>
-               <Table.Cell><NextLink href={`/subscriptions/${record.id}`}><a className="subscription-cell-link"><span className="subscription-payment">{record.payment_method || 'Not specified'}</span></a></NextLink></Table.Cell>
-               <Table.Cell><NextLink href={`/subscriptions/${record.id}`}><a className="subscription-cell-link">{record.auto_renewal ? <Badge color="success" variant="flat"><Check size={11} /> On</Badge> : <Badge variant="flat"><CalendarClock size={11} /> Off</Badge>}</a></NextLink></Table.Cell>
-               <Table.Cell><div className="subscription-actions"><NextLink href={`/subscriptions/${record.id}`}><a className="subscription-view-action" aria-label={`View subscription ${record.id}`}><Eye size={14} /></a></NextLink>{actionAvailable ? <button type="button" className={`subscription-row-action ${recordStatus === 'cancelled' ? 'reactivate' : ''}`} disabled={updatingId === record.id} onClick={() => updateSubscription(record)}>{updatingId === record.id ? <RefreshCw size={14} className="spin" /> : recordStatus === 'cancelled' ? 'Reactivate' : 'Cancel'}</button> : <span className="subscription-no-action">—</span>}</div></Table.Cell>
+               <Table.Cell><NextLink href={`/subscriptions/${detailId}`}><a className="subscription-cell-link"><div className="subscription-person"><span>{(owner?.name || owner?.email || '?').slice(0, 1).toUpperCase()}</span><div><strong>{owner?.name || 'Unnamed account'}</strong><small>{owner?.email || 'Account unavailable'}</small></div></div></a></NextLink></Table.Cell>
+               <Table.Cell><NextLink href={`/subscriptions/${detailId}`}><a className="subscription-cell-link"><div className={`subscription-access ${recordCategory}`}><strong>{CATEGORY_META[recordCategory].label}</strong><small>{recordStatus.replace('_', ' ')}</small></div></a></NextLink></Table.Cell>
+               <Table.Cell><NextLink href={`/subscriptions/${detailId}`}><a className="subscription-cell-link"><span className="subscription-plan">{effective?.plan_type || record.plan_type || 'Not specified'}</span></a></NextLink></Table.Cell>
+               <Table.Cell><NextLink href={`/subscriptions/${detailId}`}><a className="subscription-cell-link"><strong className="subscription-amount">{formatAmount(record.amount)}</strong></a></NextLink></Table.Cell>
+               <Table.Cell><NextLink href={`/subscriptions/${detailId}`}><a className="subscription-cell-link"><div className="subscription-period"><strong>{formatDate(record.start_date)}</strong><small>to {formatDate(effective?.expires_at ?? record.end_date)}</small></div></a></NextLink></Table.Cell>
+               <Table.Cell><NextLink href={`/subscriptions/${detailId}`}><a className="subscription-cell-link"><span className="subscription-payment">{record.payment_method || 'Not specified'}</span></a></NextLink></Table.Cell>
+               <Table.Cell><NextLink href={`/subscriptions/${detailId}`}><a className="subscription-cell-link">{record.auto_renewal ? <Badge color="success" variant="flat"><Check size={11} /> On</Badge> : <Badge variant="flat"><CalendarClock size={11} /> Off</Badge>}</a></NextLink></Table.Cell>
+               <Table.Cell><div className="subscription-actions"><NextLink href={`/subscriptions/${detailId}`}><a className="subscription-view-action" aria-label={`View subscription ${detailId}`}><Eye size={14} /></a></NextLink>{actionAvailable ? <button type="button" className={`subscription-row-action ${recordStatus === 'cancelled' ? 'reactivate' : ''}`} disabled={updatingId === record.id} onClick={() => updateSubscription(record)}>{updatingId === record.id ? <RefreshCw size={14} className="spin" /> : recordStatus === 'cancelled' ? 'Reactivate' : 'Cancel'}</button> : <span className="subscription-no-action">—</span>}</div></Table.Cell>
             </Table.Row>;
          }}</Table.Body>
       </Table></Box>}

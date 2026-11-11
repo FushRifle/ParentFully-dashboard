@@ -20,7 +20,7 @@ export default function FamiliesPage() {
    const [page, setPage] = useState(1);
    useEffect(() => { const timer = window.setTimeout(() => { setSearch(query.trim()); setPage(1); }, 300); return () => window.clearTimeout(timer); }, [query]);
 
-   const statistics = useQuery<AdminFamilyStatistics>({ queryKey: ['family-statistics'], queryFn: getFamilyStatistics });
+   const statistics = useQuery<AdminFamilyStatistics>({ queryKey: ['family-statistics'], queryFn: getFamilyStatistics, retry: false });
    const families = useQuery<FamilyResponse>({
       queryKey: ['families', page, search],
       queryFn: async () => (await api.get<FamilyResponse>('/v1/admin/families', { params: { page, per_page: 20, ...(search ? { search } : {}) } })).data,
@@ -28,7 +28,8 @@ export default function FamiliesPage() {
    });
    const rows = families.data?.data ?? [];
    const meta = families.data?.meta ?? EMPTY_META;
-   const error = (families.error as any)?.response?.data?.message ?? (statistics.error as any)?.response?.data?.message ?? '';
+   const error = (families.error as any)?.response?.data?.message ?? '';
+   const statisticsUnavailable = statistics.isError;
 
    return <Box className="admin-page families-page">
       <Box className="glass-panel glass-hero"><Flex justify="between" align="center" css={{ gap: '$5', flexWrap: 'wrap' }}>
@@ -37,9 +38,9 @@ export default function FamiliesPage() {
       </Flex></Box>
 
       <div className="families-metric-grid">
-         <Metric label="Families" value={statistics.data?.families_count} loading={statistics.isLoading} detail="Family records" />
-         <Metric label="Household" value={statistics.data?.household_count} loading={statistics.isLoading} detail="Owners plus accepted members" />
-         <Metric label="Children" value={statistics.data?.children_count} loading={statistics.isLoading} detail="Children linked to families" />
+         <Metric label="Families" value={statistics.data?.families_count ?? meta.total} loading={statistics.isLoading && families.isLoading} detail="Family records" />
+         <Metric label="Household" value={statistics.data?.household_count} loading={statistics.isLoading} unavailable={statisticsUnavailable} detail="Owners plus accepted members" />
+         <Metric label="Children" value={statistics.data?.children_count} loading={statistics.isLoading} unavailable={statisticsUnavailable} detail="Children linked to families" />
       </div>
       <Box className="glass-panel glass-toolbar"><Box><Text b size="$sm">Family records</Text><Text size="$xs" css={{ color: '$accents7', mt: '$1' }}>{meta.total.toLocaleString()} {meta.total === 1 ? 'family' : 'families'}</Text></Box></Box>
       {error ? <div className="feedback-error">{error}</div> : families.isLoading ? <Box className="glass-panel admin-empty-state"><Loading size="sm">Loading families…</Loading></Box> : rows.length === 0 ? <Box className="glass-panel admin-empty-state"><span><UsersRound size={22} /></span><Text b>No families found</Text><Text size="$sm" css={{ color: '$accents7' }}>{search ? 'No family matches this search.' : 'Family records will appear here after registration.'}</Text>{search && <Button auto flat size="sm" onPress={() => setQuery('')}>Clear search</Button>}</Box> : <>
@@ -59,7 +60,7 @@ export default function FamiliesPage() {
    </Box>;
 }
 
-const Metric = ({ label, value, loading, detail }: { label: string; value?: number; loading: boolean; detail: string }) => <div className="glass-panel families-metric"><span>{label}</span><strong>{loading ? '—' : (value ?? 0).toLocaleString()}</strong><small>{detail}</small></div>;
+const Metric = ({ label, value, loading, unavailable = false, detail }: { label: string; value?: number; loading: boolean; unavailable?: boolean; detail: string }) => <div className="glass-panel families-metric"><span>{label}</span><strong>{loading || unavailable ? '—' : (value ?? 0).toLocaleString()}</strong><small>{unavailable ? 'Summary unavailable' : detail}</small></div>;
 const Count = ({ value, label, child = false }: { value?: number; label: string; child?: boolean }) => <span className={`family-count-pill${child ? ' child' : ''}`}><b>{Number(value ?? 0).toLocaleString()}</b><small>{label}</small></span>;
 const formatDate = (value: string | null) => value ? new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
 const Pagination = ({ meta, page, loading, onPage }: { meta: PaginationMeta; page: number; loading: boolean; onPage: (page: number) => void }) => <nav className="admin-pagination" aria-label="Family pages"><Button auto flat size="sm" disabled={page <= 1 || loading} onPress={() => onPage(page - 1)}>Previous</Button><span>Page {meta.current_page} of {Math.max(meta.last_page, 1)}</span><Button auto flat size="sm" disabled={page >= meta.last_page || loading} onPress={() => onPage(page + 1)}>Next</Button></nav>;

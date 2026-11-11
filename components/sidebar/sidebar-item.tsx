@@ -22,6 +22,7 @@ export const SidebarItem = ({ icon, title, isActive, href = '#' }: Props) => {
       <NextLink
          href={href}
          onClick={handleClick}
+         aria-current={isActive ? 'page' : undefined}
          style={{
             width: '100%',
             textDecoration: 'none',
@@ -35,9 +36,9 @@ export const SidebarItem = ({ icon, title, isActive, href = '#' }: Props) => {
                alignItems: 'center',
                gap: '12px',
                width: '100%',
-               height: '38px',
-               padding: '0 12px 0 16px',
-               borderRadius: '10px',
+               height: '41px',
+               padding: collapsed ? '0 10px' : '0 12px 0 14px',
+               borderRadius: '11px',
                cursor: 'pointer',
                position: 'relative',
                userSelect: 'none',
@@ -46,7 +47,7 @@ export const SidebarItem = ({ icon, title, isActive, href = '#' }: Props) => {
                border: isActive
                   ? '1px solid var(--pf-border-hover)'
                   : '1px solid transparent',
-               boxShadow: isActive ? '0 8px 22px -15px rgba(242, 140, 24, 0.9)' : 'none',
+               boxShadow: isActive ? 'inset 0 0 0 1px rgba(242,140,24,.08)' : 'none',
             }}
             className={`sidebar-item-pill${collapsed ? ' sidebar-item-compact' : ''}`}
          >
@@ -64,7 +65,7 @@ export const SidebarItem = ({ icon, title, isActive, href = '#' }: Props) => {
           }
         `}</style>
 
-            {/* Left Glowing Active Indicator Line */}
+            {/* Active route indicator */}
             {isActive && (
                <span
                   style={{
@@ -72,11 +73,11 @@ export const SidebarItem = ({ icon, title, isActive, href = '#' }: Props) => {
                      left: '0',
                      top: '50%',
                      transform: 'translateY(-50%)',
-                     width: '3.5px',
-                     height: '18px',
-                     borderRadius: '0 4px 4px 0',
+                     width: '3px',
+                     height: '16px',
+                     borderRadius: '4px',
                      background: '#f28c18',
-                     boxShadow: '0 0 11px rgba(242, 140, 24, 0.8)',
+                     boxShadow: '0 0 8px rgba(242, 140, 24, 0.4)',
                   }}
                />
             )}
@@ -88,9 +89,9 @@ export const SidebarItem = ({ icon, title, isActive, href = '#' }: Props) => {
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: isActive ? 'var(--pf-nav-active-text)' : 'var(--pf-nav-icon)',
-                  width: '26px',
-                  height: '26px',
-                  flex: '0 0 26px',
+                  width: '28px',
+                  height: '28px',
+                  flex: '0 0 28px',
                   borderRadius: '8px',
                   background: isActive ? 'rgba(242, 140, 24, 0.13)' : 'transparent',
                   transition: 'color 80ms ease, background 80ms ease',
@@ -107,7 +108,7 @@ export const SidebarItem = ({ icon, title, isActive, href = '#' }: Props) => {
                className="sidebar-item-label"
                style={{
                   fontSize: '13px',
-                  fontWeight: isActive ? 600 : 400,
+                  fontWeight: isActive ? 650 : 500,
                   color: isActive ? 'var(--pf-nav-active-text)' : 'var(--pf-nav-text)',
                   letterSpacing: '-0.01em',
                   transition: 'color 0.2s ease',

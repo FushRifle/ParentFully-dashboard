@@ -1,7 +1,7 @@
 import React from 'react';
 import NextLink from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Baby, CircleDollarSign, Home, LucideIcon, ScrollText, Target, Users } from 'lucide-react';
+import { ArrowRight, Baby, BadgeDollarSign, CircleDollarSign, Home, LucideIcon, ScrollText, Target, Users } from 'lucide-react';
 import type { AdminDashboardStats } from '../../types/api';
 
 type StatItem = {
@@ -39,7 +39,7 @@ export const OverviewStats = ({ dashboardStats, loading, error }: { dashboardSta
                   <h3>{item.label}</h3>
                   <p>{item.description}</p>
                </div>
-               <span className="overview-stat-illustration">{item.illustration ? <Image src={item.illustration} alt={item.illustrationAlt} layout="fill" objectFit="contain" objectPosition="right bottom" loading="lazy" /> : <CircleDollarSign className="overview-dollar-illustration" aria-label={item.illustrationAlt} />}</span>
+               <span className="overview-stat-illustration">{item.illustration ? <Image src={item.illustration} alt={item.illustrationAlt} layout="fill" objectFit="contain" objectPosition="right bottom" loading="lazy" /> : <BadgeDollarSign className="overview-dollar-illustration" aria-label={item.illustrationAlt} />}</span>
             </a></NextLink>;
          })}
       </div>

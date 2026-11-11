@@ -1,5 +1,4 @@
 import React from 'react';
-import { Text } from '@nextui-org/react';
 import { useRouter } from 'next/router';
 import {
    BadgeHelp,
@@ -21,7 +20,7 @@ import {
 } from 'lucide-react';
 import { Box } from '../styles/box';
 import { Flex } from '../styles/flex';
-import { CompaniesDropdown } from './companies-dropdown';
+import { ParentfullyIcon } from '../icons/parentfully-icon';
 import { SidebarItem } from './sidebar-item';
 import { SidebarMenu } from './sidebar-menu';
 import { Sidebar } from './sidebar.styles';
@@ -101,8 +100,8 @@ export const SidebarWrapper = () => {
                top: 0,
                right: '-1px',
                width: '1px',
-               height: '28%',
-               background: 'linear-gradient(180deg, rgba(242,140,24,.7), transparent)',
+               height: '110px',
+               background: 'rgba(242,140,24,.7)',
                pointerEvents: 'none',
             },
          }}
@@ -143,16 +142,20 @@ export const SidebarWrapper = () => {
             <Sidebar.Header
                css={{
                   borderBottom: '1px solid var(--pf-border)',
-                  padding: '14px 10px 14px 18px',
+               padding: collapsed ? '14px 12px' : '14px 12px 14px 18px',
                }}
             >
-               {!collapsed && <CompaniesDropdown />}
+               <div className={`sidebar-brand${collapsed ? ' compact' : ''}`}>
+                  <span className="sidebar-brand-mark"><ParentfullyIcon /></span>
+                  {!collapsed && <span className="sidebar-brand-copy"><strong>ParentFully</strong><small>Admin workspace</small></span>}
+               </div>
                <button
                   type="button"
                   aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                   title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                   onClick={setCollapsed}
-                  style={{ marginLeft: collapsed ? 3 : 'auto', width: 34, height: 34, flex: '0 0 34px', borderRadius: 10, border: '1px solid var(--pf-border)', background: 'var(--pf-glass-soft)', color: 'var(--pf-text-muted)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'background 80ms ease, color 80ms ease' }}
+                  className="sidebar-collapse-button"
+                  style={{ marginLeft: collapsed ? 4 : 'auto' }}
                >
                   <Menu size={18} />
                </button>
@@ -170,7 +173,7 @@ export const SidebarWrapper = () => {
                <Sidebar.Body
                   className="sidebar-body"
                   css={{
-                     py: '$4',
+                     py: '$5',
                      px: '$3',
                      overflowY: 'auto',
                      flex: 1,
@@ -210,13 +213,11 @@ export const SidebarWrapper = () => {
                <Sidebar.Footer
                   css={{
                      borderTop: '1px solid var(--pf-border)',
-                     padding: '16px 24px',
-                     background: 'var(--pf-glass-soft)',
+                     padding: collapsed ? '14px 10px' : '14px 18px',
+                     background: 'transparent',
                   }}
                >
-                  {!collapsed && <Text size="11px" css={{ color: 'var(--pf-text-subtle)', fontWeight: 500, letterSpacing: '0.03em' }}>
-                     © 2026 ParentFully
-                  </Text>}
+                  {!collapsed ? <div className="sidebar-footer-status"><span /><div><strong>Admin console</strong><small>Connected to live data</small></div></div> : <span className="sidebar-footer-dot" title="Connected to live data" />}
                </Sidebar.Footer>
             </Flex>
          </Sidebar>

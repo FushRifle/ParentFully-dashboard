@@ -43,6 +43,7 @@ export interface BackendFormField {
 interface BackendCollectionPageProps {
    path: PagePath;
    endpoint: string;
+   readFallbackEndpoints?: string[];
    columns: BackendColumn[];
    searchable?: boolean;
    rowHref?: (row: Record<string, any>) => string;
@@ -131,6 +132,7 @@ const formatValue = (value: any, type?: BackendColumn['type']) => {
 export const BackendCollectionPage = ({
    path,
    endpoint,
+   readFallbackEndpoints = [],
    columns,
    searchable = true,
    rowHref,
@@ -149,6 +151,7 @@ export const BackendCollectionPage = ({
 }: BackendCollectionPageProps) => {
    const metaCopy = getPageMeta(path);
    const serializedListParams = JSON.stringify(listParams ?? {});
+   const serializedFallbackEndpoints = JSON.stringify(readFallbackEndpoints);
    const [rows, setRows] = useState<Record<string, any>[]>([]);
    const [meta, setMeta] = useState<CollectionMeta>({
       current_page: 1,
@@ -197,18 +200,30 @@ export const BackendCollectionPage = ({
       setLoading(true);
       setError(null);
       try {
-         const response = await api.get(endpoint, {
-            params: {
-               page,
-               per_page: 25,
-               ...JSON.parse(serializedListParams),
-               ...Object.fromEntries(
-                  Object.entries(filterValues).filter(([, value]) => value !== ''),
-               ),
-               ...(searchable && search.trim() ? { search: search.trim() } : {}),
-            },
-         });
-         const normalized = normalizeCollection(response.data);
+         const params = {
+            page,
+            per_page: 25,
+            ...JSON.parse(serializedListParams),
+            ...Object.fromEntries(Object.entries(filterValues).filter(([, value]) => value !== '')),
+            ...(searchable && search.trim() ? { search: search.trim() } : {}),
+         };
+         const endpoints = [endpoint, ...JSON.parse(serializedFallbackEndpoints)];
+         let normalized: ReturnType<typeof normalizeCollection> | null = null;
+         let lastError: any = null;
+
+         for (const readEndpoint of endpoints) {
+            try {
+               const response = await api.get(readEndpoint, { params });
+               const candidate = normalizeCollection(response.data);
+               normalized = candidate;
+               if (candidate.rows.length > 0 || readEndpoint === endpoints[endpoints.length - 1]) break;
+            } catch (requestError) {
+               lastError = requestError;
+            }
+         }
+
+         if (!normalized && lastError) throw lastError;
+         normalized ??= { rows: [], meta: { current_page: 1, last_page: 1, total: 0 } };
          setRows(normalized.rows);
          setMeta(normalized.meta);
       } catch (err: any) {
@@ -229,6 +244,7 @@ export const BackendCollectionPage = ({
       search,
       searchable,
       serializedListParams,
+      serializedFallbackEndpoints,
    ]);
 
    useEffect(() => {

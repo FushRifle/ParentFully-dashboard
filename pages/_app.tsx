@@ -48,6 +48,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
    return (
       <NextThemesProvider
          defaultTheme="system"
+         enableSystem
          attribute="class"
          value={{ light: lightTheme.className, dark: darkTheme.className }}
       >

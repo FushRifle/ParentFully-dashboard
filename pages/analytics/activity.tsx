@@ -47,6 +47,10 @@ function formatDate(dateStr: string): string {
     }
 }
 
+function formatScreenName(value?: string | null): string {
+    return value?.trim() === '/' ? 'Home Screen' : value || '—';
+}
+
 function getDateRange(days: string): { date_from: string; date_to: string } {
     const to = new Date();
     const from = new Date();
@@ -211,7 +215,7 @@ const ActivityPage = () => {
                                     {stats?.top_screens && stats.top_screens.length > 0 ? (
                                         stats.top_screens.map((s, i) => (
                                             <Flex key={i} justify="between" align="center" css={{ py: '$2', borderBottom: '1px solid $accents1' }}>
-                                                <Text size="$sm">{s.last_screen}</Text>
+                                                <Text size="$sm">{formatScreenName(s.last_screen)}</Text>
                                                 <Text b size="$sm" css={{ color: '#3f3bef' }}>{s.count}</Text>
                                             </Flex>
                                         ))
@@ -299,7 +303,7 @@ const ActivityPage = () => {
                                                     <Text size="$sm">{session.device_model ?? '—'}</Text>
                                                 </Table.Cell>
                                                 <Table.Cell>
-                                                    <Text size="$sm">{session.last_screen ?? '—'}</Text>
+                                                    <Text size="$sm">{formatScreenName(session.last_screen)}</Text>
                                                 </Table.Cell>
                                                 <Table.Cell>
                                                     <Text size="$sm">{formatDuration(session.duration_seconds)}</Text>
