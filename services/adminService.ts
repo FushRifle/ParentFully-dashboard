@@ -1,5 +1,5 @@
 import { api } from '@/lib';
-import type { AdminDashboardStats, AuthResponse, AuthUser, User } from '@/types/api';
+import type { AdminDashboardStats, AdminFamilyStatistics, AdminSubscriptionStatistics, AuthResponse, AuthUser, User } from '@/types/api';
 
 type Admin = {
      id: number;
@@ -140,6 +140,16 @@ export const getDashboardStats = async (): Promise<AdminDashboardStats> => {
                     }))
                : [],
      };
+};
+
+export const getFamilyStatistics = async (): Promise<AdminFamilyStatistics> => {
+     const response = await api.get<AdminFamilyStatistics>('/v1/admin/families/statistics');
+     return response.data;
+};
+
+export const getSubscriptionStatistics = async (): Promise<AdminSubscriptionStatistics> => {
+     const response = await api.get<{ data: AdminSubscriptionStatistics }>('/v1/admin/subscriptions/statistics');
+     return response.data.data;
 };
 
 export const getAllAppUsers = async (): Promise<User[]> => {

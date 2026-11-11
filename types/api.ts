@@ -109,6 +109,7 @@ export interface AdminDashboardStats {
      total_families: number;
      active_families: number;
      active_subscriptions: number;
+     total_premium_users: number;
      subscriptions_by_plan: Record<string, number>;
      new_users_this_week: number;
      new_users_this_month: number;
@@ -123,6 +124,28 @@ export interface AdminDashboardStats {
      rewards_month_label: string;
      top_goal_categories?: Array<{ id: number; name: string; goals_count: number }>;
      recent_activity?: AdminRecentActivity[];
+}
+
+export interface PaginationMeta {
+     current_page: number;
+     per_page: number;
+     total: number;
+     last_page: number;
+}
+
+export interface AdminFamilyStatistics {
+     families_count: number;
+     household_count: number;
+     children_count: number;
+}
+
+export interface AdminSubscriptionStatistics {
+     paid: number;
+     manual_premium: number;
+     free_trials: number;
+     inactive: number;
+     unverified: number;
+     total_accounts: number;
 }
 
 export interface AuthContextType {

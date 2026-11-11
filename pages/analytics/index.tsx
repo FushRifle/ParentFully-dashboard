@@ -23,7 +23,7 @@ type DemographicsData = {
    top_countries: { country: string; count: number }[];
 };
 
-const periods = [{ value: '7d', label: '7 days' }, { value: '30d', label: '30 days' }, { value: '90d', label: '90 days' }, { value: 'all', label: 'All time' }];
+const periods = [{ value: '7d', label: '7 days' }, { value: '30d', label: '30 days' }, { value: 'all', label: 'All time' }];
 const formatDuration = (seconds?: number | null) => {
    if (seconds == null || !Number.isFinite(Number(seconds))) return '—';
    const roundedSeconds = Math.max(0, Math.round(Number(seconds)));
@@ -41,7 +41,8 @@ export default function AnalyticsPage() {
    const [sessions, setSessions] = useState<any[]>([]);
    const [loading, setLoading] = useState(true);
    const [error, setError] = useState<string | null>(null);
-   const [showAllSessions, setShowAllSessions] = useState(false);
+   const [sessionPage, setSessionPage] = useState(1);
+   const [sessionMeta, setSessionMeta] = useState({ current_page: 1, last_page: 1, total: 0 });
 
    const load = useCallback(async () => {
       setLoading(true); setError(null);
@@ -49,22 +50,22 @@ export default function AnalyticsPage() {
          const [activityResponse, demographicsResponse, sessionsResponse] = await Promise.all([
             api.get('/v1/admin/analytics/activity', { params: { period, ...(platform !== 'all' ? { platform } : {}) } }),
             api.get('/v1/admin/analytics/demographics', { params: { period, ...(platform !== 'all' ? { platform } : {}) } }),
-            api.get('/v1/admin/analytics/sessions', { params: { period, per_page: 100, ...(platform !== 'all' ? { platform } : {}) } }),
+            api.get('/v1/admin/analytics/sessions', { params: { period, page: sessionPage, per_page: 20, ...(platform !== 'all' ? { platform } : {}) } }),
          ]);
          setActivity(activityResponse.data.data);
          setDemographics(demographicsResponse.data.data);
          setSessions(sessionsResponse.data.data?.data ?? []);
+         setSessionMeta({ current_page: sessionsResponse.data.data?.current_page ?? sessionPage, last_page: sessionsResponse.data.data?.last_page ?? 1, total: sessionsResponse.data.data?.total ?? 0 });
       } catch (err: any) { setError(err?.response?.data?.message ?? err?.message ?? 'Unable to load analytics.'); }
       finally { setLoading(false); }
-   }, [period, platform]);
+   }, [period, platform, sessionPage]);
 
    useEffect(() => { load(); }, [load]);
-   useEffect(() => { setShowAllSessions(false); }, [period, platform]);
+   useEffect(() => { setSessionPage(1); }, [period, platform]);
 
    const maxDailyOpens = Math.max(...(activity?.daily_app_opens ?? []).map((item) => item.count), 1);
    const maxScreenViews = Math.max(...(activity?.top_screens ?? []).map((item) => item.count), 1);
    const maxCountryUsers = Math.max(...(demographics?.top_countries ?? []).map((item) => item.count), 1);
-   const visibleSessions = showAllSessions ? sessions : sessions.slice(0, 10);
    const metrics = useMemo(() => [
       { label: 'Total sessions', value: activity?.total_sessions, detail: 'Recorded app visits', icon: Activity, color: '#8b83ff' },
       { label: 'Unique users', value: activity?.unique_users, detail: 'People using the app', icon: Users, color: '#10b981' },
@@ -97,8 +98,8 @@ export default function AnalyticsPage() {
          <section className="analytics-panel glass-panel"><PanelTitle icon={<Globe2 size={17}/>} title="Top countries" subtitle={`${demographics?.demographics_filled_rate ?? 0}% demographic coverage`} />{loading ? <PanelLoading/> : demographics?.top_countries?.length ? <RankedList items={demographics.top_countries.map((item) => ({ label: item.country || 'Unknown', value: item.count }))} maximum={maxCountryUsers} suffix="users"/> : <Empty text="No country data recorded."/>}</section>
       </div>
 
-      <section className="analytics-panel analytics-sessions glass-panel"><div className="analytics-session-header"><PanelTitle icon={<Clock3 size={17}/>} title="Individual sessions" subtitle={`${sessions.length.toLocaleString()} sessions in the current result`} /><select value={platform} onChange={(event) => setPlatform(event.target.value)} aria-label="Filter sessions by platform"><option value="all">All platforms</option><option value="ios">iOS only</option><option value="android">Android only</option></select></div>
-         {loading ? <PanelLoading/> : visibleSessions.length ? <><div className="analytics-table-wrap"><Table aria-label="Individual app sessions" shadow={false}><Table.Header><Table.Column>USER</Table.Column><Table.Column>PLATFORM</Table.Column><Table.Column>DEVICE</Table.Column><Table.Column>VERSION</Table.Column><Table.Column>LAST SCREEN</Table.Column><Table.Column>DURATION</Table.Column><Table.Column>OPENED</Table.Column></Table.Header><Table.Body items={visibleSessions}>{(session) => <Table.Row key={session.id}><Table.Cell><Text b size="$sm">{session.user_name ?? 'Unknown'}</Text><Text size="$xs" css={{ color: '$accents7' }}>{session.user_email ?? '—'}</Text></Table.Cell><Table.Cell><span className="analytics-platform-pill">{session.platform ?? '—'}</span></Table.Cell><Table.Cell>{session.device_model ?? '—'}</Table.Cell><Table.Cell>{session.app_version ?? '—'}</Table.Cell><Table.Cell>{session.last_screen ?? '—'}</Table.Cell><Table.Cell>{formatDuration(session.duration_seconds)}</Table.Cell><Table.Cell>{session.opened_at ? new Date(session.opened_at).toLocaleString() : '—'}</Table.Cell></Table.Row>}</Table.Body></Table></div>{sessions.length > 10 && <button className="analytics-see-more" type="button" onClick={() => setShowAllSessions((value) => !value)}>{showAllSessions ? 'Show fewer sessions' : `See all ${sessions.length} sessions`}</button>}</> : <Empty text="No sessions recorded for these filters."/>}
+      <section className="analytics-panel analytics-sessions glass-panel"><div className="analytics-session-header"><PanelTitle icon={<Clock3 size={17}/>} title="Individual sessions" subtitle={`${sessionMeta.total.toLocaleString()} sessions`} /><select value={platform} onChange={(event) => setPlatform(event.target.value)} aria-label="Filter sessions by platform"><option value="all">All platforms</option><option value="ios">iOS only</option><option value="android">Android only</option></select></div>
+         {loading ? <PanelLoading/> : sessions.length ? <><div className="analytics-table-wrap"><Table aria-label="Individual app sessions" shadow={false}><Table.Header><Table.Column>USER</Table.Column><Table.Column>PLATFORM</Table.Column><Table.Column>DEVICE</Table.Column><Table.Column>VERSION</Table.Column><Table.Column>LAST SCREEN</Table.Column><Table.Column>DURATION</Table.Column><Table.Column>OPENED</Table.Column></Table.Header><Table.Body items={sessions}>{(session) => <Table.Row key={session.id}><Table.Cell><Text b size="$sm">{session.user_name ?? 'Unknown'}</Text><Text size="$xs" css={{ color: '$accents7' }}>{session.user_email ?? '—'}</Text></Table.Cell><Table.Cell><span className="analytics-platform-pill">{session.platform ?? '—'}</span></Table.Cell><Table.Cell>{session.device_model ?? '—'}</Table.Cell><Table.Cell>{session.app_version ?? '—'}</Table.Cell><Table.Cell>{session.last_screen ?? '—'}</Table.Cell><Table.Cell>{formatDuration(session.duration_seconds)}</Table.Cell><Table.Cell>{session.opened_at ? new Date(session.opened_at).toLocaleString() : '—'}</Table.Cell></Table.Row>}</Table.Body></Table></div>{sessionMeta.last_page > 1 && <nav className="admin-pagination" aria-label="Session pages"><button disabled={sessionPage <= 1 || loading} onClick={() => setSessionPage((value) => value - 1)} type="button">Previous</button><span>Page {sessionMeta.current_page} of {sessionMeta.last_page}</span><button disabled={sessionPage >= sessionMeta.last_page || loading} onClick={() => setSessionPage((value) => value + 1)} type="button">Next</button></nav>}</> : <Empty text="No sessions recorded for these filters."/>}
       </section>
    </Box>;
 }

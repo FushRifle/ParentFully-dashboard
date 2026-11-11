@@ -19,10 +19,9 @@ type StatItem = {
 
 export const OverviewStats = ({ dashboardStats, loading, error }: { dashboardStats: AdminDashboardStats | null; loading: boolean; error: string | null }) => {
    const items: StatItem[] = [
-      { id: 'users', label: 'Total Users', description: 'People registered across families', value: dashboardStats?.total_users ?? 0, icon: Users, href: '/families', color: '#f97316', tint: 'rgba(249,115,22,.1)', illustration: '/illustrations/overview/users.webp', illustrationAlt: 'ParentFully customer community' },
       { id: 'families', label: 'Active Families', description: 'Families currently active', value: dashboardStats?.active_families ?? 0, icon: Home, href: '/families', color: '#10b981', tint: 'rgba(16,185,129,.1)', illustration: '/illustrations/overview/families.webp', illustrationAlt: 'A family together at home' },
       { id: 'children', label: 'Total Children', description: 'Children across all families', value: dashboardStats?.total_children ?? 0, icon: Baby, href: '/families', color: '#ec4899', tint: 'rgba(236,72,153,.1)', illustration: '/illustrations/overview/children.svg', illustrationAlt: 'Children learning together' },
-      { id: 'premium', label: 'Total Premium Users', description: 'Accounts with active premium access', value: dashboardStats?.active_subscriptions ?? 0, icon: CircleDollarSign, href: '/subscriptions', color: '#14b8a6', tint: 'rgba(20,184,166,.1)', illustration: '', illustrationAlt: 'Premium subscriptions' },
+      { id: 'premium', label: 'Total Premium Users', description: 'Billing owners with premium access', value: dashboardStats?.total_premium_users ?? dashboardStats?.active_subscriptions ?? 0, icon: CircleDollarSign, href: '/subscriptions', color: '#14b8a6', tint: 'rgba(20,184,166,.1)', illustration: '', illustrationAlt: 'Premium subscriptions' },
    ];
 
    return <section aria-label="Platform statistics">
@@ -46,3 +45,7 @@ export const OverviewStats = ({ dashboardStats, loading, error }: { dashboardSta
       </div>
    </section>;
 };
+
+{/**
+         { id: 'users', label: 'Total Users', description: 'People registered across families', value: dashboardStats?.total_users ?? 0, icon: Users, href: '/families', color: '#f97316', tint: 'rgba(249,115,22,.1)', illustration: '/illustrations/overview/users.webp', illustrationAlt: 'ParentFully customer community' },
+*/}

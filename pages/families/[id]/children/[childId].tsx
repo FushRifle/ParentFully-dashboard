@@ -62,7 +62,7 @@ export default function ChildDetailPage() {
             <Box>
                <Text className="section-kicker">Child profile · #{child.id}</Text>
                <Text h2 css={{ m: 0, mt: '$1', fontSize: '1.4rem' }}>{child.name || 'Unnamed child'}</Text>
-               <Text size="$sm" css={{ color: '$accents7', mt: '$1' }}>Live account information from the Parentfully API.</Text>
+               <Text size="$sm" css={{ color: '$accents7', mt: '$1' }}>Account information</Text>
             </Box>
          </Flex>
       </Box>

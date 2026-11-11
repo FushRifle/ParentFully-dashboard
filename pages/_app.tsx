@@ -19,13 +19,6 @@ const darkTheme = createTheme({
    theme: { colors: { primary: '#3f3bef' } },
 });
 
-// React Query client
-const queryClient = new QueryClient({
-   defaultOptions: {
-      queries: { staleTime: 5 * 60 * 1000, refetchOnWindowFocus: false },
-   },
-});
-
 const AuthGuard = ({ children }: { children: React.ReactNode }) => {
    const { user, isLoading } = useAuth();
    const router = useRouter();
@@ -41,6 +34,12 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
 
 export default function MyApp({ Component, pageProps }: AppProps) {
    const router = useRouter();
+   // One cache per app/request keeps SSR requests isolated from each other.
+   const [queryClient] = useState(() => new QueryClient({
+      defaultOptions: {
+         queries: { staleTime: 60 * 1000, gcTime: 10 * 60 * 1000, refetchOnWindowFocus: false, retry: 1 },
+      },
+   }));
 
    const isAuthPage = ['/login'].some((path) =>
       router.pathname.startsWith(path)

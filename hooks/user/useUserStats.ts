@@ -26,7 +26,7 @@ export const useUserStats = () => {
 
      const totalUsers = stats?.total_users ?? 0;
      const newUsers = stats?.new_users_this_month ?? 0;
-     const premiumUsers = stats?.active_subscriptions ?? 0;
+     const premiumUsers = stats?.total_premium_users ?? stats?.active_subscriptions ?? 0;
 
      return {
           stats,

@@ -34,6 +34,7 @@ export default function SubscriptionDetailPage() {
    const [subscription, setSubscription] = useState<SubscriptionDetail | null>(null);
    const [loading, setLoading] = useState(true);
    const [saving, setSaving] = useState(false);
+   const [downgrading, setDowngrading] = useState(false);
    const [error, setError] = useState<string | null>(null);
 
    const load = useCallback(async () => {
@@ -51,7 +52,8 @@ export default function SubscriptionDetailPage() {
 
    const status = String(subscription?.status ?? '').toLowerCase();
    const canReactivate = status === 'cancelled' && (!subscription?.end_date || new Date(`${subscription.end_date}T23:59:59`).getTime() >= Date.now());
-   const canCancel = status === 'active' || status === 'trial';
+   const canCancel = ['active', 'premium', 'legacy_active', 'trial'].includes(status);
+   const hasPremiumAccess = ['active', 'premium', 'legacy_active', 'trial'].includes(status);
    const features = useMemo(() => {
       if (Array.isArray(subscription?.features)) return subscription.features.map(String);
       if (subscription?.features && typeof subscription.features === 'object') return Object.entries(subscription.features).filter(([, enabled]) => Boolean(enabled)).map(([name]) => name);
@@ -67,6 +69,13 @@ export default function SubscriptionDetailPage() {
       catch (err: any) { setError(err?.response?.data?.message ?? `Unable to ${action} this subscription.`); }
       finally { setSaving(false); }
    };
+   const downgradeToFree = async () => {
+      if (!subscription.user?.email || !window.confirm(`Downgrade ${subscription.user.email} to the free plan?`)) return;
+      setDowngrading(true); setError(null);
+      try { await api.post('/v2/admin/subscription-overrides/downgrade-free', { email: subscription.user.email, reason: 'Downgraded from the admin dashboard' }); await load(); }
+      catch (err: any) { setError(err?.response?.data?.message ?? 'Unable to downgrade this account.'); }
+      finally { setDowngrading(false); }
+   };
 
    if (loading) return <Box className="glass-panel admin-empty-state"><Loading size="sm">Loading subscription…</Loading></Box>;
    if (error && !subscription) return <Box className="glass-panel admin-empty-state"><Text color="error">{error}</Text><Button auto flat onPress={() => router.push('/subscriptions')}>Back to subscriptions</Button></Box>;
@@ -76,7 +85,7 @@ export default function SubscriptionDetailPage() {
       <button className="admin-back-link" type="button" onClick={() => router.push('/subscriptions')}><ArrowLeft size={15} />Back to subscriptions</button>
       <Box className="glass-panel glass-hero subscription-detail-hero"><Flex justify="between" align="center" css={{ gap: '$5', flexWrap: 'wrap' }}>
          <Flex align="center" css={{ gap: '$4' }}><span className="subscriptions-hero-mark"><CreditCard size={21} /></span><Box><Text className="section-kicker">Subscription #{subscription.id}</Text><Text h2 css={{ m: 0, mt: '$1', fontSize: '1.4rem' }}>{subscription.user?.name || 'Unnamed account'}</Text><Text size="$sm" css={{ color: '$accents7', mt: '$1' }}>{subscription.user?.email || 'Email unavailable'}</Text></Box></Flex>
-         <Flex align="center" css={{ gap: '$3' }}><Badge color={status === 'active' ? 'success' : status === 'trial' ? 'primary' : 'error'} variant="flat">{label(subscription.status)}</Badge>{(canCancel || canReactivate) && <Button auto flat color={canReactivate ? 'success' : 'error'} disabled={saving} icon={saving ? <RefreshCw className="spin" size={14} /> : undefined} onPress={changeStatus}>{saving ? 'Updating…' : canReactivate ? 'Reactivate' : 'Cancel subscription'}</Button>}</Flex>
+         <Flex align="center" css={{ gap: '$3', flexWrap: 'wrap' }}><Badge color={hasPremiumAccess ? 'success' : 'error'} variant="flat">{label(subscription.status)}</Badge>{(canCancel || canReactivate) && <Button auto flat color={canReactivate ? 'success' : 'error'} disabled={saving || downgrading} icon={saving ? <RefreshCw className="spin" size={14} /> : undefined} onPress={changeStatus}>{saving ? 'Updating…' : canReactivate ? 'Reactivate' : 'Cancel subscription'}</Button>}{hasPremiumAccess && subscription.user?.email && <Button auto flat disabled={saving || downgrading} onPress={downgradeToFree}>{downgrading ? 'Downgrading…' : 'Downgrade to free'}</Button>}</Flex>
       </Flex></Box>
       {error && <div className="feedback-error">{error}</div>}
 
