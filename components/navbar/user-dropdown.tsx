@@ -141,17 +141,6 @@ export const UserDropdown = () => {
                </NextLink>
             </Dropdown.Item>
 
-            <Dropdown.Item key="analytics" textValue="Analytics">
-               <NextLink href="/analytics" style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}>
-                  <Flex align="center" css={{ gap: '$3' }}>
-                     <BarChart3 size={15} color="var(--pf-text-muted)" />
-                     <Text size="13px" css={{ color: 'inherit', m: 0 }}>
-                        Analytics
-                     </Text>
-                  </Flex>
-               </NextLink>
-            </Dropdown.Item>
-
             <Dropdown.Item
                key="logout"
                withDivider

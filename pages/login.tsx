@@ -40,7 +40,6 @@ const LoginPage = () => {
                <div>
                   <span className="section-kicker">ParentFully Admin</span>
                   <h1>Support every family from one clear workspace.</h1>
-                  <p>Customers, subscriptions and activity—kept together for your team.</p>
                </div>
 
                <div className="login-illustration" aria-hidden="true">

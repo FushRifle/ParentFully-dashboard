@@ -17,6 +17,7 @@ import {
    UsersRound,
    CalendarCheck,
    Menu,
+   LogOut,
 } from 'lucide-react';
 import { Box } from '../styles/box';
 import { Flex } from '../styles/flex';
@@ -25,6 +26,7 @@ import { SidebarItem } from './sidebar-item';
 import { SidebarMenu } from './sidebar-menu';
 import { Sidebar } from './sidebar.styles';
 import { useSidebarContext } from '../layout/layout-context';
+import { Text } from '@nextui-org/react';
 
 const navSections = [
    {
@@ -209,7 +211,7 @@ export const SidebarWrapper = () => {
                   ))}
                </Sidebar.Body>
 
-               {/* Footer copyright */}
+               {/* Footer copyright
                <Sidebar.Footer
                   css={{
                      borderTop: '1px solid var(--pf-border)',
@@ -217,8 +219,14 @@ export const SidebarWrapper = () => {
                      background: 'transparent',
                   }}
                >
-                  {!collapsed ? <div className="sidebar-footer-status"><span /><div><strong>Admin console</strong><small>Connected to live data</small></div></div> : <span className="sidebar-footer-dot" title="Connected to live data" />}
+                  {!collapsed ?
+                     <div className="sidebar-footer-status"><span /><div><strong>Admin console</strong>
+                        <small>Connected to live data</small>
+                     </div>
+                     </div> : <span className="sidebar-footer-dot" title="Connected to live data" />
+                  }
                </Sidebar.Footer>
+                */}
             </Flex>
          </Sidebar>
       </Box>

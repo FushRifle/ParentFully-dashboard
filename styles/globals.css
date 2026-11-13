@@ -3413,3 +3413,41 @@ select:not([multiple]) {
       flex-direction: column;
    }
 }
+
+.overview-card-illustration {
+   position: absolute;
+   right: -8px;
+   bottom: -15px;
+   z-index: 0;
+   width: 38%;
+   min-width: 105px;
+   max-width: 145px;
+   height: 118px;
+   pointer-events: none;
+   opacity: 0.45;
+   filter: saturate(0.82);
+   transform: translateY(0);
+   transition: opacity 180ms ease, transform 240ms ease;
+}
+
+.overview-card-illustration>* {
+   position: absolute;
+   inset: 0;
+   width: 100% !important;
+   height: 100% !important;
+   object-fit: contain;
+   object-position: right bottom;
+}
+
+.overview-card.interactive:hover .overview-card-illustration {
+   opacity: 0.58;
+   transform: translateY(-3px);
+}
+
+/* Ensure content (top row, value, description) sits above the illustration */
+.overview-card>.overview-card-top,
+.overview-card>strong,
+.overview-card>p {
+   position: relative;
+   z-index: 1;
+}
