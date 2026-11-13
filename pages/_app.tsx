@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from '../lib/context/authContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import { PageSearchProvider } from '../lib/context/searchContext';
 
 // NextUI themes
 const lightTheme = createTheme({
@@ -58,13 +59,15 @@ export default function MyApp({ Component, pageProps }: AppProps) {
                   {isAuthPage ? (
                      <Component {...pageProps} />
                   ) : (
-                     <GoalBackground>
-                        <Layout>
-                           <AuthGuard>
-                              <Component {...pageProps} />
-                           </AuthGuard>
-                        </Layout>
-                     </GoalBackground>
+                     <PageSearchProvider>
+                        <GoalBackground>
+                           <Layout>
+                              <AuthGuard>
+                                 <Component {...pageProps} />
+                              </AuthGuard>
+                           </Layout>
+                        </GoalBackground>
+                     </PageSearchProvider>
                   )}
                </AuthProvider>
             </QueryClientProvider>

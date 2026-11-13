@@ -142,11 +142,11 @@ export const SidebarWrapper = () => {
             <Sidebar.Header
                css={{
                   borderBottom: '1px solid var(--pf-border)',
-               padding: collapsed ? '14px 12px' : '14px 12px 14px 18px',
+                  padding: collapsed ? '14px 12px' : '14px 12px 14px 18px',
                }}
             >
                <div className={`sidebar-brand${collapsed ? ' compact' : ''}`}>
-                  <span className="sidebar-brand-mark"><ParentfullyIcon /></span>
+                  {!collapsed && <span className="sidebar-brand-mark"><ParentfullyIcon /></span>}
                   {!collapsed && <span className="sidebar-brand-copy"><strong>ParentFully</strong><small>Admin workspace</small></span>}
                </div>
                <button
@@ -155,7 +155,7 @@ export const SidebarWrapper = () => {
                   title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                   onClick={setCollapsed}
                   className="sidebar-collapse-button"
-                  style={{ marginLeft: collapsed ? 4 : 'auto' }}
+                  style={{ marginLeft: collapsed ? 0 : 'auto' }}
                >
                   <Menu size={18} />
                </button>

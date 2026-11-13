@@ -4,6 +4,8 @@ import { Activity, BarChart3, Clock3, Globe2, MonitorSmartphone, Route, Users } 
 import { api } from '../../lib';
 import { Box } from '../../components/styles/box';
 import { Flex } from '../../components/styles/flex';
+import { usePageSearch } from '../../lib/context/searchContext';
+import { OverviewCard, OverviewCardGrid } from '../../components/shared/overview-card';
 
 type ActivityData = {
    total_sessions: number;
@@ -35,6 +37,7 @@ const formatDuration = (seconds?: number | null) => {
 const formatScreenName = (value?: string | null) => value?.trim() === '/' ? 'Home Screen' : value || '—';
 
 export default function AnalyticsPage() {
+   const { search } = usePageSearch();
    const [period, setPeriod] = useState('30d');
    const [platform, setPlatform] = useState('all');
    const [activity, setActivity] = useState<ActivityData | null>(null);
@@ -75,6 +78,10 @@ export default function AnalyticsPage() {
       { label: 'Countries', value: demographics?.country_count, detail: 'Customer locations', icon: Globe2, color: '#ec4899' },
       { label: 'Top platform', value: activity?.top_platform ?? '—', detail: 'Most-used platform', icon: MonitorSmartphone, color: '#14b8a6' },
    ], [activity, demographics]);
+   const visibleSessions = useMemo(() => {
+      const query = search.trim().toLowerCase();
+      return sessions.filter((session) => !query || [session.user_name, session.user_email, session.platform, session.device_model, session.app_version, formatScreenName(session.last_screen)].some((value) => String(value ?? '').toLowerCase().includes(query)));
+   }, [search, sessions]);
 
    return <Box className="admin-page analytics-page">
       <Box className="glass-panel glass-hero"><Flex justify="between" align="center" css={{ gap: '$5', flexWrap: 'wrap' }}>
@@ -83,7 +90,7 @@ export default function AnalyticsPage() {
       </Flex></Box>
 
       {error && <div className="analytics-error">{error}</div>}
-      <div className="analytics-metrics">{metrics.map((metric) => { const Icon = metric.icon; return <div className="analytics-metric glass-panel" key={metric.label}><span style={{ color: metric.color, background: `${metric.color}17` }}><Icon size={17}/></span><div><p>{metric.label}</p><strong>{loading ? '—' : typeof metric.value === 'number' ? metric.value.toLocaleString() : metric.value ?? '—'}</strong><small>{metric.detail}</small></div></div>; })}</div>
+      <OverviewCardGrid columns={3}>{metrics.map((metric) => <OverviewCard key={metric.label} label={metric.label} value={typeof metric.value === 'number' ? metric.value.toLocaleString() : metric.value ?? '—'} description={metric.detail} icon={metric.icon} color={metric.color} loading={loading} />)}</OverviewCardGrid>
 
       <div className="analytics-primary-grid">
          <section className="analytics-panel analytics-trend glass-panel"><PanelTitle icon={<Activity size={17}/>} title="App opens" subtitle={`Daily activity · ${periods.find((item) => item.value === period)?.label}`} />
@@ -100,7 +107,7 @@ export default function AnalyticsPage() {
       </div>
 
       <section className="analytics-panel analytics-sessions glass-panel"><div className="analytics-session-header"><PanelTitle icon={<Clock3 size={17}/>} title="Individual sessions" subtitle={`${sessionMeta.total.toLocaleString()} sessions`} /><select value={platform} onChange={(event) => setPlatform(event.target.value)} aria-label="Filter sessions by platform"><option value="all">All platforms</option><option value="ios">iOS only</option><option value="android">Android only</option></select></div>
-         {loading ? <PanelLoading/> : sessions.length ? <><div className="analytics-table-wrap"><Table aria-label="Individual app sessions" shadow={false}><Table.Header><Table.Column>USER</Table.Column><Table.Column>PLATFORM</Table.Column><Table.Column>DEVICE</Table.Column><Table.Column>VERSION</Table.Column><Table.Column>LAST SCREEN</Table.Column><Table.Column>DURATION</Table.Column><Table.Column>OPENED</Table.Column></Table.Header><Table.Body items={sessions}>{(session) => <Table.Row key={session.id}><Table.Cell><Text b size="$sm">{session.user_name ?? 'Unknown'}</Text><Text size="$xs" css={{ color: '$accents7' }}>{session.user_email ?? '—'}</Text></Table.Cell><Table.Cell><span className="analytics-platform-pill">{session.platform ?? '—'}</span></Table.Cell><Table.Cell>{session.device_model ?? '—'}</Table.Cell><Table.Cell>{session.app_version ?? '—'}</Table.Cell><Table.Cell>{formatScreenName(session.last_screen)}</Table.Cell><Table.Cell>{formatDuration(session.duration_seconds)}</Table.Cell><Table.Cell>{session.opened_at ? new Date(session.opened_at).toLocaleString() : '—'}</Table.Cell></Table.Row>}</Table.Body></Table></div>{sessionMeta.last_page > 1 && <nav className="admin-pagination" aria-label="Session pages"><button disabled={sessionPage <= 1 || loading} onClick={() => setSessionPage((value) => value - 1)} type="button">Previous</button><span>Page {sessionMeta.current_page} of {sessionMeta.last_page}</span><button disabled={sessionPage >= sessionMeta.last_page || loading} onClick={() => setSessionPage((value) => value + 1)} type="button">Next</button></nav>}</> : <Empty text="No sessions recorded for these filters."/>}
+         {loading ? <PanelLoading/> : visibleSessions.length ? <><div className="analytics-table-wrap"><Table aria-label="Individual app sessions" shadow={false}><Table.Header><Table.Column>USER</Table.Column><Table.Column>PLATFORM</Table.Column><Table.Column>DEVICE</Table.Column><Table.Column>VERSION</Table.Column><Table.Column>LAST SCREEN</Table.Column><Table.Column>DURATION</Table.Column><Table.Column>OPENED</Table.Column></Table.Header><Table.Body items={visibleSessions}>{(session) => <Table.Row key={session.id}><Table.Cell><Text b size="$sm">{session.user_name ?? 'Unknown'}</Text><Text size="$xs" css={{ color: '$accents7' }}>{session.user_email ?? '—'}</Text></Table.Cell><Table.Cell><span className="analytics-platform-pill">{session.platform ?? '—'}</span></Table.Cell><Table.Cell>{session.device_model ?? '—'}</Table.Cell><Table.Cell>{session.app_version ?? '—'}</Table.Cell><Table.Cell>{formatScreenName(session.last_screen)}</Table.Cell><Table.Cell>{formatDuration(session.duration_seconds)}</Table.Cell><Table.Cell>{session.opened_at ? new Date(session.opened_at).toLocaleString() : '—'}</Table.Cell></Table.Row>}</Table.Body></Table></div>{sessionMeta.last_page > 1 && <nav className="admin-pagination" aria-label="Session pages"><button disabled={sessionPage <= 1 || loading} onClick={() => setSessionPage((value) => value - 1)} type="button">Previous</button><span>Page {sessionMeta.current_page} of {sessionMeta.last_page}</span><button disabled={sessionPage >= sessionMeta.last_page || loading} onClick={() => setSessionPage((value) => value + 1)} type="button">Next</button></nav>}</> : <Empty text={search ? "No sessions match this search." : "No sessions recorded for these filters."}/>}
       </section>
    </Box>;
 }

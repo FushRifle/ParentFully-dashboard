@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Input, Loading, Text } from '@nextui-org/react';
-import { CheckCircle2, Clock3, Inbox, MessageSquareText, Search, Tag, UserRound } from 'lucide-react';
+import { Button, Loading, Text } from '@nextui-org/react';
+import { CheckCircle2, Clock3, Inbox, MessageSquareText, Tag, UserRound } from 'lucide-react';
 import { api } from '../lib';
 import { Box } from '../components/styles/box';
 import { Flex } from '../components/styles/flex';
+import { usePageSearch } from '../lib/context/searchContext';
+import { OverviewCard, OverviewCardGrid } from '../components/shared/overview-card';
 
 const statusOptions = ['new', 'reviewed', 'resolved'];
 const initials = (name?: string) => (name || 'Unknown').split(' ').slice(0, 2).map((part) => part[0]).join('').toUpperCase();
@@ -13,7 +15,7 @@ export default function FeedbackPage() {
    const [loading, setLoading] = useState(true);
    const [updatingId, setUpdatingId] = useState<number | null>(null);
    const [error, setError] = useState<string | null>(null);
-   const [query, setQuery] = useState('');
+   const { search: query } = usePageSearch();
    const [category, setCategory] = useState('');
    const [status, setStatus] = useState('');
    const visibleRows = useMemo(() => {
@@ -59,17 +61,16 @@ export default function FeedbackPage() {
    return <Box className="admin-page feedback-page">
       <Box className="glass-panel glass-hero"><Flex justify="between" align="center" css={{ gap: '$5', flexWrap: 'wrap' }}>
          <Flex align="center" css={{ gap: '$4' }}><span className="feedback-hero-icon"><MessageSquareText size={20}/></span><Box><Text className="section-kicker">Customer voice</Text><Text h2 css={{ m: 0, mt: '$1', fontSize: '1.4rem' }}>Feedback</Text><Text size="$sm" css={{ color: '$accents7', mt: '$1' }}>Review customer submissions and move them through your response workflow.</Text></Box></Flex>
-         <Input bordered clearable aria-label="Search feedback" placeholder="Search feedback…" contentLeft={<Search size={15}/>} value={query} onChange={(event) => setQuery(event.target.value)} />
       </Flex></Box>
 
       {error && <div className="feedback-error">{error}</div>}
 
-      <div className="feedback-metrics">
-         <SummaryCard label="All feedback" value={counts.total} icon={<Inbox size={17}/>} color="#8b83ff" />
-         <SummaryCard label="New" value={counts.new} icon={<Clock3 size={17}/>} color="#f97316" />
-         <SummaryCard label="Reviewed" value={counts.reviewed} icon={<MessageSquareText size={17}/>} color="#3b82f6" />
-         <SummaryCard label="Resolved" value={counts.resolved} icon={<CheckCircle2 size={17}/>} color="#10b981" />
-      </div>
+      <OverviewCardGrid>
+         <OverviewCard label="All feedback" value={counts.total.toLocaleString()} description="Current submissions" icon={Inbox} color="#8b83ff" />
+         <OverviewCard label="New" value={counts.new.toLocaleString()} description="Awaiting review" icon={Clock3} color="#f97316" />
+         <OverviewCard label="Reviewed" value={counts.reviewed.toLocaleString()} description="Review completed" icon={MessageSquareText} color="#3b82f6" />
+         <OverviewCard label="Resolved" value={counts.resolved.toLocaleString()} description="Issues resolved" icon={CheckCircle2} color="#10b981" />
+      </OverviewCardGrid>
 
       <Box className="glass-panel feedback-toolbar"><Box><Text b size="$sm">Feedback queue</Text><Text size="$xs" css={{ color: '$accents7', mt: '$1' }}>{loading ? 'Refreshing submissions…' : `${rows.length} submissions match the current filters`}</Text></Box><Flex css={{ gap: '$3', flexWrap: 'wrap' }}>
          <div className="feedback-input-wrap"><Tag size={14}/><input className="feedback-category-input" aria-label="Filter by category" placeholder="Category" value={category} onChange={(event) => setCategory(event.target.value)} /></div>
@@ -84,4 +85,3 @@ export default function FeedbackPage() {
    </Box>;
 }
 
-const SummaryCard = ({ label, value, icon, color }: { label: string; value: number; icon: React.ReactNode; color: string }) => <div className="feedback-summary glass-panel"><span style={{ color, background: `${color}17` }}>{icon}</span><div><p>{label}</p><strong>{value.toLocaleString()}</strong></div></div>;

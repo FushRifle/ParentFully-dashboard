@@ -1,8 +1,8 @@
 import React from 'react';
-import NextLink from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Baby, BadgeDollarSign, CircleDollarSign, Home, LucideIcon, ScrollText, Target, Users } from 'lucide-react';
+import { Baby, BadgeDollarSign, CircleDollarSign, Home, LucideIcon } from 'lucide-react';
 import type { AdminDashboardStats } from '../../types/api';
+import { OverviewCard, OverviewCardGrid } from '../shared/overview-card';
 
 type StatItem = {
    id: string;
@@ -26,23 +26,7 @@ export const OverviewStats = ({ dashboardStats, loading, error }: { dashboardSta
 
    return <section aria-label="Platform statistics">
       {error && <div className="overview-error"><span />{error}</div>}
-      <div className="overview-stat-grid">
-         {items.map((item) => {
-            const Icon = item.icon;
-            return <NextLink key={item.id} href={item.href} passHref legacyBehavior><a className="overview-stat-card">
-               <div className="overview-stat-top">
-                  <span className="overview-stat-icon" style={{ color: item.color, background: item.tint }}><Icon size={19} strokeWidth={2} /></span>
-                  <ArrowRight className="overview-stat-arrow" size={17} />
-               </div>
-               <div>
-                  {loading ? <span className="overview-stat-skeleton" /> : <strong>{item.value.toLocaleString()}</strong>}
-                  <h3>{item.label}</h3>
-                  <p>{item.description}</p>
-               </div>
-               <span className="overview-stat-illustration">{item.illustration ? <Image src={item.illustration} alt={item.illustrationAlt} layout="fill" objectFit="contain" objectPosition="right bottom" loading="lazy" /> : <BadgeDollarSign className="overview-dollar-illustration" aria-label={item.illustrationAlt} />}</span>
-            </a></NextLink>;
-         })}
-      </div>
+      <OverviewCardGrid columns={3}>{items.map((item) => <OverviewCard key={item.id} label={item.label} value={item.value.toLocaleString()} description={item.description} icon={item.icon} color={item.color} href={item.href} loading={loading} decoration={item.illustration ? <Image src={item.illustration} alt={item.illustrationAlt} layout="fill" objectFit="contain" objectPosition="right bottom" loading="lazy" /> : <BadgeDollarSign aria-label={item.illustrationAlt} />} />)}</OverviewCardGrid>
    </section>;
 };
 

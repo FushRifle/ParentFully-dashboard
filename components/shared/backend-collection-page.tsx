@@ -16,7 +16,6 @@ import {
    Inbox,
    Layers3,
    Plus,
-   Search,
    Trash2,
 } from 'lucide-react';
 import NextLink from 'next/link';
@@ -24,6 +23,7 @@ import { api } from '../../lib';
 import { getPageMeta, PagePath } from '../../lib/pageMeta';
 import { Box } from '../styles/box';
 import { Flex } from '../styles/flex';
+import { usePageSearch } from '../../lib/context/searchContext';
 
 export interface BackendColumn {
    key: string;
@@ -159,7 +159,7 @@ export const BackendCollectionPage = ({
       total: 0,
    });
    const [page, setPage] = useState(1);
-   const [search, setSearch] = useState('');
+   const { search, setSearch } = usePageSearch();
    const [loading, setLoading] = useState(true);
    const [error, setError] = useState<string | null>(null);
    const [formOpen, setFormOpen] = useState(false);
@@ -400,21 +400,6 @@ export const BackendCollectionPage = ({
                   </Flex>
 
                   <Flex css={{ gap: '$3', flexWrap: 'wrap' }} align="center">
-                     {searchable && (
-                        <Input
-                           bordered
-                           clearable
-                           aria-label={`Search ${metaCopy.title}`}
-                           placeholder={`Search ${metaCopy.title.toLowerCase()}...`}
-                           contentLeft={<Search size={15} />}
-                           value={search}
-                           onChange={(event) => {
-                              setSearch(event.target.value);
-                              setPage(1);
-                           }}
-                           css={{ width: '250px' }}
-                        />
-                     )}
                      {formFields.length > 0 && allowCreate && (
                         <Button
                            auto
