@@ -3,9 +3,9 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { Button, Input, Loading, Text } from '@nextui-org/react';
 
-import { Mail } from '../components/icons/auth/mail';
-import { Password } from '../components/icons/auth/password';
-import { useLogin } from '../hooks/auth/useLogin';
+import { Mail } from '@/components/icons/auth/mail';
+import { Password } from '@/components/icons/auth/password';
+import { useLogin } from '@/hooks/auth/useLogin';
 
 const LoginPage = () => {
    const router = useRouter();

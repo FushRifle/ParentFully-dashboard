@@ -1,4 +1,4 @@
-import { BackendCollectionPage } from '../components/shared/backend-collection-page';
+import { BackendCollectionPage } from '@/components/shared/backend-collection-page';
 
 export default function RewardsPage() {
    return <BackendCollectionPage path="/rewards" endpoint="/v1/admin/rewards" rowHref={(row) => `/rewards/${row.id}?name=${encodeURIComponent(row.title)}`} columns={[

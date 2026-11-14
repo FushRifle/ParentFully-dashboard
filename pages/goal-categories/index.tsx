@@ -1,4 +1,4 @@
-import { BackendCollectionPage } from '../components/shared/backend-collection-page';
+import { BackendCollectionPage } from '@/components/shared/backend-collection-page';
 
 export default function GoalCategoriesPage() {
    return <BackendCollectionPage path="/goal-categories" endpoint="/v1/admin/goal-categories" resourceName="goal category" createLabel="Add category" allowDelete filters={[{

@@ -151,7 +151,7 @@ export default function FamilyDetailPage() {
                {/* Inline stat chips replace the separate metric grid */}
                <Flex css={{ gap: '$3', flexWrap: 'wrap' }} align="center">
                   <StatChip
-                     label="Household"
+                     label="Members"
                      value={peopleCount}
                      hint="Owner + accepted members"
                   />

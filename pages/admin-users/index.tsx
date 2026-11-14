@@ -1,4 +1,4 @@
-import { BackendCollectionPage } from '../components/shared/backend-collection-page';
+import { BackendCollectionPage } from '@/components/shared/backend-collection-page';
 
 export default function AdminUsersPage() {
    return <BackendCollectionPage path="/admin-users" endpoint="/v1/admin/users" resourceName="admin user" createLabel="Add admin" allowDelete formFields={[

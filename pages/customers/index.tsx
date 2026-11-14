@@ -1,6 +1,6 @@
 import type { GetServerSideProps } from 'next';
 
-export default function CustomersRedirect() {
+export default function CustomersIndexRedirect() {
    return null;
 }
 

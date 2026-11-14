@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Card, Input, Text } from '@nextui-org/react';
 import { KeyRound, UserRound } from 'lucide-react';
-import { api } from '../lib';
-import { useAuth } from '../lib/context/authContext';
-import { Box } from '../components/styles/box';
-import { Flex } from '../components/styles/flex';
+import { api } from '@/lib';
+import { useAuth } from '@/lib/context/authContext';
+import { Box } from '@/components/styles/box';
+import { Flex } from '@/components/styles/flex';
 
 export default function ProfilePage() {
    const { user, updateUser } = useAuth();

@@ -22,15 +22,15 @@ import {
    Sparkles,
    UserX,
 } from 'lucide-react';
-import { api } from '../lib';
+import { api } from '@/lib';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getSubscriptionStatistics } from '../services/adminService';
-import type { AdminSubscriptionStatistics, PaginationMeta } from '../types/api';
-import { Box } from '../components/styles/box';
-import { Flex } from '../components/styles/flex';
-import { usePageSearch } from '../lib/context/searchContext';
-import { OverviewCard, OverviewCardGrid } from '../components/shared/overview-card';
-import { SegmentedTabs } from '../components/shared/segmented-tabs';
+import { getSubscriptionStatistics } from '@/services/adminService';
+import type { AdminSubscriptionStatistics, PaginationMeta } from '@/types/api';
+import { Box } from '@/components/styles/box';
+import { Flex } from '@/components/styles/flex';
+import { usePageSearch } from '@/lib/context/searchContext';
+import { OverviewCard, OverviewCardGrid } from '@/components/shared/overview-card';
+import { SegmentedTabs } from '@/components/shared/segmented-tabs';
 
 interface SubscriptionUser {
    id: number | string;

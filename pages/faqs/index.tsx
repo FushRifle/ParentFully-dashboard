@@ -1,4 +1,4 @@
-import { BackendCollectionPage } from '../components/shared/backend-collection-page';
+import { BackendCollectionPage } from '@/components/shared/backend-collection-page';
 
 export default function FaqsPage() {
    return <BackendCollectionPage path="/faqs" endpoint="/v1/admin/faqs" readFallbackEndpoints={['/v1/admin/faqs/active', '/v1/faqs']} resourceName="FAQ" createLabel="Add FAQ" allowDelete formFields={[

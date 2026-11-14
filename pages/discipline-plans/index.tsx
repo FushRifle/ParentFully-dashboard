@@ -1,4 +1,4 @@
-import { BackendCollectionPage } from '../components/shared/backend-collection-page';
+import { BackendCollectionPage } from '@/components/shared/backend-collection-page';
 
 export default function DisciplinePlansPage() {
    return <BackendCollectionPage path="/discipline-plans" endpoint="/v1/admin/system-plans" resourceName="discipline plan" createLabel="Add plan" allowDelete rowHref={(row) => `/discipline-plans/${row.id}/rules?name=${encodeURIComponent(row.name)}`} formFields={[

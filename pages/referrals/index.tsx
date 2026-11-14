@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Badge, Button, Loading, Table, Text } from '@nextui-org/react';
-import { api } from '../lib';
-import { Box } from '../components/styles/box';
-import { Flex } from '../components/styles/flex';
-import { usePageSearch } from '../lib/context/searchContext';
+import { api } from '@/lib';
+import { Box } from '@/components/styles/box';
+import { Flex } from '@/components/styles/flex';
+import { usePageSearch } from '@/lib/context/searchContext';
 
 export default function ReferralsPage() {
    const { search, clearSearch } = usePageSearch();

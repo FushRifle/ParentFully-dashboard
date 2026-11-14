@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Loading, Text } from '@nextui-org/react';
 import { CheckCircle2, Clock3, Inbox, MessageSquareText, Tag, UserRound } from 'lucide-react';
-import { api } from '../lib';
-import { Box } from '../components/styles/box';
-import { Flex } from '../components/styles/flex';
-import { usePageSearch } from '../lib/context/searchContext';
-import { OverviewCard, OverviewCardGrid } from '../components/shared/overview-card';
+import { api } from '@/lib';
+import { Box } from '@/components/styles/box';
+import { Flex } from '@/components/styles/flex';
+import { usePageSearch } from '@/lib/context/searchContext';
+import { OverviewCard, OverviewCardGrid } from '@/components/shared/overview-card';
 
 const statusOptions = ['new', 'reviewed', 'resolved'];
 const initials = (name?: string) => (name || 'Unknown').split(' ').slice(0, 2).map((part) => part[0]).join('').toUpperCase();

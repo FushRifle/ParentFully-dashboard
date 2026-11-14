@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Card, Input, Loading, Switch, Text } from '@nextui-org/react';
-import { api } from '../lib';
-import { Box } from '../components/styles/box';
-import { Flex } from '../components/styles/flex';
+import { api } from '@/lib';
+import { Box } from '@/components/styles/box';
+import { Flex } from '@/components/styles/flex';
 
 type PlatformSettings = {
    maintenance_mode: boolean;

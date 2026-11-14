@@ -1,4 +1,4 @@
-import { BackendCollectionPage } from '../components/shared/backend-collection-page';
+import { BackendCollectionPage } from '@/components/shared/backend-collection-page';
 
 export default function RoutinesPage() {
    return <BackendCollectionPage path="/routines" endpoint="/v1/admin/system-routines" resourceName="routine" createLabel="Add routine" allowDelete rowHref={(row) => `/routines/${row.id}/tasks?name=${encodeURIComponent(row.title)}`} formFields={[
