@@ -4,6 +4,7 @@ import { Table, User, Text, Badge, Grid } from '@nextui-org/react';
 import { Box } from '../../components/styles/box';
 import { Flex } from '../../components/styles/flex';
 import { columns, payments } from '../../components/payments/data';
+import { TableExport } from '@/components/shared/table-export';
 
 const PaymentHistory = () => {
      const renderCell = (user: any, columnKey: React.Key) => {
@@ -42,9 +43,7 @@ const PaymentHistory = () => {
           <Box css={{ p: '$10' }}>
                <Flex justify="between" align="center" css={{ mb: '$10' }}>
                     <Text h2>Payment History</Text>
-                    <Badge color="primary" variant="bordered" size="lg">
-                         Total Revenue: $45,910
-                    </Badge>
+                    <Flex align="center" css={{ gap: '$3' }}><Badge color="primary" variant="bordered" size="lg">Total Revenue: $45,910</Badge><TableExport rows={payments} filename="payments" title="Payment history" columns={[{ key: 'name', label: 'User' }, { key: 'email', label: 'Email' }, { key: 'amount', label: 'Amount' }, { key: 'status', label: 'Status' }, { key: 'credits', label: 'Credits' }, { key: 'date', label: 'Date' }]} /></Flex>
                </Flex>
 
                {/* Credit Balances Overview */}

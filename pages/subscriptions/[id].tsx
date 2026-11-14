@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
-import { Badge, Button, Loading, Text } from '@nextui-org/react';
+import { Badge, Button, Text } from '@nextui-org/react';
 import { ArrowLeft, CalendarDays, CreditCard, Hash, RefreshCw, ShieldCheck, UserRound } from 'lucide-react';
 import { api } from '../../lib';
 import { Box } from '../../components/styles/box';
 import { Flex } from '../../components/styles/flex';
+import { AppLoadingState } from '../../components/shared/app-loading-state';
 
 interface SubscriptionDetail {
    id: number | string;
@@ -77,7 +78,7 @@ export default function SubscriptionDetailPage() {
       finally { setDowngrading(false); }
    };
 
-   if (loading) return <Box className="glass-panel admin-empty-state"><Loading size="sm">Loading subscription…</Loading></Box>;
+   if (loading) return <Box className="glass-panel"><AppLoadingState message="Loading subscription…" /></Box>;
    if (error && !subscription) return <Box className="glass-panel admin-empty-state"><Text color="error">{error}</Text><Button auto flat onPress={() => router.push('/subscriptions')}>Back to subscriptions</Button></Box>;
    if (!subscription) return null;
 

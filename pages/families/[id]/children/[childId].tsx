@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
-import { Badge, Button, Loading, Text } from '@nextui-org/react';
+import { Badge, Button, Text } from '@nextui-org/react';
 import { ArrowLeft, Baby, CalendarDays, Heart, Home, UserRound } from 'lucide-react';
 import { api } from '../../../../lib';
 import { Box } from '../../../../components/styles/box';
 import { Flex } from '../../../../components/styles/flex';
+import { AppLoadingState } from '../../../../components/shared/app-loading-state';
 
 const formatDate = (value?: string | null) => value
    ? new Date(value.length === 10 ? `${value}T00:00:00` : value).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })
@@ -48,7 +49,7 @@ export default function ChildDetailPage() {
 
    const backToFamily = () => router.push(`/families/${child?.family?.id ?? familyId}`);
 
-   if (loading) return <Box className="glass-panel admin-empty-state"><Loading size="sm">Loading child profile…</Loading></Box>;
+   if (loading) return <Box className="glass-panel"><AppLoadingState message="Loading child profile…" /></Box>;
    if (error || !child) return <Box className="glass-panel admin-empty-state"><Text color="error">{error ?? 'Child not found.'}</Text><Button auto flat onPress={backToFamily}>Back to family</Button></Box>;
 
    return <Box className="admin-page child-detail-page">

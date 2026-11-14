@@ -31,6 +31,8 @@ import { Flex } from '@/components/styles/flex';
 import { usePageSearch } from '@/lib/context/searchContext';
 import { OverviewCard, OverviewCardGrid } from '@/components/shared/overview-card';
 import { SegmentedTabs } from '@/components/shared/segmented-tabs';
+import { TableExport } from '@/components/shared/table-export';
+import { AppLoadingState } from '@/components/shared/app-loading-state';
 
 interface SubscriptionUser {
    id: number | string;
@@ -527,6 +529,7 @@ export default function SubscriptionsPage() {
                      Clear
                   </button>
                )}
+               <TableExport rows={filteredRecords} filename="subscriptions" title="Subscriptions report" columns={[{ key: 'subscription_owner.name', label: 'Subscriber' }, { key: 'subscription_owner.email', label: 'Email' }, { key: 'effective_subscription.plan_type', label: 'Plan' }, { key: 'effective_subscription.status', label: 'Status' }, { key: 'amount', label: 'Amount' }, { key: 'payment_method', label: 'Payment method', value: (record) => formatPaymentMethod(record.payment_method) }, { key: 'auto_renewal', label: 'Auto renewal', value: (record) => record.auto_renewal ? 'On' : 'Off' }, { key: 'start_date', label: 'Started' }, { key: 'end_date', label: 'Ends' }]} />
                {category === 'manual' && (
                   <Button
                      className="subscriptions-filter-action"
@@ -543,8 +546,8 @@ export default function SubscriptionsPage() {
          </Box>
 
          {loading ? (
-            <Box className="glass-panel admin-empty-state">
-               <Loading size="sm">Loading subscriptions…</Loading>
+            <Box className="glass-panel">
+               <AppLoadingState message="Loading subscriptions…" />
             </Box>
          ) : filteredRecords.length === 0 ? (
             <Box className="glass-panel admin-empty-state">

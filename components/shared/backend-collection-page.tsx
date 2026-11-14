@@ -24,6 +24,7 @@ import { getPageMeta, PagePath } from '../../lib/pageMeta';
 import { Box } from '../styles/box';
 import { Flex } from '../styles/flex';
 import { usePageSearch } from '../../lib/context/searchContext';
+import { TableExport } from './table-export';
 
 export interface BackendColumn {
    key: string;
@@ -400,6 +401,12 @@ export const BackendCollectionPage = ({
                   </Flex>
 
                   <Flex css={{ gap: '$3', flexWrap: 'wrap' }} align="center">
+                     <TableExport
+                        rows={visibleRows}
+                        columns={columns.map((column) => ({ key: column.key, label: column.label }))}
+                        filename={metaCopy.title}
+                        title={`${metaCopy.title} report`}
+                     />
                      {formFields.length > 0 && allowCreate && (
                         <Button
                            auto

@@ -7,6 +7,8 @@ import { api } from '../../../../lib';
 import { Box } from '../../../../components/styles/box';
 import { Flex } from '../../../../components/styles/flex';
 import { Select } from '../../../../components/styles/select';
+import { TableExport } from '@/components/shared/table-export';
+import { AppLoadingState } from '@/components/shared/app-loading-state';
 
 type FocusSkill = {
    id: number;
@@ -144,12 +146,12 @@ export default function GoalFocusSkillsPage() {
                   <Box css={{ width: 44, height: 44, borderRadius: 14, display: 'grid', placeItems: 'center', color: '#8b83ff', bg: 'rgba(99,91,255,.12)' }}><Sparkles size={20} /></Box>
                   <Box><Text className="section-kicker">Goal library</Text><Text h2 css={{ m: 0, fontSize: '1.35rem' }}>{goal?.title ?? 'Focus Skills'}</Text><Text size="$xs" css={{ color: '$accents7' }}>Manage the predefined skills offered with this goal.</Text></Box>
                </Flex>
-               <Button auto color="primary" icon={<Plus size={16} />} onPress={showCreate}>Add skill</Button>
+               <Flex css={{ gap: '$3' }}><TableExport rows={skills} filename="goal-focus-skills" title={`${goal?.title ?? 'Goal'} focus skills`} columns={[{ key: 'title', label: 'Skill' }, { key: 'smart_section', label: 'Section' }, { key: 'target_progress', label: 'Times' }, { key: 'mastery_points', label: 'Points' }, { key: 'is_active', label: 'Active', value: (skill) => skill.is_active ? 'Yes' : 'No' }]} /><Button auto color="primary" icon={<Plus size={16} />} onPress={showCreate}>Add skill</Button></Flex>
             </Flex>
          </Box>
          {error && <Text color="error" size="$sm" css={{ mb: '$4' }}>{error}</Text>}
          <Card><Card.Body css={{ p: 0 } as any}>
-            {loading ? <Box css={{ p: '$10', textAlign: 'center' }}><Loading size="sm">Loading focus skills…</Loading></Box> : skills.length === 0 ? (
+            {loading ? <AppLoadingState message="Loading focus skills…" /> : skills.length === 0 ? (
                <Box css={{ p: '$12', textAlign: 'center' }}><Text b>No focus skills yet</Text><Text size="$sm" css={{ color: '$accents7', mt: '$2' }}>Add the first predefined skill for this goal.</Text></Box>
             ) : (
                <Table aria-label="Goal focus skills" css={{ minWidth: 760 }}>

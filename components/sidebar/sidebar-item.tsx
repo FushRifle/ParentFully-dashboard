@@ -9,7 +9,7 @@ interface Props {
    href?: string;
 }
 
-export const SidebarItem = ({ icon, title, isActive, href = '#' }: Props) => {
+export const SidebarItem = React.memo(function SidebarItem({ icon, title, isActive, href = '#' }: Props) {
    const { setCollapsed, collapsed, mobileOpen } = useSidebarContext();
 
    const handleClick = () => {
@@ -111,7 +111,7 @@ export const SidebarItem = ({ icon, title, isActive, href = '#' }: Props) => {
                   fontWeight: isActive ? 650 : 500,
                   color: isActive ? 'var(--pf-nav-active-text)' : 'var(--pf-nav-text)',
                   letterSpacing: '-0.01em',
-                  transition: 'color 0.2s ease',
+                  transition: 'color 80ms ease',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
@@ -122,4 +122,4 @@ export const SidebarItem = ({ icon, title, isActive, href = '#' }: Props) => {
          </div>
       </NextLink>
    );
-};
+});

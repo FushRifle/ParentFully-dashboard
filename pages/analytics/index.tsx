@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Loading, Table, Text } from '@nextui-org/react';
+import { Table, Text } from '@nextui-org/react';
 import { Activity, BarChart3, Clock3, Globe2, MonitorSmartphone, Route, Users } from 'lucide-react';
 import { api } from '../../lib';
 import { Box } from '../../components/styles/box';
 import { Flex } from '../../components/styles/flex';
 import { usePageSearch } from '../../lib/context/searchContext';
 import { OverviewCard, OverviewCardGrid } from '../../components/shared/overview-card';
+import { TableExport } from '@/components/shared/table-export';
+import { AppLoadingState } from '@/components/shared/app-loading-state';
 
 type ActivityData = {
    total_sessions: number;
@@ -34,7 +36,7 @@ const formatDuration = (seconds?: number | null) => {
    const remainingSeconds = roundedSeconds % 60;
    return remainingSeconds ? `${minutes}m ${remainingSeconds}s` : `${minutes}m`;
 };
-const formatScreenName = (value?: string | null) => value?.trim() === '/' ? 'Home Screen' : value || '—';
+const formatScreenName = (value?: string | null) => value?.trim() === '/' ? 'Homescreen' : value || '—';
 
 export default function AnalyticsPage() {
    const { search } = usePageSearch();
@@ -102,17 +104,17 @@ export default function AnalyticsPage() {
       </div>
 
       <div className="analytics-secondary-grid">
-         <section className="analytics-panel glass-panel"><PanelTitle icon={<Route size={17}/>} title="Top screens" subtitle="Most visited areas" />{loading ? <PanelLoading/> : activity?.top_screens?.length ? <RankedList items={activity.top_screens.map((item) => ({ label: item.screen || 'Unknown screen', value: item.count }))} maximum={maxScreenViews} suffix="views"/> : <Empty text="No screen activity recorded."/>}</section>
+         <section className="analytics-panel glass-panel"><PanelTitle icon={<Route size={17}/>} title="Top screens" subtitle="Most visited areas" />{loading ? <PanelLoading/> : activity?.top_screens?.length ? <RankedList items={activity.top_screens.map((item) => ({ label: formatScreenName(item.screen), value: item.count }))} maximum={maxScreenViews} suffix="views"/> : <Empty text="No screen activity recorded."/>}</section>
          <section className="analytics-panel glass-panel"><PanelTitle icon={<Globe2 size={17}/>} title="Top countries" subtitle={`${demographics?.demographics_filled_rate ?? 0}% demographic coverage`} />{loading ? <PanelLoading/> : demographics?.top_countries?.length ? <RankedList items={demographics.top_countries.map((item) => ({ label: item.country || 'Unknown', value: item.count }))} maximum={maxCountryUsers} suffix="users"/> : <Empty text="No country data recorded."/>}</section>
       </div>
 
-      <section className="analytics-panel analytics-sessions glass-panel"><div className="analytics-session-header"><PanelTitle icon={<Clock3 size={17}/>} title="Individual sessions" subtitle={`${sessionMeta.total.toLocaleString()} sessions`} /><select value={platform} onChange={(event) => setPlatform(event.target.value)} aria-label="Filter sessions by platform"><option value="all">All platforms</option><option value="ios">iOS only</option><option value="android">Android only</option></select></div>
+      <section className="analytics-panel analytics-sessions glass-panel"><div className="analytics-session-header"><PanelTitle icon={<Clock3 size={17}/>} title="Individual sessions" subtitle={`${sessionMeta.total.toLocaleString()} sessions`} /><Flex align="center" css={{ gap: '$3', flexWrap: 'wrap' }}><select value={platform} onChange={(event) => setPlatform(event.target.value)} aria-label="Filter sessions by platform"><option value="all">All platforms</option><option value="ios">iOS only</option><option value="android">Android only</option></select><TableExport rows={visibleSessions} filename="analytics-sessions" title="Analytics sessions" columns={[{ key: 'user_name', label: 'User' }, { key: 'user_email', label: 'Email' }, { key: 'platform', label: 'Platform' }, { key: 'device_model', label: 'Device' }, { key: 'app_version', label: 'Version' }, { key: 'last_screen', label: 'Last screen', value: (session) => formatScreenName(session.last_screen) }, { key: 'duration_seconds', label: 'Duration', value: (session) => formatDuration(session.duration_seconds) }, { key: 'opened_at', label: 'Opened' }]} /></Flex></div>
          {loading ? <PanelLoading/> : visibleSessions.length ? <><div className="analytics-table-wrap"><Table aria-label="Individual app sessions" shadow={false}><Table.Header><Table.Column>USER</Table.Column><Table.Column>PLATFORM</Table.Column><Table.Column>DEVICE</Table.Column><Table.Column>VERSION</Table.Column><Table.Column>LAST SCREEN</Table.Column><Table.Column>DURATION</Table.Column><Table.Column>OPENED</Table.Column></Table.Header><Table.Body items={visibleSessions}>{(session) => <Table.Row key={session.id}><Table.Cell><Text b size="$sm">{session.user_name ?? 'Unknown'}</Text><Text size="$xs" css={{ color: '$accents7' }}>{session.user_email ?? '—'}</Text></Table.Cell><Table.Cell><span className="analytics-platform-pill">{session.platform ?? '—'}</span></Table.Cell><Table.Cell>{session.device_model ?? '—'}</Table.Cell><Table.Cell>{session.app_version ?? '—'}</Table.Cell><Table.Cell>{formatScreenName(session.last_screen)}</Table.Cell><Table.Cell>{formatDuration(session.duration_seconds)}</Table.Cell><Table.Cell>{session.opened_at ? new Date(session.opened_at).toLocaleString() : '—'}</Table.Cell></Table.Row>}</Table.Body></Table></div>{sessionMeta.last_page > 1 && <nav className="admin-pagination" aria-label="Session pages"><button disabled={sessionPage <= 1 || loading} onClick={() => setSessionPage((value) => value - 1)} type="button">Previous</button><span>Page {sessionMeta.current_page} of {sessionMeta.last_page}</span><button disabled={sessionPage >= sessionMeta.last_page || loading} onClick={() => setSessionPage((value) => value + 1)} type="button">Next</button></nav>}</> : <Empty text={search ? "No sessions match this search." : "No sessions recorded for these filters."}/>}
       </section>
    </Box>;
 }
 
 const PanelTitle = ({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle: string }) => <header className="analytics-panel-title"><span>{icon}</span><div><h3>{title}</h3><p>{subtitle}</p></div></header>;
-const PanelLoading = () => <div className="analytics-loading"><Loading size="sm"/></div>;
+const PanelLoading = () => <AppLoadingState message="Loading analytics…" minHeight={150} />;
 const Empty = ({ text }: { text: string }) => <div className="analytics-empty"><BarChart3 size={20}/><p>{text}</p></div>;
 const RankedList = ({ items, maximum, suffix }: { items: { label: string; value: number }[]; maximum: number; suffix: string }) => <div className="analytics-ranked-list">{items.slice(0, 8).map((item, index) => <div key={`${item.label}-${index}`}><span>{String(index + 1).padStart(2, '0')}</span><section><div><strong>{item.label}</strong><small>{item.value.toLocaleString()} {suffix}</small></div><i><b style={{ width: `${Math.max((item.value / maximum) * 100, 4)}%` }}/></i></section></div>)}</div>;

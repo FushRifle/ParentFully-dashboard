@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { Box } from '../styles/box';
+import { Flex } from '../styles/flex';
 import { RenderCell } from './render-cell';
 import type { User } from '../../types/api';
 import { useUser } from '@/hooks/auth/useGetUserList';
@@ -12,6 +13,7 @@ import {
    Spacer
 } from '@nextui-org/react';
 import { Search } from 'lucide-react';
+import { TableExport } from '../shared/table-export';
 
 const ITEMS_PER_PAGE = 10;
 const COLUMNS: { name: string; uid: string }[] = [
@@ -75,9 +77,7 @@ export const TableWrapper = () => {
                   {!loading && allUsers.length > 0 && ` Total users: ${allUsers.length}`}
                </Text>
             </Grid>
-            <Grid>
-               <Input bordered clearable aria-label="Search users" placeholder="Search name or email…" contentLeft={<Search size={15} />} value={query} onChange={(event) => setQuery(event.target.value)} />
-            </Grid>
+            <Grid><Flex align="center" css={{ gap: '$3' }}><Input bordered clearable aria-label="Search users" placeholder="Search name or email…" contentLeft={<Search size={15} />} value={query} onChange={(event) => setQuery(event.target.value)} /><TableExport rows={tableUsers} filename="users" title="Users report" columns={[{ key: 'name', label: 'Name' }, { key: 'email', label: 'Email' }, { key: 'role', label: 'Role' }, { key: 'status', label: 'Status' }, { key: 'points', label: 'Points' }]} /></Flex></Grid>
          </Grid.Container>
 
          <Spacer y={1} />

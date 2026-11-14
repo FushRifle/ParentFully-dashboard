@@ -2,8 +2,7 @@ import { styled } from '@nextui-org/react';
 
 export const SidebarWrapper = styled('div', {
    'backgroundColor': '$background',
-   'transition': 'width 90ms cubic-bezier(.2,.8,.2,1), transform 100ms cubic-bezier(.2,.8,.2,1)',
-   'willChange': 'transform',
+   'transition': 'width 80ms ease-out, transform 90ms ease-out',
    'height': '100%',
    'position': 'fixed',
    'transform': 'translateX(-100%)',
@@ -26,6 +25,7 @@ export const SidebarWrapper = styled('div', {
       'height': '100vh',
       'transform': 'translateX(0)',
       'width': '15rem',
+      'willChange': 'width',
    },
    'variants': {
       open: {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import NextLink from 'next/link';
-import { Button, Loading, Table, Text } from '@nextui-org/react';
+import { Button, Table, Text } from '@nextui-org/react';
 import { Baby, Home, UsersRound } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib';
@@ -10,6 +10,8 @@ import { Box } from '@/components/styles/box';
 import { Flex } from '@/components/styles/flex';
 import { usePageSearch } from '@/lib/context/searchContext';
 import { OverviewCard, OverviewCardGrid } from '@/components/shared/overview-card';
+import { TableExport } from '@/components/shared/table-export';
+import { AppLoadingState } from '@/components/shared/app-loading-state';
 
 type FamilyRow = {
    id: number;
@@ -111,7 +113,7 @@ export default function FamiliesPage() {
             <div className="feedback-error">{error}</div>
          ) : families.isLoading ? (
             <Box className="glass-panel admin-empty-state">
-               <Loading size="sm">Loading families…</Loading>
+               <AppLoadingState message="Loading families…" />
             </Box>
          ) : rows.length === 0 ? (
             <Box className="glass-panel admin-empty-state">
@@ -131,6 +133,9 @@ export default function FamiliesPage() {
          ) : (
             <>
                <Box className="glass-panel families-table-shell">
+                  <Flex justify="end" css={{ p: '$3', borderBottom: '1px solid $border' }}>
+                     <TableExport rows={rows} filename="families" title="Families report" columns={[{ key: 'name', label: 'Family' }, { key: 'members_count', label: 'Members' }, { key: 'pending_invitations_count', label: 'Pending invitations' }, { key: 'children_count', label: 'Children' }, { key: 'created_at', label: 'Created' }]} />
+                  </Flex>
                   <Table className="families-table" aria-label="Families" shadow={false} css={{ minWidth: '100%' }}>
                      <Table.Header>
                         <Table.Column>FAMILY</Table.Column>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { Box } from '../../components/styles/box';
-import { Loading, } from '@nextui-org/react';
+import { AppLoadingState } from '../../components/shared/app-loading-state';
 
 import { AccountDetails } from '../../components/accounts/details';
 import type { User } from '../../types/api';
@@ -35,7 +35,7 @@ const AccountDetailsPage = () => {
 
      if (loading) return (
           <Box css={{ py: '$20', textAlign: 'center' }}>
-               <Loading size="xl">Fetching user details...</Loading>
+               <AppLoadingState message="Loading user details…" />
           </Box>
      );
      if (!user) return <div>User not found</div>;

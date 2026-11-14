@@ -3,6 +3,7 @@ import { Button, Card, Input, Loading, Switch, Text } from '@nextui-org/react';
 import { api } from '@/lib';
 import { Box } from '@/components/styles/box';
 import { Flex } from '@/components/styles/flex';
+import { AppLoadingState } from '@/components/shared/app-loading-state';
 
 type PlatformSettings = {
    maintenance_mode: boolean;
@@ -88,7 +89,7 @@ export default function SettingsPage() {
          {error && <Text color="error" size="$sm" css={{ mb: '$5' }}>{error}</Text>}
          <Card>
             <Card.Body css={{ p: '$8' } as any}>
-               {loading ? <Loading size="sm">Loading settings…</Loading> : settings && (
+               {loading ? <AppLoadingState message="Loading settings…" /> : settings && (
                   <Flex direction="column" css={{ gap: '$7' }}>
                      {(Object.keys(settings) as (keyof PlatformSettings)[]).map((key) => (
                         <Flex key={key} justify="between" align="center" css={{ gap: '$8' }}>
@@ -118,7 +119,7 @@ export default function SettingsPage() {
                   </Box>
                   {policy && <Text size="$xs" css={{ color: '$success' }}>Enforcement: {policy.enforcement_status}</Text>}
                </Flex>
-               {loading ? <Loading size="sm">Loading policy…</Loading> : policy && (
+               {loading ? <AppLoadingState message="Loading policy…" /> : policy && (
                   <Flex css={{ gap: '$5', flexWrap: 'wrap' }}>
                      {(Object.keys(policy.limits) as (keyof FreePlanPolicy['limits'])[]).map((key) => (
                         <Box key={key} css={{ flex: '1 1 220px' }}>

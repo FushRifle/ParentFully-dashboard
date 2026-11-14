@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Badge, Button, Loading, Table, Text } from '@nextui-org/react';
+import { Badge, Button, Table, Text } from '@nextui-org/react';
 import { api } from '@/lib';
 import { Box } from '@/components/styles/box';
 import { Flex } from '@/components/styles/flex';
 import { usePageSearch } from '@/lib/context/searchContext';
+import { TableExport } from '@/components/shared/table-export';
+import { AppLoadingState } from '@/components/shared/app-loading-state';
 
 export default function ReferralsPage() {
    const { search, clearSearch } = usePageSearch();
@@ -45,10 +47,10 @@ export default function ReferralsPage() {
    return <Box className="admin-page" css={{ maxW: '1440px', mx: 'auto' }}>
       <Flex justify="between" align="end" css={{ mb: '$6', gap: '$4', flexWrap: 'wrap' }}>
          <Box><Text h2 css={{ m: 0, fontSize: '1.35rem' }}>Referrals</Text><Text size="$sm" css={{ color: '$accents7' }}>Parent Points reward claims and fulfilment.</Text></Box>
-         <Flex css={{ gap: '$3', flexWrap: 'wrap' }}><select value={status} onChange={(event) => setStatus(event.target.value)}><option value="">All statuses</option><option value="pending_fulfillment">Pending</option><option value="credited">Credited</option><option value="fulfilled">Fulfilled</option><option value="cancelled">Cancelled</option></select></Flex>
+         <Flex css={{ gap: '$3', flexWrap: 'wrap' }}><select value={status} onChange={(event) => setStatus(event.target.value)}><option value="">All statuses</option><option value="pending_fulfillment">Pending</option><option value="credited">Credited</option><option value="fulfilled">Fulfilled</option><option value="cancelled">Cancelled</option></select><TableExport rows={visibleRows} filename="referral-claims" title="Referral reward claims" columns={[{ key: 'user.name', label: 'User' }, { key: 'user.email', label: 'Email' }, { key: 'family.name', label: 'Family' }, { key: 'selected_option', label: 'Reward' }, { key: 'reward_value', label: 'Value' }, { key: 'status', label: 'Status' }, { key: 'created_at', label: 'Claimed' }]} /></Flex>
       </Flex>
       {error && <Text color="error" size="$sm">{error}</Text>}
-      {loading ? <Box className="glass-panel admin-empty-state"><Loading size="sm">Loading referral claims…</Loading></Box> : visibleRows.length === 0 ? (
+      {loading ? <Box className="glass-panel"><AppLoadingState message="Loading referral claims…" /></Box> : visibleRows.length === 0 ? (
          <Box className="glass-panel admin-empty-state"><span aria-hidden="true">0</span><Text b>No referral claims found</Text><Text size="$sm" css={{ color: '$accents7' }}>{status || search ? 'No claims match the selected filters.' : 'Reward claims will appear here when customers submit them.'}</Text>{(status || search) && <Button auto flat size="sm" onPress={clearFilters}>Clear filters</Button>}</Box>
       ) : <Box className="glass-panel glass-table"><Table aria-label="Referral reward claims" shadow={false}>
          <Table.Header><Table.Column>USER</Table.Column><Table.Column>FAMILY</Table.Column><Table.Column>REWARD</Table.Column><Table.Column>VALUE</Table.Column><Table.Column>STATUS</Table.Column><Table.Column>CLAIMED</Table.Column><Table.Column>ACTIONS</Table.Column></Table.Header>

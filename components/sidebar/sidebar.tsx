@@ -17,7 +17,7 @@ import {
    UsersRound,
    CalendarCheck,
    Menu,
-   LogOut,
+   Headphones,
 } from 'lucide-react';
 import { Box } from '../styles/box';
 import { Flex } from '../styles/flex';
@@ -61,6 +61,7 @@ const navSections = [
       title: 'Insights',
       items: [
          { title: 'Feedback', href: '/feedback', icon: MessageSquareText },
+         { title: 'Support', href: '/support', icon: Headphones },
          { title: 'Analytics', href: '/analytics', icon: BarChart3 },
          { title: 'FAQs', href: '/faqs', icon: BadgeHelp },
       ],

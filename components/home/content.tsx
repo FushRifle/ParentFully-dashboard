@@ -12,6 +12,7 @@ import {
    LifeBuoy,
 } from 'lucide-react';
 import { api } from '../../lib';
+import { TableExport } from '../shared/table-export';
 import { Box } from '../styles/box';
 import { Flex } from '../styles/flex';
 import { OverviewStats } from './overview-stats';
@@ -196,11 +197,7 @@ export const Content = () => {
                         <p>Latest sessions recorded by analytics</p>
                      </div>
                   </div>
-                  <NextLink href="/analytics" passHref legacyBehavior>
-                     <a className="overview-panel-link">
-                        View analytics <ArrowRight size={14} />
-                     </a>
-                  </NextLink>
+                  <Flex align="center" css={{ gap: '$3' }}>{overview.data?.sessions?.length ? <TableExport rows={overview.data.sessions} filename="recent-app-sessions" title="Recent app sessions" columns={[{ key: 'user_name', label: 'User' }, { key: 'user_email', label: 'Email' }, { key: 'platform', label: 'Platform' }, { key: 'last_screen', label: 'Last screen', value: (session) => formatScreenName(session.last_screen) }, { key: 'duration_seconds', label: 'Duration', value: (session) => formatDuration(session.duration_seconds) }, { key: 'opened_at', label: 'Opened' }]} /> : null}<NextLink href="/analytics" passHref legacyBehavior><a className="overview-panel-link">View analytics <ArrowRight size={14} /></a></NextLink></Flex>
                </header>
                {overview.isLoading ? (
                   <PanelSkeleton />
@@ -278,7 +275,7 @@ const formatSessionDate = (value: string | null) => {
 };
 
 const formatScreenName = (value: string | null) =>
-   value?.trim() === '/' ? 'Home Screen' : value || '—';
+   value?.trim() === '/' ? 'Homescreen' : value || '—';
 
 const TextLabel = ({ children }: { children: React.ReactNode }) => (
    <span className="overview-kicker">{children}</span>

@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Badge, Button, Loading, Table, Text } from '@nextui-org/react';
+import { Badge, Button, Table, Text } from '@nextui-org/react';
 import { api } from '@/lib';
 import { Box } from '@/components/styles/box';
 import { Flex } from '@/components/styles/flex';
 import { usePageSearch } from '@/lib/context/searchContext';
 import { SegmentedTabs } from '@/components/shared/segmented-tabs';
+import { TableExport } from '@/components/shared/table-export';
+import { AppLoadingState } from '@/components/shared/app-loading-state';
 
 const tabs = [
    'applications',
@@ -335,25 +337,22 @@ export default function AffiliatesPage() {
                ariaLabel="Affiliate sections"
                className="affiliate-tabs"
             />
-            <label className="affiliate-status-filter">
-               <span>Status</span>
-               <select value={status} onChange={(event) => setStatus(event.target.value)}>
-                  <option value="">All statuses</option>
-                  <option value="pending_review">Pending review</option>
-                  <option value="pending">Pending</option>
-                  <option value="active">Active</option>
-                  <option value="disabled">Disabled</option>
-                  <option value="approved">Approved</option>
-                  <option value="paid">Paid</option>
-               </select>
-            </label>
+            <Flex align="end" css={{ gap: '$3', flexWrap: 'wrap' }}>
+               <label className="affiliate-status-filter">
+                  <span>Status</span>
+                  <select value={status} onChange={(event) => setStatus(event.target.value)}>
+                     <option value="">All statuses</option><option value="pending_review">Pending review</option><option value="pending">Pending</option><option value="active">Active</option><option value="disabled">Disabled</option><option value="approved">Approved</option><option value="paid">Paid</option>
+                  </select>
+               </label>
+               <TableExport rows={visibleRows} filename={`affiliates-${tab}`} title={`${tabLabels[tab]} report`} columns={columnLabels[tab].map((label, index) => ({ key: String(index), label, value: (row: any) => values(row)[index] }))} />
+            </Flex>
          </Box>
 
          {error && <div className="feedback-error">{error}</div>}
 
          {loading ? (
-            <Box className="glass-panel admin-empty-state">
-               <Loading size="sm">Loading {tabLabels[tab].toLowerCase()}…</Loading>
+            <Box className="glass-panel">
+               <AppLoadingState message={`Loading ${tabLabels[tab].toLowerCase()}…`} />
             </Box>
          ) : visibleRows.length === 0 ? (
             <Box className="glass-panel admin-empty-state">

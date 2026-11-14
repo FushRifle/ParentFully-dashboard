@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import NextLink from 'next/link';
 import { useRouter } from 'next/router';
-import { Badge, Button, Loading, Text } from '@nextui-org/react';
+import { Badge, Button, Text } from '@nextui-org/react';
 import {
    ArrowLeft,
    Baby,
@@ -14,6 +14,7 @@ import {
 import { api } from '../../lib';
 import { Box } from '../../components/styles/box';
 import { Flex } from '../../components/styles/flex';
+import { AppLoadingState } from '../../components/shared/app-loading-state';
 
 export default function FamilyDetailPage() {
    const router = useRouter();
@@ -98,7 +99,7 @@ export default function FamilyDetailPage() {
    if (loading)
       return (
          <Box className="glass-panel admin-empty-state">
-            <Loading size="sm">Loading family…</Loading>
+            <AppLoadingState message="Loading family…" />
          </Box>
       );
    if (error && !family)

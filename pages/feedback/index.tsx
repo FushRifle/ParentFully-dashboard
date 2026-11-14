@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Loading, Text } from '@nextui-org/react';
+import { Button, Text } from '@nextui-org/react';
 import { CheckCircle2, Clock3, Inbox, MessageSquareText, Tag, UserRound } from 'lucide-react';
 import { api } from '@/lib';
 import { Box } from '@/components/styles/box';
 import { Flex } from '@/components/styles/flex';
 import { usePageSearch } from '@/lib/context/searchContext';
 import { OverviewCard, OverviewCardGrid } from '@/components/shared/overview-card';
+import { TableExport } from '@/components/shared/table-export';
+import { AppLoadingState } from '@/components/shared/app-loading-state';
 
 const statusOptions = ['new', 'reviewed', 'resolved'];
 const initials = (name?: string) => (name || 'Unknown').split(' ').slice(0, 2).map((part) => part[0]).join('').toUpperCase();
@@ -75,9 +77,10 @@ export default function FeedbackPage() {
       <Box className="glass-panel feedback-toolbar"><Box><Text b size="$sm">Feedback queue</Text><Text size="$xs" css={{ color: '$accents7', mt: '$1' }}>{loading ? 'Refreshing submissions…' : `${rows.length} submissions match the current filters`}</Text></Box><Flex css={{ gap: '$3', flexWrap: 'wrap' }}>
          <div className="feedback-input-wrap"><Tag size={14}/><input className="feedback-category-input" aria-label="Filter by category" placeholder="Category" value={category} onChange={(event) => setCategory(event.target.value)} /></div>
          <select value={status} onChange={(event) => setStatus(event.target.value)} aria-label="Filter by status"><option value="">All statuses</option>{statusOptions.map((item) => <option key={item} value={item}>{item}</option>)}</select>
+         <TableExport rows={visibleRows} filename="feedback" title="Feedback report" columns={[{ key: 'user.name', label: 'Customer' }, { key: 'user.email', label: 'Email' }, { key: 'category', label: 'Category' }, { key: 'subject', label: 'Subject' }, { key: 'message', label: 'Message' }, { key: 'status', label: 'Status' }, { key: 'created_at', label: 'Submitted' }]} />
       </Flex></Box>
 
-      {loading ? <Box className="glass-panel feedback-loading"><Loading size="sm">Loading feedback…</Loading></Box> : visibleRows.length ? <div className="feedback-grid">{visibleRows.map((item) => <article className="feedback-card glass-panel" key={item.id}>
+      {loading ? <Box className="glass-panel feedback-loading"><AppLoadingState message="Loading feedback…" /></Box> : visibleRows.length ? <div className="feedback-grid">{visibleRows.map((item) => <article className="feedback-card glass-panel" key={item.id}>
          <header><div className="feedback-avatar">{initials(item.user?.name)}</div><div className="feedback-author"><strong>{item.user?.name ?? 'Unknown customer'}</strong><span>{item.user?.email ?? 'Email unavailable'}</span></div><span className={`feedback-status status-${item.status || 'new'}`}>{item.status || 'new'}</span></header>
          <div className="feedback-card-content"><div className="feedback-card-meta"><span><Tag size={12}/>{item.category || 'General'}</span><time>{item.created_at ? new Date(item.created_at).toLocaleDateString([], { dateStyle: 'medium' }) : 'Date unavailable'}</time></div><h3>{item.subject || 'Customer feedback'}</h3><p>{item.message || 'No message was supplied.'}</p></div>
          <footer><span><UserRound size={13}/> Submission #{item.id}</span><label>Status<select value={item.status || 'new'} disabled={updatingId === item.id} onChange={(event) => update(item, event.target.value)}>{statusOptions.map((option) => <option key={option} value={option}>{option}</option>)}</select></label></footer>

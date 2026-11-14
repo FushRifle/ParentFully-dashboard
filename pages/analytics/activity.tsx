@@ -7,6 +7,8 @@ import { Flex } from '../../components/styles/flex';
 
 import { LineChart } from '../../components/charts/line-chart';
 import { MetricCard } from '../../components/analytics/metric-card';
+import { TableExport } from '@/components/shared/table-export';
+import { AppLoadingState } from '@/components/shared/app-loading-state';
 
 import {
     getSessionStats,
@@ -48,7 +50,7 @@ function formatDate(dateStr: string): string {
 }
 
 function formatScreenName(value?: string | null): string {
-    return value?.trim() === '/' ? 'Home Screen' : value || '—';
+    return value?.trim() === '/' ? 'Homescreen' : value || '—';
 }
 
 function getDateRange(days: string): { date_from: string; date_to: string } {
@@ -180,7 +182,7 @@ const ActivityPage = () => {
             {/* Stat Cards */}
             {isLoading && !stats ? (
                 <Flex justify="center" css={{ py: '$20' }}>
-                    <Loading size="lg" />
+                    <AppLoadingState message="Loading activity analytics…" />
                 </Flex>
             ) : (
                 <>
@@ -261,11 +263,11 @@ const ActivityPage = () => {
                         <Card.Header>
                             <Flex justify="between" align="center" css={{ width: '100%' }}>
                                 <Text h4>Sessions</Text>
-                                {sessionsMeta && (
+                                <Flex align="center" css={{ gap: '$3' }}>{sessionsMeta && (
                                     <Text size="$sm" color="$accents7">
                                         {sessionsMeta.total.toLocaleString()} total
                                     </Text>
-                                )}
+                                )}<TableExport rows={sessions} filename="activity-sessions" title="Activity sessions" columns={[{ key: 'user.name', label: 'User' }, { key: 'user.email', label: 'Email' }, { key: 'platform', label: 'Platform' }, { key: 'device_model', label: 'Device' }, { key: 'last_screen', label: 'Last screen', value: (session) => formatScreenName(session.last_screen) }, { key: 'duration_seconds', label: 'Duration', value: (session) => formatDuration(session.duration_seconds) }, { key: 'opened_at', label: 'Opened' }]} /></Flex>
                             </Flex>
                         </Card.Header>
                         <Card.Body>

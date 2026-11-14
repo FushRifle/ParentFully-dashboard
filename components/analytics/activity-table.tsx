@@ -4,6 +4,7 @@ import { Box } from '../styles/box';
 import { Flex } from '../styles/flex';
 import { TopContent } from './data';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { TableExport } from '../shared/table-export';
 
 interface ActivityTableProps {
      data: TopContent[];
@@ -33,9 +34,7 @@ export const ActivityTable: React.FC<ActivityTableProps> = ({
      return (
           <Card css={{ p: '$6' }} variant="flat">
                {title && (
-                    <Card.Header>
-                         <Text h4>{title}</Text>
-                    </Card.Header>
+                    <Card.Header><Flex justify="between" align="center" css={{ width: '100%' }}><Text h4>{title}</Text><TableExport rows={displayedData} filename={title || 'activity'} title={title || 'Activity report'} columns={[{ key: 'title', label: 'Content' }, { key: 'views', label: 'Views' }, { key: 'engagement', label: 'Engagement' }, { key: 'change', label: 'Change' }]} /></Flex></Card.Header>
                )}
 
                <Card.Body>
