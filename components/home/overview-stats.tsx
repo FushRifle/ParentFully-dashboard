@@ -48,7 +48,7 @@ export const OverviewStats = ({
          href: '/families',
          color: '#ec4899',
          tint: 'rgba(236,72,153,.1)',
-         illustration: '/illustrations/overview/children.svg',
+         illustration: '/illustrations/overview/children.png',
          illustrationAlt: 'Children learning together',
       },
       {
@@ -63,7 +63,7 @@ export const OverviewStats = ({
          href: '/subscriptions',
          color: '#14b8a6',
          tint: 'rgba(20,184,166,.1)',
-         illustration: 'dollar-sign',
+         illustration: '/illustrations/overview/sub.png',
          illustrationAlt: 'Premium subscriptions',
       },
    ];
