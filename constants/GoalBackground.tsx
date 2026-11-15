@@ -13,15 +13,17 @@ export const GoalBackground = ({ children }: { children: React.ReactNode }) => {
     const isDark = mounted && resolvedTheme === 'dark';
 
     return (
-        <div className="relative min-h-screen w-full">
+        <div className="relative isolate min-h-screen w-full overflow-hidden">
             <div
-                className="pointer-events-none fixed inset-0 -z-10 bg-cover bg-center"
+                className="pointer-events-none fixed inset-0 z-0 bg-cover bg-center"
                 style={{
                     backgroundImage: `url(${isDark ? GOAL_BACKGROUND_DARK : GOAL_BACKGROUND})`,
-                    opacity: isDark ? 0.09 : 0.14,
+                    opacity: isDark ? 0.05 : 0.075,
+                    filter: 'blur(7px)',
+                    transform: 'scale(1.025)',
                 }}
             />
-            <div className="relative z-10 h-full">{children}</div>
+            <div className="relative z-10 min-h-screen w-full">{children}</div>
         </div>
     );
 };

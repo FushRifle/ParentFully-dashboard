@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { Button, Input, Loading, Text } from '@/components/ui/legacy';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
 
 import { Mail } from '@/components/icons/auth/mail';
 import { Password } from '@/components/icons/auth/password';
@@ -13,6 +17,7 @@ const LoginPage = () => {
    const [email, setEmail] = useState('');
    const [password, setPassword] = useState('');
    const [rememberMe, setRememberMe] = useState(false);
+   const [showPassword, setShowPassword] = useState(false);
 
    useEffect(() => {
       const savedEmail = window.localStorage.getItem('rememberedEmail');
@@ -61,7 +66,7 @@ const LoginPage = () => {
                      alt="ParentFully"
                      width={132}
                      height={56}
-                     style={{ objectFit: 'contain', objectPosition: 'left center' }}
+                     style={{ width: '132px', height: 'auto', objectFit: 'contain', objectPosition: 'left center' }}
                      priority
                   />
 
@@ -69,76 +74,84 @@ const LoginPage = () => {
                   <p className="login-subtitle">Sign in with your administrator account.</p>
 
                   <form className="login-form" onSubmit={handleSubmit}>
-                     <Input
-                        fullWidth
-                        size="lg"
-                        type="email"
-                        placeholder="Email address"
-                        contentLeft={<Mail fill="#A1A1AA" />}
-                        value={email}
-                        autoComplete="email"
-                        required
-                        onChange={(event) => {
-                           setEmail(event.target.value);
-                           if (error) clearError();
-                        }}
-                        css={{ mb: '$11', borderRadius: '12px' }}
-                     />
+                     <FieldGroup className="gap-5">
+                        <Field>
+                           <FieldLabel htmlFor="admin-email">Email address</FieldLabel>
+                           <div className="relative">
+                              <span className="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-muted-foreground">
+                                 <Mail fill="currentColor" />
+                              </span>
+                              <Input
+                                 id="admin-email"
+                                 type="email"
+                                 placeholder="name@parentfullyapp.com"
+                                 value={email}
+                                 autoComplete="email"
+                                 required
+                                 className="h-12 rounded-xl border-border bg-background pl-11 pr-4 shadow-sm"
+                                 onChange={(event) => {
+                                    setEmail(event.target.value);
+                                    if (error) clearError();
+                                 }}
+                              />
+                           </div>
+                        </Field>
 
-                     <Input.Password
-                        fullWidth
-                        size="lg"
-                        placeholder="Password"
-                        contentLeft={<Password fill="#A1A1AA" />}
-                        value={password}
-                        autoComplete="current-password"
-                        required
-                        onChange={(event) => {
-                           setPassword(event.target.value);
-                           if (error) clearError();
-                        }}
-                        css={{ borderRadius: '12px' }}
-                     />
+                        <Field>
+                           <FieldLabel htmlFor="admin-password">Password</FieldLabel>
+                           <div className="relative">
+                              <span className="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-muted-foreground">
+                                 <Password fill="currentColor" />
+                              </span>
+                              <Input
+                                 id="admin-password"
+                                 type={showPassword ? 'text' : 'password'}
+                                 placeholder="Enter your password"
+                                 value={password}
+                                 autoComplete="current-password"
+                                 required
+                                 className="h-12 rounded-xl border-border bg-background pl-11 pr-12 shadow-sm"
+                                 onChange={(event) => {
+                                    setPassword(event.target.value);
+                                    if (error) clearError();
+                                 }}
+                              />
+                              <button
+                                 type="button"
+                                 aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                 onClick={() => setShowPassword((visible) => !visible)}
+                                 className="absolute right-2.5 top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                              >
+                                 {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                              </button>
+                           </div>
+                        </Field>
+                     </FieldGroup>
 
                      <div className="login-options">
                         <label className="login-remember">
-                           <input
-                              type="checkbox"
+                           <Checkbox
                               checked={rememberMe}
-                              onChange={(event) => setRememberMe(event.target.checked)}
+                              onCheckedChange={(checked) => setRememberMe(checked === true)}
                            />
                            <span>Remember email</span>
                         </label>
                         <span className="login-access-note">Admin access only</span>
                      </div>
 
-                     {error && (
-                        <Text color="error" size="$sm" css={{ mt: '$7', textAlign: 'center' }} role="alert">
-                           {error}
-                        </Text>
-                     )}
+                     <FieldError className="mt-4 justify-center text-center">{error}</FieldError>
 
                      <Button
                         type="submit"
-                        size="lg"
                         disabled={isLoading || !email.trim() || !password}
-                        css={{
-                           mt: '$9',
-                           width: '100%',
-                           height: '52px',
-                           borderRadius: '13px',
-                           fontWeight: 700,
-                           background: '#f28c18',
-                           boxShadow: '0 12px 25px -14px rgba(242, 140, 24, 0.8)',
-                           transition: 'transform 140ms ease, box-shadow 140ms ease',
-                           '&:hover': {
-                              background: '#df7e11',
-                              transform: 'translateY(-1px)',
-                              boxShadow: '0 15px 28px -14px rgba(242, 140, 24, 0.9)',
-                           },
-                        }}
+                        className="mt-6 h-[52px] w-full rounded-xl bg-[#f28c18] text-sm font-bold text-white shadow-[0_12px_25px_-14px_rgba(242,140,24,0.8)] hover:bg-[#df7e11]"
                      >
-                        {isLoading ? <Loading type="points" color="white" size="sm" /> : 'Sign in'}
+                        {isLoading ? (
+                           <span className="inline-flex items-center gap-2">
+                              <Loader2 size={16} className="animate-spin" />
+                              Signing in…
+                           </span>
+                        ) : 'Sign in'}
                      </Button>
                   </form>
                </div>

@@ -30,10 +30,10 @@ export const NavbarWrapper = ({ children }: Props) => {
    }, []);
 
    return (
-      <div className="flex flex-1 flex-col overflow-hidden">
-         <nav className="sticky top-0 z-40 flex h-[70px] items-center gap-8 border-b bg-background/80 px-4 backdrop-blur-xl">
+      <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
+         <nav className="relative z-40 flex h-[70px] shrink-0 items-center gap-5 border-b border-border/70 bg-background/85 px-4 backdrop-blur-xl sm:gap-8 sm:px-6">
             {/* Left: Title */}
-            <div className="flex min-w-[220px] items-center gap-4">
+            <div className="flex min-w-0 shrink-0 items-center gap-4 sm:min-w-[220px]">
                <div>
                   <h4 className="m-0 text-base font-semibold leading-tight text-foreground">{meta.title}</h4>
                   <p className="hidden text-xs text-muted-foreground sm:block">{meta.subtitle}</p>
@@ -55,7 +55,7 @@ export const NavbarWrapper = ({ children }: Props) => {
             </div>
 
             {/* Right actions */}
-            <div className="ml-auto flex items-center gap-5 pl-2 sm:gap-8 sm:pl-4">
+            <div className="ml-auto flex shrink-0 items-center gap-4 pl-1 sm:gap-7 sm:pl-4">
                <DarkModeSwitch />
 
                <NextLink
@@ -79,7 +79,9 @@ export const NavbarWrapper = ({ children }: Props) => {
             </div>
          </nav>
 
-         <main className="admin-canvas flex-1 overflow-y-auto p-4 sm:p-6">{children}</main>
+         <main className="admin-canvas min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6">
+            {children}
+         </main>
       </div>
    );
 };

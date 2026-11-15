@@ -86,7 +86,7 @@ export const SidebarWrapper = () => {
 
    return (
       <aside
-         className="sticky top-0 z-[202] h-screen border-r bg-background before:pointer-events-none before:absolute before:-right-px before:top-0 before:h-[110px] before:w-px before:bg-orange-500/70"
+         className="relative z-[202] h-full shrink-0 bg-background md:border-r before:pointer-events-none before:absolute before:-right-px before:top-0 before:hidden before:h-[110px] before:w-px before:bg-orange-500/70 md:before:block"
       >
          <style>{`
         .sidebar-body::-webkit-scrollbar { width: 4px; }
@@ -109,7 +109,7 @@ export const SidebarWrapper = () => {
          )}
 
          <div
-            className={`flex h-full flex-col border-r bg-background transition-all duration-100 ${mobileOpen ? 'fixed inset-y-0 left-0 w-60 translate-x-0 shadow-md' : 'hidden md:sticky md:flex md:translate-x-0'
+            className={`flex h-full flex-col bg-background transition-[width,transform] duration-100 ease-out ${mobileOpen ? 'fixed inset-y-0 left-0 w-60 translate-x-0 border-r shadow-md' : 'hidden md:flex md:translate-x-0'
                } ${collapsed ? 'md:w-[4.75rem]' : 'md:w-60'}`}
          >
             {/* Header */}

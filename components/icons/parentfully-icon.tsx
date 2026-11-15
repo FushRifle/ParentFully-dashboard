@@ -20,6 +20,7 @@ export const ParentfullyIcon = ({
                height={size}
                priority={priority}
                className={className}
+               style={{ width: `${size}px`, height: 'auto' }}
           />
      )
 }
