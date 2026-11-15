@@ -1,6 +1,5 @@
 import React from 'react';
-import { Badge, Text } from '@nextui-org/react';
-import { Flex } from '../styles/flex';
+import { Badge } from '@/components/ui/badge';
 
 interface StatusBadgeProps {
      status: 'operational' | 'degraded' | 'down' | 'healthy' | 'warning' | 'critical';
@@ -8,66 +7,39 @@ interface StatusBadgeProps {
      withText?: boolean;
 }
 
-export const StatusBadge: React.FC<StatusBadgeProps> = ({
-     status,
-     size = 'md',
-     withText = true
-}) => {
-     const getStatusConfig = () => {
+export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'md', withText = true }) => {
+     const getConfig = () => {
           switch (status) {
                case 'operational':
                case 'healthy':
                     return {
-                         color: 'success' as const,
-                         icon: '●',
-                         text: status === 'operational' ? 'Operational' : 'Healthy'
+                         dot: 'bg-emerald-500',
+                         text: status === 'operational' ? 'Operational' : 'Healthy',
                     };
                case 'degraded':
                case 'warning':
                     return {
-                         color: 'warning' as const,
-                         icon: '●',
-                         text: status === 'degraded' ? 'Degraded' : 'Warning'
+                         dot: 'bg-amber-500',
+                         text: status === 'degraded' ? 'Degraded' : 'Warning',
                     };
                case 'down':
                case 'critical':
                     return {
-                         color: 'error' as const,
-                         icon: '●',
-                         text: status === 'down' ? 'Down' : 'Critical'
+                         dot: 'bg-red-500',
+                         text: status === 'down' ? 'Down' : 'Critical',
                     };
                default:
-                    return {
-                         color: 'default' as const,
-                         icon: '○',
-                         text: 'Unknown'
-                    };
+                    return { dot: 'bg-gray-400', text: 'Unknown' };
           }
      };
 
-     const config = getStatusConfig();
+     const config = getConfig();
+     const dotSize = size === 'sm' ? 'h-1.5 w-1.5' : size === 'lg' ? 'h-2.5 w-2.5' : 'h-2 w-2';
 
      return (
-          <Flex align="center" css={{ gap: '$2' }}>
-               <Badge
-                    size={size}
-                    variant="flat"
-                    color={config.color}
-                    css={{
-                         minWidth: 'auto',
-                         p: 0,
-                         '& .nextui-badge-content': {
-                              p: '$1'
-                         }
-                    }}
-               >
-                    <Text css={{ fontSize: '8px', lineHeight: 1 }}>{config.icon}</Text>
-               </Badge>
-               {withText && (
-                    <Text size="$sm" css={{ fontWeight: 500 }}>
-                         {config.text}
-                    </Text>
-               )}
-          </Flex>
+          <div className="flex items-center gap-2">
+               <span className={`${dotSize} rounded-full ${config.dot}`} />
+               {withText && <span className="text-sm font-medium">{config.text}</span>}
+          </div>
      );
 };

@@ -1,4 +1,4 @@
-import { CSS } from '@nextui-org/react';
+import { CSS } from '@/components/ui/legacy';
 import React from 'react';
 import { Svg } from '../../styles/svg';
 

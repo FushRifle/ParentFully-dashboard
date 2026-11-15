@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Badge, Button, Card, Loading, Pagination, Text, Textarea } from '@nextui-org/react';
+import { Badge, Button, Card, Loading, Pagination, Text, Textarea } from '@/components/ui/legacy';
 import { Headphones, Inbox, Send } from 'lucide-react';
 import { api } from '../../lib';
 import { Box } from '../../components/styles/box';

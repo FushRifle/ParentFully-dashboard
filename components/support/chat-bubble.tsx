@@ -1,7 +1,5 @@
 import React from 'react';
-import { Text, Badge } from '@nextui-org/react';
-import { Box } from '../styles/box';
-import { Flex } from '../../components/styles/flex';
+import { Badge } from '@/components/ui/badge';
 
 interface ChatBubbleProps {
      id: string;
@@ -17,76 +15,40 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
      sender,
      createdAt,
      isRead = true,
-     showTime = true
+     showTime = true,
 }) => {
      const isUser = sender === 'user';
 
      const formatTime = (timestamp?: string) => {
           if (!timestamp) return '';
-          const date = new Date(timestamp);
-          return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
      };
 
-     const getSenderName = () => {
-          switch (sender) {
-               case 'user':
-                    return 'You';
-               case 'support':
-                    return 'Support Agent';
-               default:
-                    return sender;
-          }
-     };
+     const getSenderName = () => (sender === 'user' ? 'You' : 'Support Agent');
 
      return (
-          <Flex direction="column" align={isUser ? 'end' : 'start'} css={{ mb: '$6' }}>
-               <Flex
-                    align="center"
-                    css={{
-                         gap: '$4',
-                         mb: '$2',
-                         justifyContent: isUser ? 'flex-end' : 'flex-start'
-                    }}
-               >
-                    <Text
-                         size="$xs"
-                         color="$accents6"
-                         css={{ order: isUser ? 2 : 1 }}
-                    >
-                         {getSenderName()}
-                    </Text>
+          <div className={`mb-6 flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
+               <div className={`mb-2 flex items-center gap-4 ${isUser ? 'justify-end' : 'justify-start'}`}>
                     {!isRead && sender === 'support' && (
-                         <Badge size="xs" color="primary" variant="flat">New</Badge>
+                         <Badge variant="default" className="text-xs">New</Badge>
                     )}
-               </Flex>
+                    <span className="text-xs text-muted-foreground">{getSenderName()}</span>
+               </div>
 
-               <Box css={{
-                    maxWidth: '75%',
-                    p: '$6',
-                    borderRadius: '$lg',
-                    bg: isUser ? '$primary' : '$accents1',
-                    color: isUser ? '$white' : '$text',
-                    borderTopRightRadius: isUser ? '0' : '$lg',
-                    borderTopLeftRadius: isUser ? '$lg' : '0',
-                    position: 'relative',
-                    boxShadow: '$sm',
-                    wordBreak: 'break-word'
-               }}>
-                    <Text css={{ lineHeight: 1.6 }}>{text}</Text>
-               </Box>
+               <div
+                    className={`max-w-[75%] break-words rounded-lg p-6 shadow-sm ${isUser
+                         ? 'rounded-tr-none bg-primary text-primary-foreground'
+                         : 'rounded-tl-none bg-muted text-foreground'
+                         }`}
+               >
+                    <p className="leading-relaxed">{text}</p>
+               </div>
 
                {showTime && createdAt && (
-                    <Text
-                         size="$tiny"
-                         color="$accents7"
-                         css={{
-                              mt: '$2',
-                              alignSelf: isUser ? 'flex-end' : 'flex-start'
-                         }}
-                    >
+                    <span className={`mt-2 text-[10px] text-muted-foreground ${isUser ? 'self-end' : 'self-start'}`}>
                          {formatTime(createdAt)}
-                    </Text>
+                    </span>
                )}
-          </Flex>
+          </div>
      );
 };

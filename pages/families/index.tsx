@@ -1,13 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import NextLink from 'next/link';
-import { Button, Table, Text } from '@nextui-org/react';
 import { Baby, Home, UsersRound } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+   Table,
+   TableBody,
+   TableCell,
+   TableHead,
+   TableHeader,
+   TableRow,
+} from '@/components/ui/table';
 import { api } from '@/lib';
 import { getFamilyStatistics } from '@/services/adminService';
 import type { AdminFamilyStatistics, PaginationMeta } from '@/types/api';
-import { Box } from '@/components/styles/box';
-import { Flex } from '@/components/styles/flex';
 import { usePageSearch } from '@/lib/context/searchContext';
 import { OverviewCard, OverviewCardGrid } from '@/components/shared/overview-card';
 import { TableExport } from '@/components/shared/table-export';
@@ -32,6 +39,11 @@ const initials = (name?: string) =>
       .map((part) => part[0])
       .join('')
       .toUpperCase();
+
+const formatDate = (value: string | null) =>
+   value
+      ? new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+      : '—';
 
 export default function FamiliesPage() {
    const { search: query, clearSearch } = usePageSearch();
@@ -69,24 +81,21 @@ export default function FamiliesPage() {
    const statisticsUnavailable = statistics.isError;
 
    return (
-      <Box className="admin-page families-page">
-
-         <Box className="glass-panel glass-hero">
-            <Flex justify="between" align="center" css={{ gap: '$5', flexWrap: 'wrap' }}>
-               <Flex align="center" css={{ gap: '$4' }}>
+      <div className="admin-page families-page">
+         <div className="glass-panel glass-hero">
+            <div className="flex flex-wrap items-center justify-between gap-5">
+               <div className="flex items-center gap-4">
                   <span className="families-hero-mark">
                      <Home size={20} />
                   </span>
-                  <Box>
-                     <Text className="section-kicker">Family directory</Text>
-                     <Text h2 css={{ m: 0, mt: '$1', fontSize: '1.4rem' }}>
-                        Families
-                     </Text>
-                     <Text size="$sm" css={{ color: '$accents7', mt: '$1' }}>
+                  <div>
+                     <p className="section-kicker">Family directory</p>
+                     <h2 className="m-0 mt-1 text-[1.4rem] font-semibold">Families</h2>
+                     <p className="mt-1 text-sm text-muted-foreground">
                         Households and children from the live Parentfully API.
-                     </Text>
-                  </Box>
-               </Flex>
+                     </p>
+                  </div>
+               </div>
 
                <OverviewCardGrid columns={2}>
                   <OverviewCard
@@ -106,108 +115,115 @@ export default function FamiliesPage() {
                      color="#ec4899"
                   />
                </OverviewCardGrid>
-            </Flex>
-         </Box>
+            </div>
+         </div>
 
          {error ? (
-            <div className="feedback-error">{error}</div>
+            <div className="feedback-error mt-4 rounded-lg border border-red-300 bg-red-500/10 p-4 text-sm text-red-500">
+               {error}
+            </div>
          ) : families.isLoading ? (
-            <Box className="glass-panel admin-empty-state">
+            <div className="glass-panel admin-empty-state">
                <AppLoadingState message="Loading families…" />
-            </Box>
+            </div>
          ) : rows.length === 0 ? (
-            <Box className="glass-panel admin-empty-state">
-               <span>
+            <div className="glass-panel admin-empty-state flex flex-col items-center gap-3 py-12 text-center">
+               <span className="grid h-12 w-12 place-items-center rounded-full bg-muted">
                   <UsersRound size={22} />
                </span>
-               <Text b>No families found</Text>
-               <Text size="$sm" css={{ color: '$accents7' }}>
+               <p className="font-semibold">No families found</p>
+               <p className="text-sm text-muted-foreground">
                   {search ? 'No family matches this search.' : 'Family records will appear here after registration.'}
-               </Text>
+               </p>
                {search && (
-                  <Button auto flat size="sm" onPress={clearSearch}>
-                     Clear search
-                  </Button>
+                  <Button variant="secondary" size="sm" onClick={clearSearch}>Clear search</Button>
                )}
-            </Box>
+            </div>
          ) : (
             <>
-               <Box className="glass-panel families-table-shell">
-                  <Flex justify="end" css={{ p: '$3', borderBottom: '1px solid $border' }}>
-                     <TableExport rows={rows} filename="families" title="Families report" columns={[{ key: 'name', label: 'Family' }, { key: 'members_count', label: 'Members' }, { key: 'pending_invitations_count', label: 'Pending invitations' }, { key: 'children_count', label: 'Children' }, { key: 'created_at', label: 'Created' }]} />
-                  </Flex>
-                  <Table className="families-table" aria-label="Families" shadow={false} css={{ minWidth: '100%' }}>
-                     <Table.Header>
-                        <Table.Column>FAMILY</Table.Column>
-                        <Table.Column>MEMBER RECORDS</Table.Column>
-                        <Table.Column>PENDING</Table.Column>
-                        <Table.Column>CHILDREN</Table.Column>
-                        <Table.Column>CREATED</Table.Column>
-                        <Table.Column hideHeader>ACTION</Table.Column>
-                     </Table.Header>
-                     <Table.Body items={rows}>
-                        {(family) => (
-                           <Table.Row key={family.id}>
-                              <Table.Cell>
-                                 <NextLink href={`/families/${family.id}`}>
-                                    <a className="family-name-link">
-                                       <span>{initials(family.name)}</span>
-                                       <div>
-                                          <strong>{family.name || `Family #${family.id}`}</strong>
-                                          <small>Family ID · {family.id}</small>
-                                       </div>
-                                    </a>
+               <div className="glass-panel families-table-shell">
+                  <div className="flex justify-end border-b p-3">
+                     <TableExport
+                        rows={rows}
+                        filename="families"
+                        title="Families report"
+                        columns={[
+                           { key: 'name', label: 'Family' },
+                           { key: 'members_count', label: 'Members' },
+                           { key: 'pending_invitations_count', label: 'Pending invitations' },
+                           { key: 'children_count', label: 'Children' },
+                           { key: 'created_at', label: 'Created' },
+                        ]}
+                     />
+                  </div>
+                  <Table>
+                     <TableHeader>
+                        <TableRow>
+                           <TableHead>FAMILY</TableHead>
+                           <TableHead>MEMBER RECORDS</TableHead>
+                           <TableHead>PENDING</TableHead>
+                           <TableHead>CHILDREN</TableHead>
+                           <TableHead>CREATED</TableHead>
+                           <TableHead>ACTION</TableHead>
+                        </TableRow>
+                     </TableHeader>
+                     <TableBody>
+                        {rows.map((family) => (
+                           <TableRow key={family.id}>
+                              <TableCell>
+                                 <NextLink href={`/families/${family.id}`} className="family-name-link flex items-center gap-3">
+                                    <span className="grid h-9 w-9 place-items-center rounded-full bg-muted text-xs font-semibold">
+                                       {initials(family.name)}
+                                    </span>
+                                    <div>
+                                       <strong className="block text-sm">{family.name || `Family #${family.id}`}</strong>
+                                       <small className="text-xs text-muted-foreground">Family ID · {family.id}</small>
+                                    </div>
                                  </NextLink>
-                              </Table.Cell>
-                              <Table.Cell>
+                              </TableCell>
+                              <TableCell>
                                  <Count value={family.members_count} label="additional" />
-                              </Table.Cell>
-                              <Table.Cell>
+                              </TableCell>
+                              <TableCell>
                                  <Count value={family.pending_invitations_count} label="pending" />
-                              </Table.Cell>
-                              <Table.Cell>
+                              </TableCell>
+                              <TableCell>
                                  <Count value={family.children_count} label="children" child />
-                              </Table.Cell>
-                              <Table.Cell>
+                              </TableCell>
+                              <TableCell>
                                  <div className="family-date-cell">
-                                    <strong>{formatDate(family.created_at)}</strong>
-                                    <small>
+                                    <strong className="block text-sm">{formatDate(family.created_at)}</strong>
+                                    <small className="text-xs text-muted-foreground">
                                        {family.created_at
                                           ? new Date(family.created_at).toLocaleDateString(undefined, { weekday: 'short' })
                                           : 'Date unavailable'}
                                     </small>
                                  </div>
-                              </Table.Cell>
-                              <Table.Cell>
-                                 <NextLink href={`/families/${family.id}`}>
-                                    <a className="family-open-link">
-                                       View family <span>→</span>
-                                    </a>
+                              </TableCell>
+                              <TableCell>
+                                 <NextLink href={`/families/${family.id}`} className="family-open-link">
+                                    View family <span>→</span>
                                  </NextLink>
-                              </Table.Cell>
-                           </Table.Row>
-                        )}
-                     </Table.Body>
+                              </TableCell>
+                           </TableRow>
+                        ))}
+                     </TableBody>
                   </Table>
-               </Box>
+               </div>
+
                <Pagination meta={meta} page={page} loading={families.isFetching} onPage={setPage} />
             </>
          )}
-      </Box>
+      </div>
    );
 }
 
 const Count = ({ value, label, child = false }: { value?: number; label: string; child?: boolean }) => (
-   <span className={`family-count-pill${child ? ' child' : ''}`}>
-      <b>{Number(value ?? 0).toLocaleString()}</b>
-      <small>{label}</small>
+   <span className={`family-count-pill${child ? ' child' : ''} inline-flex items-center gap-1.5`}>
+      <b className="text-sm font-semibold">{Number(value ?? 0).toLocaleString()}</b>
+      <small className="text-xs text-muted-foreground">{label}</small>
    </span>
 );
-
-const formatDate = (value: string | null) =>
-   value
-      ? new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-      : '—';
 
 const Pagination = ({
    meta,
@@ -220,14 +236,14 @@ const Pagination = ({
    loading: boolean;
    onPage: (page: number) => void;
 }) => (
-   <nav className="admin-pagination" aria-label="Family pages">
-      <Button auto flat size="sm" disabled={page <= 1 || loading} onPress={() => onPage(page - 1)}>
+   <nav className="admin-pagination mt-4 flex items-center justify-center gap-4" aria-label="Family pages">
+      <Button variant="secondary" size="sm" disabled={page <= 1 || loading} onClick={() => onPage(page - 1)}>
          Previous
       </Button>
-      <span>
+      <span className="text-sm">
          Page {meta.current_page} of {Math.max(meta.last_page, 1)}
       </span>
-      <Button auto flat size="sm" disabled={page >= meta.last_page || loading} onPress={() => onPage(page + 1)}>
+      <Button variant="secondary" size="sm" disabled={page >= meta.last_page || loading} onClick={() => onPage(page + 1)}>
          Next
       </Button>
    </nav>

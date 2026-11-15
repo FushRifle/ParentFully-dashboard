@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Text, Button, Avatar, Input, Badge } from '@nextui-org/react';
+import { Card, Text, Button, Avatar, Input, Badge } from '@/components/ui/legacy';
 import { Heart, Reply, MoreVertical, Send } from 'lucide-react';
 
 import { Flex } from '../styles/flex';

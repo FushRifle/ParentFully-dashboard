@@ -94,11 +94,10 @@ export const OverviewStats = ({
                         <Image
                            src={item.illustration}
                            alt={item.illustrationAlt}
-                           layout="fill"
-                           objectFit="contain"
-                           objectPosition="right bottom"
+                           fill
+                           sizes="(max-width: 720px) 145px, 12vw"
+                           style={{ objectFit: 'contain', objectPosition: 'right bottom' }}
                            loading="lazy"
-                           priority={false}
                         />
                      ) : undefined
                   }

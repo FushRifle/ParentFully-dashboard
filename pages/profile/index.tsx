@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Card, Input, Text } from '@nextui-org/react';
+import { Button, Card, Input, Text } from '@/components/ui/legacy';
 import { KeyRound, UserRound } from 'lucide-react';
 import { api } from '@/lib';
 import { useAuth } from '@/lib/context/authContext';

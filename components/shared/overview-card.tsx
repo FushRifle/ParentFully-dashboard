@@ -16,7 +16,7 @@ export type OverviewCardProps = {
    decoration?: React.ReactNode;
    /**
     * Large illustration rendered behind the card content.
-    * Pass a React node (e.g. `<Image layout="fill" …/>`, an <svg>, or an <img>).
+    * Pass a React node (for example a fill-mode Next Image, SVG, or img).
     * The component supplies the positioned, sized wrapper.
     */
    illustration?: React.ReactNode;
@@ -61,10 +61,8 @@ export const OverviewCard = ({
 
    if (href)
       return (
-         <NextLink href={href} passHref legacyBehavior>
-            <a className={className} style={style}>
-               {content}
-            </a>
+         <NextLink href={href} className={className} style={style}>
+            {content}
          </NextLink>
       );
    if (onClick)

@@ -1,13 +1,7 @@
-import type { NextPage } from 'next';
-import { Content } from '../components/home/content';
-import { GoalBackground } from '../constants/GoalBackground';
+import type { GetServerSideProps } from 'next';
 
-const Home: NextPage = () => {
-   return (
-      <GoalBackground>
-         <Content />
-      </GoalBackground>
-   );
-};
+export default function Home() { return null; }
 
-export default Home;
+export const getServerSideProps: GetServerSideProps = async () => ({
+   redirect: { destination: '/login', permanent: false },
+});

@@ -2,7 +2,7 @@ import React from 'react';
 import dynamic from 'next/dynamic';
 import { Box } from '../styles/box';
 import { Flex } from '../styles/flex';
-import { Text, Card, Badge } from '@nextui-org/react';
+import { Text, Card, Badge } from '@/components/ui/legacy';
 
 const Chart = dynamic(
      () => import('../charts/steam').then((mod) => mod.Steam),

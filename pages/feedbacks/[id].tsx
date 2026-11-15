@@ -14,7 +14,7 @@ import {
      Button,
      Spacer,
      Avatar,
-} from '@nextui-org/react';
+} from '@/components/ui/legacy';
 import { AppLoadingState } from '@/components/shared/app-loading-state';
 import ChatAvatarWrapper from '@/components/Avatar/ChatAvatarWrapper';
 

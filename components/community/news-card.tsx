@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Text, Button, Badge } from '@nextui-org/react';
+import { Card, Text, Button, Badge } from '@/components/ui/legacy';
 import { Flex } from '../styles/flex';
 import { Box } from '../styles/box';
 import { NewsItem } from './data';

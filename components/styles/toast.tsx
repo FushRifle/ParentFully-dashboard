@@ -1,29 +1,13 @@
-import { Card, Text, Spacer } from '@nextui-org/react';
-import { Flex } from '../styles/flex';
 import React from 'react';
 
-export const Toast = ({ message, visible }: { message: string, visible: boolean }) => {
+export const Toast = ({ message, visible }: { message: string; visible: boolean }) => {
      if (!visible) return null;
+
      return (
-          <Card
-               css={{
-                    position: 'fixed',
-                    top: '20px',
-                    right: '20px',
-                    zIndex: 10000,
-                    width: '300px',
-                    bg: '$green600',
-                    boxShadow: '$lg',
-               }}
-          >
-               <Card.Body css={{ py: '$4' }}>
-                    <Flex align={'center'}>
-                         <Spacer x={0.5} />
-                         <Text css={{ color: 'white' }} weight={'medium'}>
-                              {message}
-                         </Text>
-                    </Flex>
-               </Card.Body>
-          </Card>
+          <div className="fixed right-5 top-5 z-[10000] w-[300px] rounded-xl bg-emerald-600 p-4 shadow-lg">
+               <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-white">{message}</span>
+               </div>
+          </div>
      );
 };

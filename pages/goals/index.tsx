@@ -3,7 +3,7 @@ import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useCorePlanHandlers } from '@/hooks/goals/useCorePlan';
 import { goalCategoryApi } from '@/services/goalService';
-import { Card, Grid, Text, Loading, Button, Modal, Input, Textarea } from '@nextui-org/react';
+import { Card, Grid, Text, Loading, Button, Modal, Input, Textarea } from '@/components/ui/legacy';
 import { AppLoadingState } from '@/components/shared/app-loading-state';
 
 const GoalsPage: NextPage = () => {

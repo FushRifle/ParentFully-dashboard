@@ -4,7 +4,7 @@ import { Flex } from '../../components/styles/flex';
 import { Box } from '../../components/styles/box';
 import { SidebarContext } from '../../components/layout/layout-context';
 import { getUserByID } from '@/services/authService';
-import { Card, Text, Divider, Button, Badge, Grid, Spacer } from '@nextui-org/react';
+import { Card, Text, Divider, Button, Badge, Grid, Spacer } from '@/components/ui/legacy';
 import { AppLoadingState } from '@/components/shared/app-loading-state';
 
 type User = {

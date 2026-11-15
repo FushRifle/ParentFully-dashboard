@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Badge, Button, Table, Text } from '@nextui-org/react';
+import { Badge, Button, Table, Text } from '@/components/ui/legacy';
 import { api } from '@/lib';
 import { Box } from '@/components/styles/box';
 import { Flex } from '@/components/styles/flex';

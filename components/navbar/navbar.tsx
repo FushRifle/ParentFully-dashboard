@@ -1,16 +1,13 @@
 import React, { useEffect } from 'react';
 import NextLink from 'next/link';
-import { Navbar, Input, Text } from '@nextui-org/react';
 import { useRouter } from 'next/router';
 import { MessageSquare, HelpCircle, Search } from 'lucide-react';
-
-import { Box } from '../styles/box';
-import { Flex } from '../styles/flex';
-import { NotificationsDropdown } from './notifications-dropdown';
-import { UserDropdown } from './user-dropdown';
-import { DarkModeSwitch } from './darkmodeswitch';
-import { getPageMeta } from '../../lib/pageMeta';
-import { usePageSearch } from '../../lib/context/searchContext';
+import { Input } from '@/components/ui/input';
+import { NotificationsDropdown } from '@/components/navbar/notifications-dropdown';
+import { UserDropdown } from '@/components/navbar/user-dropdown';
+import { DarkModeSwitch } from '@/components/navbar/darkmodeswitch';
+import { getPageMeta } from '@/lib/pageMeta';
+import { usePageSearch } from '@/lib/context/searchContext';
 
 interface Props {
    children: React.ReactNode;
@@ -31,132 +28,58 @@ export const NavbarWrapper = ({ children }: Props) => {
       window.addEventListener('keydown', focusQuickSearch);
       return () => window.removeEventListener('keydown', focusQuickSearch);
    }, []);
-   const collapseItems = [
-      'Profile',
-      'Dashboard',
-      'Activity',
-      'Analytics',
-      'System',
-      'Deployments',
-      'My Settings',
-      'Log Out',
-   ];
 
    return (
-      <Box css={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-         <Navbar
-            isBordered
-            variant="sticky"
-            css={{
-               borderBottom: '1px solid var(--pf-border)',
-               height: '70px',
-               background: 'var(--pf-navbar-bg) !important',
-               backdropFilter: 'blur(20px)',
-               '& .nextui-navbar-container': {
-                  maxWidth: '100%',
-                  gap: '$8',
-                  bg: 'transparent',
-               },
-            }}
-         >
-            {/* Left Section: Brand & Page Title */}
-            <Navbar.Content css={{ minWidth: '220px', gap: '$4', '@mdMax': { pl: '$12' } }}>
-               <Navbar.Item>
-                  <Box>
-                     <Text h4 css={{ m: 0, lineHeight: '$sm', fontSize: '1rem', color: 'var(--pf-text)' }}>
-                        {meta.title}
-                     </Text>
-                     <Text size="$xs" css={{ color: '$accents6', '@xsMax': { display: 'none' } }}>
-                        {meta.subtitle}
-                     </Text>
-                  </Box>
-               </Navbar.Item>
-            </Navbar.Content>
+      <div className="flex flex-1 flex-col overflow-hidden">
+         <nav className="sticky top-0 z-40 flex h-[70px] items-center gap-8 border-b bg-background/80 px-4 backdrop-blur-xl">
+            {/* Left: Title */}
+            <div className="flex min-w-[220px] items-center gap-4">
+               <div>
+                  <h4 className="m-0 text-base font-semibold leading-tight text-foreground">{meta.title}</h4>
+                  <p className="hidden text-xs text-muted-foreground sm:block">{meta.subtitle}</p>
+               </div>
+            </div>
 
-            {/* Search Input */}
-            <Navbar.Content css={{ flex: 1, '@smMax': { display: 'none' } }}>
-               <Navbar.Item css={{ width: '100%', maxWidth: '420px' }}>
+            {/* Search */}
+            <div className="hidden flex-1 sm:block">
+               <div className="relative w-full max-w-[420px]">
+                  <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <Input
-                     clearable
-                     contentLeft={<Search size={16} color="var(--pf-text-muted)" />}
                      placeholder={`Search ${meta.title.toLowerCase()}... (Cmd + K)`}
                      aria-label="Search current page"
                      value={search}
                      onChange={(event) => setSearch(event.target.value)}
-                     bordered
-                     width="100%"
-                     css={{
-                        '& .nextui-input-wrapper': {
-                           bg: 'var(--pf-glass-soft)',
-                           borderRadius: '$pill',
-                           px: '$6',
-                           py: '$3',
-                           border: '1px solid var(--pf-border)',
-                        },
-                     }}
+                     className="h-10 w-full rounded-full border bg-muted/50 pl-10 pr-4"
                   />
-               </Navbar.Item>
-            </Navbar.Content>
+               </div>
+            </div>
 
-            {/* Right Section: Actions */}
-            <Navbar.Content className="navbar-right-actions" css={{ gap: '$8', alignItems: 'center', pl: '$4', '@smMax': { gap: '$5', pl: '$1' } }}>
-               <Navbar.Item>
-                  <DarkModeSwitch />
-               </Navbar.Item>
+            {/* Right actions */}
+            <div className="ml-auto flex items-center gap-5 pl-2 sm:gap-8 sm:pl-4">
+               <DarkModeSwitch />
 
-               {/* Feedback */}
-               <Navbar.Item css={{ '@mdMax': { display: 'none' } }}>
-                  <NextLink href="/feedback" passHref legacyBehavior>
-                     <Flex align="center" css={{ gap: '$3', cursor: 'pointer', opacity: 0.8, '&:hover': { opacity: 1 } }}>
-                        <MessageSquare size={16} color="var(--pf-text)" />
-                        <Text span size="$xs" b css={{ color: 'var(--pf-text)' }}>
-                           Feedback
-                        </Text>
-                     </Flex>
-                  </NextLink>
-               </Navbar.Item>
+               <NextLink
+                  href="/feedback"
+                  className="hidden items-center gap-3 opacity-80 transition-opacity hover:opacity-100 md:flex"
+               >
+                  <MessageSquare size={16} className="text-foreground" />
+                  <span className="text-xs font-semibold text-foreground">Feedback</span>
+               </NextLink>
 
-               {/* Notifications */}
-               <Navbar.Item>
-                  <NotificationsDropdown />
-               </Navbar.Item>
+               <NotificationsDropdown />
 
-               {/* Support */}
-               <Navbar.Item css={{ '@mdMax': { display: 'none' } }}>
-                  <NextLink href="#" passHref legacyBehavior>
-                     <Flex align="center" css={{ cursor: 'pointer', opacity: 0.8, '&:hover': { opacity: 1 } }}>
-                        <HelpCircle size={18} color="var(--pf-text)" />
-                     </Flex>
-                  </NextLink>
-               </Navbar.Item>
+               <NextLink
+                  href="#"
+                  className="hidden cursor-pointer items-center opacity-80 transition-opacity hover:opacity-100 md:flex"
+               >
+                  <HelpCircle size={18} className="text-foreground" />
+               </NextLink>
 
-               {/* User Profile */}
-               <Navbar.Item>
-                  <UserDropdown />
-               </Navbar.Item>
-            </Navbar.Content>
+               <UserDropdown />
+            </div>
+         </nav>
 
-            {/* Mobile Collapse Menu */}
-            <Navbar.Collapse>
-               {collapseItems.map((item, index) => (
-                  <Navbar.CollapseItem
-                     key={item}
-                     activeColor="secondary"
-                     css={{ color: index === collapseItems.length - 1 ? '$error' : '$foreground' }}
-                     isActive={index === 2}
-                  >
-                     <NextLink href="#" style={{ minWidth: '100%', color: 'inherit', textDecoration: 'none' }}>
-                        {item}
-                     </NextLink>
-                  </Navbar.CollapseItem>
-               ))}
-            </Navbar.Collapse>
-         </Navbar>
-
-         {/* Main Layout Container */}
-         <Box className="admin-canvas" css={{ p: '$6', '@xsMax': { p: '$4' }, flex: 1, overflowY: 'auto' }}>
-            {children}
-         </Box>
-      </Box>
+         <main className="admin-canvas flex-1 overflow-y-auto p-4 sm:p-6">{children}</main>
+      </div>
    );
 };

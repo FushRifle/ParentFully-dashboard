@@ -1,11 +1,14 @@
-import { Dropdown, Text } from '@nextui-org/react';
 import React, { useState } from 'react';
-import { AcmeIcon } from '../icons/acme-icon';
-import { AcmeLogo } from '../icons/acmelogo';
-
-import { ParentfullyIcon } from '../icons/parentfully-icon';
-import { Box } from '../styles/box';
-import { Flex } from '../styles/flex';
+import { AcmeIcon } from '@/components/icons/acme-icon';
+import { AcmeLogo } from '@/components/icons/acmelogo';
+import { ParentfullyIcon } from '@/components/icons/parentfully-icon';
+import {
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuItem,
+   DropdownMenuLabel,
+   DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface Company {
    name: string;
@@ -19,109 +22,46 @@ export const CompaniesDropdown = () => {
       location: 'Pilandres Solutions Inc.',
       logo: <ParentfullyIcon />,
    });
+
    return (
-      <Dropdown placement="bottom-right" borderWeight={'extrabold'}>
-         <Dropdown.Trigger css={{ cursor: 'pointer' }}>
-            <Box>
-               <Flex align={'center'} css={{ gap: '$4' }}>
-                  {company.logo}
-                  <Box>
-                     <Text
-                        h3
-                        size={'$lg'}
-                        weight={'medium'}
-                        css={{
-                           m: 0,
-                           color: '$accents9',
-                           lineHeight: '$lg',
-                           mb: '-$5',
-                        }}
-                     >
-                        {company.name}
-                     </Text>
-                     <Text
-                        span
-                        weight={'medium'}
-                        size={'$xs'}
-                        css={{ color: '$accents8' }}
-                     >
-                        {company.location}
-                     </Text>
-                  </Box>
-               </Flex>
-            </Box>
-         </Dropdown.Trigger>
+      <DropdownMenu>
+         <DropdownMenuTrigger className="cursor-pointer rounded-md px-2 py-1 transition-colors hover:bg-muted">
+            <div className="flex items-center gap-4">
+               {company.logo}
+               <div className="text-left">
+                  <h3 className="m-0 text-lg font-medium leading-tight text-foreground">{company.name}</h3>
+                  <span className="text-xs font-medium text-muted-foreground">{company.location}</span>
+               </div>
+            </div>
+         </DropdownMenuTrigger>
 
-         <Dropdown.Menu
-            onAction={(e) => {
-               if (e === '1') {
-                  setCompany({
-                     name: 'ParentFully',
-                     location: 'San Fransico, CA',
-                     logo: <AcmeIcon />,
-                  });
+         <DropdownMenuContent align="end" className="w-[340px] border-2">
+            <DropdownMenuLabel>Companies</DropdownMenuLabel>
+            <DropdownMenuItem
+               onClick={() =>
+                  setCompany({ name: 'Memora', location: 'San Francisco, CA', logo: <AcmeIcon /> })
                }
-               if (e === '2') {
-                  setCompany({
-                     name: 'Memora',
-                     location: 'Fush Inc.',
-                     logo: <AcmeLogo />,
-                  });
+               className="flex items-center gap-4 py-2"
+            >
+               <AcmeIcon />
+               <div className="flex flex-col">
+                  <span className="font-semibold">Memora</span>
+                  <span className="text-xs text-muted-foreground">San Francisco, CA</span>
+               </div>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+               onClick={() =>
+                  setCompany({ name: 'Whispr', location: 'Austin, Tx', logo: <AcmeLogo /> })
                }
-            }}
-            aria-label="Avatar Actions"
-            css={{
-               '$$dropdownMenuWidth': '340px',
-               '$$dropdownItemHeight': '60px',
-               '& .nextui-dropdown-item': {
-                  'py': '$2',
-                  // dropdown item left icon
-                  'svg': {
-                     color: '$secondary',
-                     mr: '$4',
-                  },
-                  // dropdown item title
-                  '& .nextui-dropdown-item-content': {
-                     w: '100%',
-                     fontWeight: '$semibold',
-                  },
-               },
-            }}
-         >
-            <Dropdown.Section title="Companies">
-               <Dropdown.Item
-                  key="1"
-                  icon={<AcmeIcon />}
-                  description="San Fransico, CA"
-               >
-                  Memora
-               </Dropdown.Item>
-               <Dropdown.Item
-                  key="2"
-                  icon={<AcmeLogo />}
-                  description="Austin, Tx"
-               >
-                  Whispr
-               </Dropdown.Item>
-
-               {/** 
-               <Dropdown.Item
-                  key="3"
-                  icon={<AcmeIcon />}
-                  description="Brooklyn, NY"
-               >
-                  Twitter
-               </Dropdown.Item>
-               <Dropdown.Item
-                  key="4"
-                  icon={<AcmeIcon />}
-                  description="Palo Alto, CA"
-               >
-                  Acme Co.
-               </Dropdown.Item>
-               */}
-            </Dropdown.Section>
-         </Dropdown.Menu>
-      </Dropdown>
+               className="flex items-center gap-4 py-2"
+            >
+               <AcmeLogo />
+               <div className="flex flex-col">
+                  <span className="font-semibold">Whispr</span>
+                  <span className="text-xs text-muted-foreground">Austin, Tx</span>
+               </div>
+            </DropdownMenuItem>
+         </DropdownMenuContent>
+      </DropdownMenu>
    );
 };

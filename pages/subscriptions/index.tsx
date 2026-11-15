@@ -9,7 +9,7 @@ import {
    Table,
    Text,
    Textarea,
-} from '@nextui-org/react';
+} from '@/components/ui/legacy';
 import {
    CalendarClock,
    CreditCard,

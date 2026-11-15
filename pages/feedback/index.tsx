@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Text } from '@nextui-org/react';
+import { Button, Text } from '@/components/ui/legacy';
 import { CheckCircle2, Clock3, Inbox, MessageSquareText, Tag, UserRound } from 'lucide-react';
 import { api } from '@/lib';
 import { Box } from '@/components/styles/box';

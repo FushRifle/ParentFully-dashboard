@@ -1,9 +1,9 @@
 import React from 'react';
-import { Avatar } from '@nextui-org/react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface ChatAvatarWrapperProps {
-     photo?: string | null; // contact image
-     profile_image?: string | null; // user image fallback
+     photo?: string | null;
+     profile_image?: string | null;
      contactName?: string;
      phoneNumber?: string;
      size?: number;
@@ -29,55 +29,35 @@ const ChatAvatarWrapper: React.FC<ChatAvatarWrapperProps> = ({
      const [hasError, setHasError] = React.useState(false);
      const [currentUrl, setCurrentUrl] = React.useState<string | undefined>();
 
-     React.useEffect(() => {
-          setHasError(false);
-
-          // Reset and determine which URL to use
-          const contactUrl = resolveStorageUrl(photo);
-          const userUrl = resolveStorageUrl(profile_image);
-
-          // Try contact photo first, then fallback to profile image
-          const url = contactUrl || userUrl;
-          setCurrentUrl(url);
-     }, [photo, profile_image]);
-
      const resolveStorageUrl = (uri?: string | null) => {
           if (!uri) return undefined;
-
           let cleaned = uri;
-
           cleaned = cleaned.replace('contacts/contacts/', 'contacts/');
           cleaned = cleaned.replace('profiles/profile_images/', 'profile_images/');
           cleaned = cleaned.replace(/\/(\w+)\/\1\//g, '/$1/');
-
-          if (cleaned.startsWith('http')) {
-               return cleaned;
-          }
-
+          if (cleaned.startsWith('http')) return cleaned;
           return `https://production-api.parentfullyapp.com/storage/${cleaned.replace(/^\/+/, '')}`;
      };
+
+     React.useEffect(() => {
+          setHasError(false);
+          const contactUrl = resolveStorageUrl(photo);
+          const userUrl = resolveStorageUrl(profile_image);
+          setCurrentUrl(contactUrl || userUrl);
+     }, [photo, profile_image]);
 
      const getInitials = () => {
           if (!contactName) {
                if (phoneNumber) return phoneNumber.slice(-2);
                return '?';
           }
-
           const names = contactName.trim().split(' ');
-
-          if (names.length === 1) {
-               return names[0].charAt(0).toUpperCase();
-          }
-
-          return (
-               names[0].charAt(0) +
-               names[names.length - 1].charAt(0)
-          ).toUpperCase();
+          if (names.length === 1) return names[0].charAt(0).toUpperCase();
+          return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
      };
 
      const getBackgroundColor = () => {
           if (backgroundColor) return backgroundColor;
-
           switch (variant) {
                case 'secondary':
                     return '#607D8B';
@@ -90,7 +70,6 @@ const ChatAvatarWrapper: React.FC<ChatAvatarWrapperProps> = ({
 
      const getBorderColor = () => {
           if (borderColor) return borderColor;
-
           switch (variant) {
                case 'secondary':
                     return '#455A64';
@@ -106,28 +85,29 @@ const ChatAvatarWrapper: React.FC<ChatAvatarWrapperProps> = ({
      const brdColor = getBorderColor();
      const shouldShowImage = !hasError && currentUrl;
 
+     const style = {
+          width: size,
+          height: size,
+          minWidth: size,
+          minHeight: size,
+          borderWidth,
+          borderColor: brdColor,
+          borderStyle: 'solid' as const,
+     };
+
      if (shouldShowImage) {
           return (
-               <Avatar
-                    size={size as any}
-                    css={{
-                         width: size,
-                         height: size,
-                         minWidth: size,
-                         minHeight: size,
-                         borderWidth: borderWidth,
-                         borderColor: brdColor,
-                         borderStyle: 'solid',
-                         '& img': {
-                              objectFit: 'cover',
-                              width: '100%',
-                              height: '100%',
-                         },
-                    }}
-                    src={currentUrl}
-                    alt={contactName}
-                    onError={() => setHasError(true)}
-               />
+               <Avatar style={style}>
+                    <AvatarImage
+                         src={currentUrl}
+                         alt={contactName}
+                         className="object-cover w-full h-full"
+                         onError={() => setHasError(true)}
+                    />
+                    <AvatarFallback style={{ backgroundColor: bgColor, color: textColor }}>
+                         {initials}
+                    </AvatarFallback>
+               </Avatar>
           );
      }
 
@@ -135,53 +115,29 @@ const ChatAvatarWrapper: React.FC<ChatAvatarWrapperProps> = ({
           const userUrl = resolveStorageUrl(profile_image);
           if (userUrl) {
                return (
-                    <Avatar
-                         size={size as any}
-                         css={{
-                              width: size,
-                              height: size,
-                              minWidth: size,
-                              minHeight: size,
-                              borderWidth: borderWidth,
-                              borderColor: brdColor,
-                              borderStyle: 'solid',
-                              '& img': {
-                                   objectFit: 'cover',
-                                   width: '100%',
-                                   height: '100%',
-                              },
-                         }}
-                         src={userUrl}
-                         alt={contactName}
-                         onError={() => setHasError(true)}
-                    />
+                    <Avatar style={style}>
+                         <AvatarImage
+                              src={userUrl}
+                              alt={contactName}
+                              className="object-cover w-full h-full"
+                              onError={() => setHasError(true)}
+                         />
+                         <AvatarFallback style={{ backgroundColor: bgColor, color: textColor }}>
+                              {initials}
+                         </AvatarFallback>
+                    </Avatar>
                );
           }
      }
 
-     // Show initials avatar
      return (
-          <Avatar
-               size={size as any}
-               css={{
-                    width: size,
-                    height: size,
-                    minWidth: size,
-                    minHeight: size,
-                    backgroundColor: bgColor,
-                    borderWidth: borderWidth,
-                    borderColor: brdColor,
-                    borderStyle: 'solid',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    fontSize: size / 3,
-                    color: textColor,
-                    fontWeight: '$bold',
-               }}
-               text={initials}
-               color="default"
-          />
+          <Avatar style={{ ...style, backgroundColor: bgColor }}>
+               <AvatarFallback
+                    style={{ backgroundColor: bgColor, color: textColor, fontSize: size / 3, fontWeight: 'bold' }}
+               >
+                    {initials}
+               </AvatarFallback>
+          </Avatar>
      );
 };
 

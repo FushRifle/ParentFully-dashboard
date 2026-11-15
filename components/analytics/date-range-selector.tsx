@@ -1,7 +1,6 @@
 import React from 'react';
-import { Button, Text, Card } from '@nextui-org/react';
-import { Flex } from '../styles/flex';
-import { Box } from '../styles/box';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface DateRangeSelectorProps {
@@ -15,23 +14,18 @@ export const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
      onRangeChange,
      onDateChange,
      selectedRange = 'week',
-     selectedDate = new Date()
+     selectedDate = new Date(),
 }) => {
      const ranges = [
           { id: 'today', label: 'Today' },
           { id: 'week', label: 'This Week' },
           { id: 'month', label: 'This Month' },
           { id: 'quarter', label: 'This Quarter' },
-          { id: 'year', label: 'This Year' }
+          { id: 'year', label: 'This Year' },
      ];
 
-     const formatDate = (date: Date) => {
-          return date.toLocaleDateString('en-US', {
-               month: 'short',
-               day: 'numeric',
-               year: 'numeric'
-          });
-     };
+     const formatDate = (date: Date) =>
+          date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
      const handlePrevious = () => {
           const newDate = new Date(selectedDate);
@@ -39,7 +33,6 @@ export const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
           else if (selectedRange === 'month') newDate.setMonth(newDate.getMonth() - 1);
           else if (selectedRange === 'year') newDate.setFullYear(newDate.getFullYear() - 1);
           else newDate.setDate(newDate.getDate() - 1);
-
           onDateChange?.(newDate);
      };
 
@@ -49,79 +42,49 @@ export const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
           else if (selectedRange === 'month') newDate.setMonth(newDate.getMonth() + 1);
           else if (selectedRange === 'year') newDate.setFullYear(newDate.getFullYear() + 1);
           else newDate.setDate(newDate.getDate() + 1);
-
           onDateChange?.(newDate);
      };
 
      return (
-          <Card css={{ p: '$6' }} variant="flat">
-               <Card.Body>
-                    <Flex direction="column" css={{ gap: '$6' }}>
-                         <Flex justify="between" align="center">
-                              <Text h4>Date Range</Text>
+          <Card className="p-6">
+               <CardContent className="flex flex-col gap-6 p-0">
+                    <div className="flex items-center justify-between">
+                         <h4 className="text-lg font-semibold">Date Range</h4>
+                         <Button variant="ghost" size="sm">
+                              <Calendar size={16} className="mr-2" />
+                              Custom Range
+                         </Button>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                         {ranges.map((range) => (
                               <Button
-                                   auto
-                                   light
+                                   key={range.id}
                                    size="sm"
-                                   icon={<Calendar size={16} />}
+                                   variant={selectedRange === range.id ? 'default' : 'secondary'}
+                                   className="rounded-full"
+                                   onClick={() => onRangeChange?.(range.id)}
                               >
-                                   Custom Range
+                                   {range.label}
                               </Button>
-                         </Flex>
+                         ))}
+                    </div>
 
-                         <Flex css={{ gap: '$2' }} wrap="wrap">
-                              {ranges.map((range) => (
-                                   <Button
-                                        key={range.id}
-                                        auto
-                                        size="sm"
-                                        color={selectedRange === range.id ? 'primary' : 'default'}
-                                        css={{
-                                             borderRadius: '$pill',
-                                             bg: selectedRange === range.id ? '$primary' : '$accents0',
-                                             color: selectedRange === range.id ? '$white' : '$text'
-                                        }}
-                                        onPress={() => onRangeChange?.(range.id)}
-                                   >
-                                        {range.label}
-                                   </Button>
-                              ))}
-                         </Flex>
-
-                         <Flex justify="center" align="center" css={{ gap: '$4' }}>
-                              <Button
-                                   auto
-                                   light
-                                   size="sm"
-                                   icon={<ChevronLeft size={16} />}
-                                   onPress={handlePrevious}
-                              />
-
-                              <Box
-                                   css={{
-                                        p: '$4',
-                                        bg: '$accents0',
-                                        borderRadius: '$lg',
-                                        minWidth: '200px',
-                                        textAlign: 'center'
-                                   }}
-                              >
-                                   <Text b>{formatDate(selectedDate)}</Text>
-                                   <Text size="$xs" color="$accents7">
-                                        {selectedRange.charAt(0).toUpperCase() + selectedRange.slice(1)} view
-                                   </Text>
-                              </Box>
-
-                              <Button
-                                   auto
-                                   light
-                                   size="sm"
-                                   icon={<ChevronRight size={16} />}
-                                   onPress={handleNext}
-                              />
-                         </Flex>
-                    </Flex>
-               </Card.Body>
+                    <div className="flex items-center justify-center gap-4">
+                         <Button variant="ghost" size="sm" onClick={handlePrevious}>
+                              <ChevronLeft size={16} />
+                         </Button>
+                         <div className="min-w-[200px] rounded-lg bg-muted p-4 text-center">
+                              <p className="font-semibold">{formatDate(selectedDate)}</p>
+                              <p className="text-xs text-muted-foreground">
+                                   {selectedRange.charAt(0).toUpperCase() + selectedRange.slice(1)} view
+                              </p>
+                         </div>
+                         <Button variant="ghost" size="sm" onClick={handleNext}>
+                              <ChevronRight size={16} />
+                         </Button>
+                    </div>
+               </CardContent>
           </Card>
      );
 };

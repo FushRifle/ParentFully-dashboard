@@ -1,9 +1,9 @@
 import React from 'react';
-import { Card, Button, Text } from '@nextui-org/react';
+import { Card, Button, Text } from '@/components/ui/legacy';
 import { Flex } from '../styles/flex';
 import { Box } from '../styles/box';
 import { Search, Filter } from 'lucide-react';
-import { Input } from '@nextui-org/react';
+import { Input } from '@/components/ui/legacy';
 
 interface FilterBarProps {
      searchQuery: string;

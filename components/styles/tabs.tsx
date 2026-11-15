@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, ReactNode } from 'react';
-import { styled, CSS } from '@nextui-org/react';
+import { styled, CSS } from '@/components/ui/legacy';
 import { Flex } from './flex';
 import { Box } from './box';
 

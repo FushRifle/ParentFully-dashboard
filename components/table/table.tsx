@@ -1,22 +1,29 @@
 import React, { useMemo, useState, useCallback } from 'react';
-import { Box } from '../styles/box';
-import { Flex } from '../styles/flex';
-import { RenderCell } from './render-cell';
-import type { User } from '../../types/api';
-import { useUser } from '@/hooks/auth/useGetUserList';
+import { Input } from '@/components/ui/input';
 import {
    Table,
-   Loading,
-   Text,
-   Input,
-   Grid,
-   Spacer
-} from '@nextui-org/react';
+   TableBody,
+   TableCell,
+   TableHead,
+   TableHeader,
+   TableRow,
+} from '@/components/ui/table';
+import {
+   Pagination,
+   PaginationContent,
+   PaginationItem,
+   PaginationLink,
+   PaginationNext,
+   PaginationPrevious,
+} from '@/components/ui/pagination';
+import { RenderCell } from '@/components/table/render-cell';
+import type { User } from '@/types/api';
+import { useUser } from '@/hooks/auth/useGetUserList';
 import { Search } from 'lucide-react';
-import { TableExport } from '../shared/table-export';
+import { TableExport } from '@/components/shared/table-export';
 
 const ITEMS_PER_PAGE = 10;
-const COLUMNS: { name: string; uid: string }[] = [
+const COLUMNS = [
    { name: 'AVATAR', uid: 'avatar' },
    { name: 'NAME', uid: 'name' },
    { name: 'EMAIL', uid: 'email' },
@@ -26,16 +33,15 @@ const COLUMNS: { name: string; uid: string }[] = [
    { name: 'ACTIONS', uid: 'actions' },
 ];
 
-const generateTempId = (user: User, index: number) => {
-   return `${user.id}-${user.email || index}-${index}`;
-};
+const generateTempId = (user: User, index: number) =>
+   `${user.id}-${user.email || index}-${index}`;
 
 const prepareTableItems = (users: User[]) =>
    users.map((user, index) => ({
       ...user,
       key: generateTempId(user, index),
-      avatar: typeof user?.user?.profile_image === 'string' ?
-         user.user.profile_image : '',
+      avatar:
+         typeof user?.user?.profile_image === 'string' ? user.user.profile_image : '',
       role: user.has_child ? 'Parent' : 'User',
       status: user.has_completed_onboarding ? 'Active' : 'Pending',
    }));
@@ -44,116 +50,142 @@ export const TableWrapper = () => {
    const [currentPage, setCurrentPage] = useState(1);
    const [query, setQuery] = useState('');
 
-   const {
-      users = [],
-      allUsers = [],
-      loading,
-      error,
-      totalPages,
-   } = useUser(currentPage, ITEMS_PER_PAGE);
-
-   const handlePageChange = useCallback(
-      (page: number) => {
-         console.log('Changing to page:', page);
-         setCurrentPage(page);
-      },
-      []
+   const { users = [], allUsers = [], loading, error, totalPages } = useUser(
+      currentPage,
+      ITEMS_PER_PAGE,
    );
+
+   const handlePageChange = useCallback((page: number) => {
+      setCurrentPage(page);
+   }, []);
 
    const tableUsers = useMemo(() => {
       const search = query.trim().toLowerCase();
-      return prepareTableItems(users).filter((user) => !search || [user.name, user.email].some((value) => String(value ?? '').toLowerCase().includes(search)));
+      return prepareTableItems(users).filter(
+         (user) =>
+            !search ||
+            [user.name, user.email].some((value) =>
+               String(value ?? '').toLowerCase().includes(search),
+            ),
+      );
    }, [query, users]);
 
-   const tableKey = useMemo(() => `table-${currentPage}`, [currentPage]);
-
    return (
-      <Box css={{ p: '$8', width: '100%', display: 'flex', flexDirection: 'column', gap: '$4' }}>
-         <Grid.Container justify="space-between" alignItems="center">
-            <Grid>
-               <Text h3 css={{ m: 0 }}>User Management</Text>
-               <Text size="$xs" color="$accents7">
+      <div className="flex w-full flex-col gap-4 p-8">
+         <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+               <h3 className="m-0 text-2xl font-semibold">User Management</h3>
+               <p className="text-xs text-muted-foreground">
                   Manage your ParentFully Users. Showing {ITEMS_PER_PAGE} users per page.
                   {!loading && allUsers.length > 0 && ` Total users: ${allUsers.length}`}
-               </Text>
-            </Grid>
-            <Grid><Flex align="center" css={{ gap: '$3' }}><Input bordered clearable aria-label="Search users" placeholder="Search name or email…" contentLeft={<Search size={15} />} value={query} onChange={(event) => setQuery(event.target.value)} /><TableExport rows={tableUsers} filename="users" title="Users report" columns={[{ key: 'name', label: 'Name' }, { key: 'email', label: 'Email' }, { key: 'role', label: 'Role' }, { key: 'status', label: 'Status' }, { key: 'points', label: 'Points' }]} /></Flex></Grid>
-         </Grid.Container>
-
-         <Spacer y={1} />
+               </p>
+            </div>
+            <div className="flex items-center gap-3">
+               <div className="relative">
+                  <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                     aria-label="Search users"
+                     placeholder="Search name or email…"
+                     value={query}
+                     onChange={(event) => setQuery(event.target.value)}
+                     className="w-64 pl-9"
+                  />
+               </div>
+               <TableExport
+                  rows={tableUsers}
+                  filename="users"
+                  title="Users report"
+                  columns={[
+                     { key: 'name', label: 'Name' },
+                     { key: 'email', label: 'Email' },
+                     { key: 'role', label: 'Role' },
+                     { key: 'status', label: 'Status' },
+                     { key: 'points', label: 'Points' },
+                  ]}
+               />
+            </div>
+         </div>
 
          {loading && allUsers.length === 0 ? (
-            <Box css={{ py: '$20', textAlign: 'center' }}>
-               <Loading size="xl">Fetching users...</Loading>
-            </Box>
+            <div className="py-20 text-center text-muted-foreground">Fetching users...</div>
          ) : error ? (
-            <Box css={{ py: '$20', textAlign: 'center' }}>
-               <Text color="error" b>System Error</Text>
-               <Text color="$accents8">{error}</Text>
-            </Box>
+            <div className="py-20 text-center">
+               <p className="font-semibold text-red-500">System Error</p>
+               <p className="text-muted-foreground">{error}</p>
+            </div>
          ) : (
             <>
-               <Table
-                  key={tableKey}
-                  aria-label="User directory table"
-                  selectionMode="none"
-                  shadow={false}
-                  bordered
-               >
-                  <Table.Header columns={COLUMNS}>
-                     {(column) => (
-                        <Table.Column
-                           key={column.uid}
-                           align={column.uid === 'actions' ? 'center' : 'start'}
-                        >
-                           {column.name}
-                        </Table.Column>
-                     )}
-                  </Table.Header>
+               <div className="rounded-xl border">
+                  <Table>
+                     <TableHeader>
+                        <TableRow>
+                           {COLUMNS.map((column) => (
+                              <TableHead
+                                 key={column.uid}
+                                 className={column.uid === 'actions' ? 'text-center' : undefined}
+                              >
+                                 {column.name}
+                              </TableHead>
+                           ))}
+                        </TableRow>
+                     </TableHeader>
+                     <TableBody>
+                        {tableUsers.map((item) => (
+                           <TableRow key={item.key}>
+                              {COLUMNS.map((column) => (
+                                 <TableCell
+                                    key={column.uid}
+                                    className={column.uid === 'actions' ? 'text-center' : undefined}
+                                 >
+                                    <RenderCell user={item} columnKey={column.uid} />
+                                 </TableCell>
+                              ))}
+                           </TableRow>
+                        ))}
+                     </TableBody>
+                  </Table>
+               </div>
 
-                  <Table.Body
-                     items={tableUsers}
-                     loadingState={loading ? 'loading' : 'idle'}
-                  >
-                     {(item) => (
-                        <Table.Row key={item.key}>
-                           {(columnKey) => (
-                              <Table.Cell>
-                                 <RenderCell user={item} columnKey={columnKey as string} />
-                              </Table.Cell>
-                           )}
-                        </Table.Row>
-                     )}
-                  </Table.Body>
-
-                  <Table.Pagination
-                     shadow
-                     noMargin
-                     align="center"
-                     rowsPerPage={ITEMS_PER_PAGE}
-                     total={totalPages}
-                     page={currentPage}
-                     onPageChange={handlePageChange}
-                  />
-               </Table>
-
-               <Grid.Container justify="space-between" css={{ px: '$6', pt: '$4' }}>
-                  <Grid>
-                     <Text size="$sm" color="$accents6">
-                        Page <b>{currentPage}</b> of <b>{totalPages}</b>
-                     </Text>
-                  </Grid>
-                  <Grid>
-                     <Box css={{ display: 'flex', alignItems: 'center', gap: '$2' }}>
-                        <Text size="$sm" color="$accents6">
-                           Showing <b>{users.length}</b> of <b>{allUsers.length}</b> users
-                        </Text>
-                        {loading && <Loading size="xs" />}
-                     </Box>
-                  </Grid>
-               </Grid.Container>
+               <div className="flex flex-wrap items-center justify-between gap-4 px-2 pt-4">
+                  <p className="text-sm text-muted-foreground">
+                     Page <b>{currentPage}</b> of <b>{totalPages}</b>
+                  </p>
+                  <div className="flex items-center gap-4">
+                     <p className="text-sm text-muted-foreground">
+                        Showing <b>{users.length}</b> of <b>{allUsers.length}</b> users
+                        {loading && <span className="ml-2 text-xs">(loading…)</span>}
+                     </p>
+                     <Pagination>
+                        <PaginationContent>
+                           <PaginationItem>
+                              <PaginationPrevious
+                                 onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                                 className={
+                                    currentPage === 1
+                                       ? 'pointer-events-none opacity-50'
+                                       : 'cursor-pointer'
+                                 }
+                              />
+                           </PaginationItem>
+                           <PaginationItem>
+                              <PaginationLink isActive>{currentPage}</PaginationLink>
+                           </PaginationItem>
+                           <PaginationItem>
+                              <PaginationNext
+                                 onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                                 className={
+                                    currentPage === totalPages
+                                       ? 'pointer-events-none opacity-50'
+                                       : 'cursor-pointer'
+                                 }
+                              />
+                           </PaginationItem>
+                        </PaginationContent>
+                     </Pagination>
+                  </div>
+               </div>
             </>
          )}
-      </Box>
+      </div>
    );
 };

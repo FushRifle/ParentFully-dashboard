@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Text, Button, Input, Card, Divider } from '@nextui-org/react';
+import { Modal, Text, Button, Input, Card, Divider } from '@/components/ui/legacy';
 
 
 import { Select } from '../styles/select';

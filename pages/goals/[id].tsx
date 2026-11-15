@@ -5,7 +5,7 @@ import { GoalsTable } from '@/components/resources/goals/table';
 import { goalCategoryApi, goalApi } from '@/services/goalService';
 import { useGoals } from '@/hooks/goals/useGoalsData';
 import { useAddGoal, SMART_FIELDS_CONFIG, FREQUENCY_UNITS } from '@/hooks/goals/useAddGoals';
-import { Card, Text, Loading, Button, Container, Modal, Input, Textarea } from '@nextui-org/react';
+import { Card, Text, Loading, Button, Container, Modal, Input, Textarea } from '@/components/ui/legacy';
 import type { CoreValue, Goal } from '@/types/api';
 import { AppLoadingState } from '@/components/shared/app-loading-state';
 

@@ -1,6 +1,8 @@
+// components/team/role-card.tsx
 import React from 'react';
-import { Card, Badge, Text, Button, Progress, Divider } from '@nextui-org/react';
-import { Flex } from '../styles/flex';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { RolePreset } from './data';
 import { Users, CheckCircle, Settings } from 'lucide-react';
 
@@ -15,100 +17,89 @@ export const RoleCard: React.FC<RoleCardProps> = ({
      role,
      isSelected = false,
      onClick,
-     onEdit
+     onEdit,
 }) => {
      return (
           <Card
-               isPressable={!!onClick}
-               isHoverable
-               variant={isSelected ? 'flat' : 'shadow'}
-               css={{
-                    p: '$6',
-                    border: isSelected ? `2px solid ${role.color}` : '1px solid $border',
-                    bg: isSelected ? `${role.color}10` : '$background'
-               }}
                onClick={() => onClick?.(role)}
+               className={`cursor-pointer p-6 ${isSelected ? 'border-2' : 'border'}`}
+               style={isSelected ? { borderColor: role.color, background: `${role.color}10` } : undefined}
           >
-               <Card.Body>
-                    <Flex justify="between" align="start">
-                         <Flex direction="column" css={{ gap: '$2' }}>
-                              <Flex align="center" css={{ gap: '$3' }}>
-                                   <Badge
-                                        size="sm"
-                                        variant="flat"
-                                        css={{ bg: role.color, color: '$white' }}
+               <CardContent className="p-0">
+                    <div className="flex items-start justify-between">
+                         <div className="flex flex-col gap-2">
+                              <div className="flex items-center gap-3">
+                                   <span
+                                        className="rounded px-2 py-0.5 text-xs font-semibold text-white"
+                                        style={{ background: role.color }}
                                    >
                                         {role.name}
-                                   </Badge>
-                                   <Text size="$xs" color="$accents7">
-                                        {role.memberCount} members
-                                   </Text>
-                              </Flex>
-
-                              <Text size="$sm" color="$accents7">
-                                   {role.description}
-                              </Text>
-                         </Flex>
+                                   </span>
+                                   <span className="text-xs text-muted-foreground">{role.memberCount} members</span>
+                              </div>
+                              <p className="text-sm text-muted-foreground">{role.description}</p>
+                         </div>
 
                          {onEdit && (
                               <Button
-                                   auto
-                                   light
-                                   size="sm"
-                                   icon={<Settings size={16} />}
-                                   onPress={() => onEdit(role)}
-                              />
+                                   variant="ghost"
+                                   size="icon"
+                                   className="h-8 w-8"
+                                   onClick={(e) => {
+                                        e.stopPropagation();
+                                        onEdit(role);
+                                   }}
+                                   aria-label="Edit role"
+                              >
+                                   <Settings size={16} />
+                              </Button>
                          )}
-                    </Flex>
+                    </div>
 
-                    <Divider y={1.5} />
+                    <div className="my-4 h-px bg-border" />
 
-                    <Flex direction="column" css={{ gap: '$4' }}>
-                         <Text size="$xs" color="$accents7">Permissions included:</Text>
+                    <div className="flex flex-col gap-4">
+                         <span className="text-xs text-muted-foreground">Permissions included:</span>
 
-                         <Flex direction="column" css={{ gap: '$2' }}>
+                         <div className="flex flex-col gap-2">
                               {role.permissions.slice(0, 3).map((permission, index) => (
-                                   <Flex key={index} align="center" css={{ gap: '$2' }}>
-                                        <CheckCircle size={14} color={role.color} />
-                                        <Text size="$xs">
-                                             {permission.replace(/_/g, ' ')}
-                                        </Text>
-                                   </Flex>
+                                   <div key={index} className="flex items-center gap-2">
+                                        <CheckCircle size={14} style={{ color: role.color }} />
+                                        <span className="text-xs">{permission.replace(/_/g, ' ')}</span>
+                                   </div>
                               ))}
-
                               {role.permissions.length > 3 && (
-                                   <Text size="$xs" color="$accents7">
+                                   <span className="text-xs text-muted-foreground">
                                         +{role.permissions.length - 3} more permissions
-                                   </Text>
+                                   </span>
                               )}
-                         </Flex>
+                         </div>
 
-                         <Progress
-                              value={(role.permissions.length / 10) * 100}
-                              color="primary"
-                              size="sm"
-                              css={{ mt: '$2' }}
-                         />
+                         <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                              <div
+                                   className="h-full rounded-full bg-primary transition-all"
+                                   style={{ width: `${(role.permissions.length / 10) * 100}%` }}
+                              />
+                         </div>
 
-                         <Flex justify="between" align="center" css={{ mt: '$2' }}>
-                              <Flex align="center" css={{ gap: '$2' }}>
-                                   <Users size={14} color="$accents7" />
-                                   <Text size="$xs" color="$accents7">
-                                        {role.memberCount} members
-                                   </Text>
-                              </Flex>
-
+                         <div className="mt-2 flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                   <Users size={14} className="text-muted-foreground" />
+                                   <span className="text-xs text-muted-foreground">{role.memberCount} members</span>
+                              </div>
                               <Button
-                                   auto
                                    size="sm"
-                                   css={{ bg: role.color }}
-                                   onPress={() => onClick?.(role)}
+                                   style={{ background: role.color, color: 'white' }}
+                                   onClick={(e) => {
+                                        e.stopPropagation();
+                                        onClick?.(role);
+                                   }}
                               >
                                    Select Role
                               </Button>
-                         </Flex>
-                    </Flex>
-               </Card.Body>
+                         </div>
+                    </div>
+               </CardContent>
           </Card>
      );
 };

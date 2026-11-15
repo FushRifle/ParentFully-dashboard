@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Badge, Button, Card, Input, Loading, Modal, Table, Text, Textarea } from '@nextui-org/react';
+import { Badge, Button, Card, Input, Loading, Modal, Table, Text, Textarea } from '@/components/ui/legacy';
 import { ArrowDown, ArrowLeft, ArrowUp, Edit2, Plus, Sparkles, Trash2 } from 'lucide-react';
 import NextLink from 'next/link';
 import { useRouter } from 'next/router';
@@ -137,8 +137,8 @@ export default function GoalFocusSkillsPage() {
 
    return (
       <Box className="admin-page">
-         <NextLink href={`/goal-categories/${categoryId}`} passHref legacyBehavior>
-            <a className="admin-back-link"><ArrowLeft size={15} />Back to goals</a>
+         <NextLink href={`/goal-categories/${categoryId}`} className="admin-back-link">
+            <ArrowLeft size={15} />Back to goals
          </NextLink>
          <Box className="glass-panel glass-hero">
             <Flex justify="between" align="center" css={{ gap: '$5', flexWrap: 'wrap', position: 'relative', zIndex: 1 }}>

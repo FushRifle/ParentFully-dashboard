@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Card, Input, Loading, Switch, Text } from '@nextui-org/react';
+import { Button, Card, Input, Loading, Switch, Text } from '@/components/ui/legacy';
 import { api } from '@/lib';
 import { Box } from '@/components/styles/box';
 import { Flex } from '@/components/styles/flex';

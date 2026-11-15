@@ -1,16 +1,24 @@
 import React, { useState } from 'react';
-import {
-     Modal,
-     Input,
-     Text,
-     Button,
-     Checkbox,
-} from '@nextui-org/react';
-
-import { Select } from '../styles/select';
-import { Flex } from '../styles/flex';
-import { RolePreset, Role } from './data';
 import { Mail, UserPlus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+     Dialog,
+     DialogContent,
+     DialogFooter,
+     DialogHeader,
+     DialogTitle,
+} from '@/components/ui/dialog';
+import {
+     Select,
+     SelectContent,
+     SelectItem,
+     SelectTrigger,
+     SelectValue,
+} from '@/components/ui/select';
+import { RolePreset, Role } from './data';
 
 interface AddMemberModalProps {
      open: boolean;
@@ -23,7 +31,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
      open,
      onClose,
      onAdd,
-     rolePresets
+     rolePresets,
 }) => {
      const [email, setEmail] = useState('');
      const [role, setRole] = useState<Role>('viewer');
@@ -32,7 +40,6 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
 
      const handleSubmit = async () => {
           if (!email || !role) return;
-
           setLoading(true);
           try {
                await onAdd({ email, role, sendInvitation });
@@ -45,74 +52,72 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
      };
 
      return (
-          <Modal
-               open={open}
-               onClose={onClose}
-               closeButton
-               aria-labelledby="add-member-modal"
-          >
-               <Modal.Header>
-                    <Flex align="center" css={{ gap: '$4' }}>
-                         <UserPlus size={24} />
-                         <Text h3>Add Team Member</Text>
-                    </Flex>
-               </Modal.Header>
+          <Dialog open={open} onOpenChange={onClose}>
+               <DialogContent>
+                    <DialogHeader>
+                         <DialogTitle className="flex items-center gap-3">
+                              <UserPlus size={20} />
+                              Add Team Member
+                         </DialogTitle>
+                    </DialogHeader>
 
-               <Modal.Body>
-                    <Input
-                         fullWidth
-                         label="Email Address"
-                         placeholder="member@company.com"
-                         value={email}
-                         onChange={(e) => setEmail(e.target.value)}
-                         contentLeft={<Mail size={16} />}
-                         css={{ mb: '$4' }}
-                    />
+                    <div className="flex flex-col gap-4 py-4">
+                         <div className="flex flex-col gap-1.5">
+                              <Label htmlFor="member-email">Email Address</Label>
+                              <div className="relative">
+                                   <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                                   <Input
+                                        id="member-email"
+                                        type="email"
+                                        placeholder="member@company.com"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        className="pl-9"
+                                   />
+                              </div>
+                         </div>
 
+                         <div className="flex flex-col gap-1.5">
+                              <Label htmlFor="member-role">Role</Label>
+                              <Select value={role} onValueChange={(v) => setRole(v as Role)}>
+                                   <SelectTrigger id="member-role">
+                                        <SelectValue placeholder="Select a role" />
+                                   </SelectTrigger>
+                                   <SelectContent>
+                                        {rolePresets.map((preset) => (
+                                             <SelectItem key={preset.id} value={preset.id}>
+                                                  <span style={{ color: preset.color }}>{preset.name}</span>
+                                             </SelectItem>
+                                        ))}
+                                   </SelectContent>
+                              </Select>
+                         </div>
 
-                    <Select
-                         fullWidth
-                         placeholder="Select a role"
-                         value={role}
-                         onChange={(value) => setRole(value as Role)}
-                         css={{ mb: '$4' }}
-                         options={rolePresets.map(rolePreset => ({
-                              value: rolePreset.id,
-                              label: (
-                                   <Text size="$sm" css={{ color: rolePreset.color }}>
-                                        {rolePreset.name}
-                                   </Text>
-                              ),
-                         }))}
-                    />
+                         <div className="flex items-center gap-2">
+                              <Checkbox
+                                   id="send-invitation"
+                                   checked={sendInvitation}
+                                   onCheckedChange={(v) => setSendInvitation(v === true)}
+                              />
+                              <Label htmlFor="send-invitation" className="font-normal">
+                                   Send invitation email
+                              </Label>
+                         </div>
 
+                         <p className="text-xs text-muted-foreground">
+                              An invitation link will be sent to the email address above
+                         </p>
+                    </div>
 
-                    <Checkbox
-                         isSelected={sendInvitation}
-                         onChange={setSendInvitation}
-                         css={{ mt: '$2' }}
-                    >
-                         Send invitation email
-                    </Checkbox>
-
-                    <Text size="$xs" color="$accents7" css={{ mt: '$2' }}>
-                         An invitation link will be sent to the email address above
-                    </Text>
-               </Modal.Body>
-
-               <Modal.Footer>
-                    <Button auto flat onPress={onClose}>
-                         Cancel
-                    </Button>
-                    <Button
-                         auto
-                         onPress={handleSubmit}
-                         disabled={!email || !role || loading}
-                         css={{ bg: '#3f3bef' }}
-                    >
-                         {sendInvitation ? 'Send Invitation' : 'Add Member'}
-                    </Button>
-               </Modal.Footer>
-          </Modal>
+                    <DialogFooter>
+                         <Button variant="secondary" onClick={onClose}>
+                              Cancel
+                         </Button>
+                         <Button onClick={handleSubmit} disabled={!email || !role || loading}>
+                              {sendInvitation ? 'Send Invitation' : 'Add Member'}
+                         </Button>
+                    </DialogFooter>
+               </DialogContent>
+          </Dialog>
      );
 };

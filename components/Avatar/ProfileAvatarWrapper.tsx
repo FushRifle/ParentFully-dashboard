@@ -1,8 +1,5 @@
 import React from 'react';
-import { Avatar, H4, YStack } from 'tamagui';
-import { Image } from 'expo-image';
-import { Platform } from 'react-native';
-import { useTheme } from '@/styles/ThemeContext';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface UltimateProfileAvatarProps {
      imageUrl?: string | null;
@@ -15,7 +12,6 @@ const UltimateProfileAvatar: React.FC<UltimateProfileAvatarProps> = ({
      initials,
      size = 48,
 }) => {
-     const { colors } = useTheme();
      const [hasError, setHasError] = React.useState(false);
 
      React.useEffect(() => {
@@ -24,52 +20,39 @@ const UltimateProfileAvatar: React.FC<UltimateProfileAvatarProps> = ({
 
      const resolveImageUrl = (uri?: string | null) => {
           if (!uri) return undefined;
-
           let cleaned = uri;
           cleaned = cleaned.replace('profiles/profile_images/', 'profile_images/');
           cleaned = cleaned.replace(/\/(\w+)\/\1\//g, '/$1/');
-          if (cleaned.startsWith('http')) {
-               return cleaned;
-          }
-
-          const finalUrl = `https://production-api.parentfullyapp.com/storage/${cleaned.replace(/^\/+/, '')}`;
-          return finalUrl;
+          if (cleaned.startsWith('http')) return cleaned;
+          return `https://production-api.parentfullyapp.com/storage/${cleaned.replace(/^\/+/, '')}`;
      };
 
      const resolvedUrl = resolveImageUrl(imageUrl);
-     const source = !hasError && resolvedUrl ? { uri: resolvedUrl } : undefined;
-
-     const shouldShowImage = !!source;
+     const shouldShowImage = !hasError && resolvedUrl;
 
      return (
           <Avatar
-               size={size}
-               br={size / 2}
-               overflow="hidden"
-               jc="center"
-               ai="center"
-               backgroundColor={colors.secondaryContainer}
-               bw={0}
-               borderColor={colors.onPrimary}
+               style={{
+                    width: size,
+                    height: size,
+                    minWidth: size,
+                    minHeight: size,
+                    backgroundColor: '#4CAF50',
+               }}
           >
                {shouldShowImage ? (
-                    <Image
-                         source={source}
-                         style={{ width: size, height: size, borderRadius: size / 2 }}
-                         contentFit="cover"
-                         cachePolicy="memory-disk"
+                    <AvatarImage
+                         src={resolvedUrl!}
+                         alt="Profile"
+                         className="object-cover w-full h-full"
+                         onError={() => setHasError(true)}
                     />
                ) : (
-                    <YStack jc="center" ai="center" width={size} height={size}>
-                         <H4
-                              color="white"
-                              fontSize={size / 3.2}
-                              fontWeight="bold"
-                              textAlign="center"
-                         >
-                              {initials.substring(0, 2)}
-                         </H4>
-                    </YStack>
+                    <AvatarFallback
+                         style={{ backgroundColor: '#4CAF50', color: 'white', fontSize: size / 3.2, fontWeight: 'bold' }}
+                    >
+                         {initials.substring(0, 2)}
+                    </AvatarFallback>
                )}
           </Avatar>
      );

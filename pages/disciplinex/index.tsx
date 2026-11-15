@@ -2,9 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { getPlans, getTemplatePlans, createPlan, deletePlan } from '@/services/disciplineService';
-import { Card, Grid, Text, Loading, Button, Modal, Input, Textarea, Badge } from '@nextui-org/react';
 import type { DisciplinePlan } from '@/types/api';
 import { AppLoadingState } from '@/components/shared/app-loading-state';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import {
+     Dialog,
+     DialogContent,
+     DialogFooter,
+     DialogHeader,
+     DialogTitle,
+} from '@/components/ui/dialog';
 
 type FilterTab = 'all' | 'custom' | 'templates';
 
@@ -17,7 +29,6 @@ const DisciplinePlansPage: NextPage = () => {
      const [error, setError] = useState<string | null>(null);
      const [activeTab, setActiveTab] = useState<FilterTab>('all');
 
-     // Create modal state
      const [addModalOpen, setAddModalOpen] = useState(false);
      const [formName, setFormName] = useState('');
      const [formDescription, setFormDescription] = useState('');
@@ -28,10 +39,7 @@ const DisciplinePlansPage: NextPage = () => {
           setLoading(true);
           setError(null);
           try {
-               const [custom, templates] = await Promise.all([
-                    getPlans(),
-                    getTemplatePlans(),
-               ]);
+               const [custom, templates] = await Promise.all([getPlans(), getTemplatePlans()]);
                setCustomPlans(custom);
                setTemplatePlans(templates);
           } catch (err) {
@@ -78,17 +86,9 @@ const DisciplinePlansPage: NextPage = () => {
           }
      };
 
-     const handleCardClick = (plan: DisciplinePlan) => {
-          router.push(`/disciplinex/${plan.id}`);
-     };
-
      const getDisplayedPlans = (): { plan: DisciplinePlan; isTemplate: boolean }[] => {
-          if (activeTab === 'custom') {
-               return customPlans.map((p) => ({ plan: p, isTemplate: false }));
-          }
-          if (activeTab === 'templates') {
-               return templatePlans.map((p) => ({ plan: p, isTemplate: true }));
-          }
+          if (activeTab === 'custom') return customPlans.map((p) => ({ plan: p, isTemplate: false }));
+          if (activeTab === 'templates') return templatePlans.map((p) => ({ plan: p, isTemplate: true }));
           return [
                ...customPlans.map((p) => ({ plan: p, isTemplate: false })),
                ...templatePlans.map((p) => ({ plan: p, isTemplate: true })),
@@ -110,160 +110,113 @@ const DisciplinePlansPage: NextPage = () => {
 
      return (
           <div>
-               {/* Header */}
-               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                    <Text h3 css={{ m: 0 }}>Discipline Plans</Text>
-                    <Button auto shadow color="primary" onPress={() => setAddModalOpen(true)}>
-                         + Create Plan
-                    </Button>
+               <div className="mb-4 flex items-center justify-between">
+                    <h3 className="m-0 text-xl font-semibold">Discipline Plans</h3>
+                    <Button onClick={() => setAddModalOpen(true)}>+ Create Plan</Button>
                </div>
 
-               {/* Filter Tabs */}
-               <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+               <div className="mb-4 flex flex-wrap gap-2">
                     {tabs.map((tab) => (
                          <Button
                               key={tab.key}
-                              auto
-                              flat={activeTab !== tab.key}
-                              color={activeTab === tab.key ? 'primary' : 'default'}
-                              onPress={() => setActiveTab(tab.key)}
+                              variant={activeTab === tab.key ? 'default' : 'secondary'}
                               size="sm"
+                              onClick={() => setActiveTab(tab.key)}
                          >
                               {tab.label}
                          </Button>
                     ))}
                </div>
 
-               {/* Error Display */}
-               {error && (
-                    <Text color="error" css={{ marginBottom: '1rem' }}>
-                         Error: {error}
-                    </Text>
-               )}
+               {error && <p className="mb-4 text-red-500">Error: {error}</p>}
 
-               {/* Plans Grid */}
-               <Grid.Container gap={2}>
+               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
                     {loading && displayedPlans.length === 0 ? (
-                         <Grid xs={12} css={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
+                         <div className="col-span-full flex justify-center p-8">
                               <AppLoadingState message="Loading discipline plans…" />
-                         </Grid>
+                         </div>
                     ) : displayedPlans.length === 0 ? (
-                         <Grid xs={12} css={{ textAlign: 'center', padding: '2rem' }}>
-                              <Text>No discipline plans found</Text>
-                         </Grid>
+                         <div className="col-span-full p-8 text-center text-muted-foreground">
+                              No discipline plans found
+                         </div>
                     ) : (
                          displayedPlans.map(({ plan, isTemplate }) => (
-                              <Grid key={`${isTemplate ? 'tpl' : 'cst'}-${plan.id}`} xs={12} sm={6} md={4}>
-                                   <div style={{ position: 'relative', width: '100%' }}>
-                                        <Button
-                                             auto
-                                             size="xs"
-                                             color="error"
-                                             flat
-                                             css={{
-                                                  position: 'absolute',
-                                                  top: 8,
-                                                  right: 8,
-                                                  zIndex: 10,
-                                                  minWidth: 'auto',
-                                                  px: '$4',
-                                             }}
-                                             onPress={() => handleDeletePlan(plan.id)}
-                                        >
-                                             ✕
-                                        </Button>
-                                        <Card
-                                             isPressable
-                                             onClick={() => handleCardClick(plan)}
-                                             css={{
-                                                  padding: '$6',
-                                                  borderRadius: '$xl',
-                                                  minHeight: '200px',
-                                                  transition: 'transform 0.2s',
-                                                  '&:hover': {
-                                                       transform: 'scale(1.02)',
-                                                       boxShadow: '$lg',
-                                                  },
-                                             }}
-                                        >
-                                             <Card.Body css={{
-                                                  display: 'flex',
-                                                  flexDirection: 'column',
-                                                  gap: '$4',
-                                                  justifyContent: 'center',
-                                                  alignItems: 'center',
-                                                  textAlign: 'center',
-                                             }}>
-                                                  <Text h4 css={{ color: '#FF8C01', fontWeight: '$bold' }}>
-                                                       {plan.name}
-                                                  </Text>
-                                                  {plan.description && (
-                                                       <Text css={{ color: '$gray700' }}>
-                                                            {plan.description}
-                                                       </Text>
-                                                  )}
-                                                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
-                                                       {isTemplate && (
-                                                            <Badge variant="flat" color="secondary">Template</Badge>
-                                                       )}
-                                                       <Text small css={{ color: '$gray600' }}>
-                                                            {getRuleCount(plan)} {getRuleCount(plan) === 1 ? 'Rule' : 'Rules'}
-                                                       </Text>
-                                                  </div>
-                                             </Card.Body>
-                                        </Card>
-                                   </div>
-                              </Grid>
+                              <div key={`${isTemplate ? 'tpl' : 'cst'}-${plan.id}`} className="relative w-full">
+                                   <Button
+                                        variant="destructive"
+                                        size="icon"
+                                        className="absolute right-2 top-2 z-10 h-7 w-7 p-0"
+                                        onClick={(e) => {
+                                             e.stopPropagation();
+                                             handleDeletePlan(plan.id);
+                                        }}
+                                        aria-label="Delete plan"
+                                   >
+                                        ✕
+                                   </Button>
+                                   <Card
+                                        className="min-h-[200px] cursor-pointer rounded-xl p-6 transition-transform hover:scale-[1.02]"
+                                        onClick={() => router.push(`/disciplinex/${plan.id}`)}
+                                   >
+                                        <CardContent className="flex flex-col items-center justify-center gap-4 p-0 text-center">
+                                             <h4 className="text-lg font-bold" style={{ color: '#FF8C01' }}>{plan.name}</h4>
+                                             {plan.description && <p className="text-muted-foreground">{plan.description}</p>}
+                                             <div className="flex flex-wrap items-center justify-center gap-2">
+                                                  {isTemplate && <Badge variant="secondary">Template</Badge>}
+                                                  <span className="text-sm text-muted-foreground">
+                                                       {getRuleCount(plan)} {getRuleCount(plan) === 1 ? 'Rule' : 'Rules'}
+                                                  </span>
+                                             </div>
+                                        </CardContent>
+                                   </Card>
+                              </div>
                          ))
                     )}
-               </Grid.Container>
+               </div>
 
-               {/* Create Plan Modal */}
-               <Modal
-                    open={addModalOpen}
-                    onClose={() => setAddModalOpen(false)}
-                    closeButton
-                    aria-labelledby="create-plan-modal"
-               >
-                    <Modal.Header>
-                         <Text h4 id="create-plan-modal">Create Discipline Plan</Text>
-                    </Modal.Header>
-                    <Modal.Body>
-                         <Input
-                              fullWidth
-                              bordered
-                              label="Plan Name"
-                              placeholder="Enter plan name"
-                              value={formName}
-                              onChange={(e) => setFormName(e.target.value)}
-                              required
-                         />
-                         <Textarea
-                              fullWidth
-                              bordered
-                              label="Description"
-                              placeholder="Plan description (optional)"
-                              value={formDescription}
-                              onChange={(e) => setFormDescription(e.target.value)}
-                         />
-                         <Textarea
-                              fullWidth
-                              bordered
-                              label="Notes"
-                              placeholder="Additional notes (optional)"
-                              value={formNotes}
-                              onChange={(e) => setFormNotes(e.target.value)}
-                         />
-                    </Modal.Body>
-                    <Modal.Footer>
-                         <Button auto flat color="error" onPress={() => setAddModalOpen(false)}>
-                              Cancel
-                         </Button>
-                         <Button auto shadow color="primary" onPress={handleCreatePlan} disabled={submitting || !formName.trim()}>
-                              {submitting ? <Loading size="xs" /> : 'Create'}
-                         </Button>
-                    </Modal.Footer>
-               </Modal>
+               <Dialog open={addModalOpen} onOpenChange={setAddModalOpen}>
+                    <DialogContent>
+                         <DialogHeader>
+                              <DialogTitle>Create Discipline Plan</DialogTitle>
+                         </DialogHeader>
+                         <div className="flex flex-col gap-4 py-4">
+                              <div className="flex flex-col gap-1.5">
+                                   <Label htmlFor="plan-name">Plan Name</Label>
+                                   <Input
+                                        id="plan-name"
+                                        placeholder="Enter plan name"
+                                        value={formName}
+                                        onChange={(e) => setFormName(e.target.value)}
+                                        required
+                                   />
+                              </div>
+                              <div className="flex flex-col gap-1.5">
+                                   <Label htmlFor="plan-description">Description</Label>
+                                   <Textarea
+                                        id="plan-description"
+                                        placeholder="Plan description (optional)"
+                                        value={formDescription}
+                                        onChange={(e) => setFormDescription(e.target.value)}
+                                   />
+                              </div>
+                              <div className="flex flex-col gap-1.5">
+                                   <Label htmlFor="plan-notes">Notes</Label>
+                                   <Textarea
+                                        id="plan-notes"
+                                        placeholder="Additional notes (optional)"
+                                        value={formNotes}
+                                        onChange={(e) => setFormNotes(e.target.value)}
+                                   />
+                              </div>
+                         </div>
+                         <DialogFooter>
+                              <Button variant="secondary" onClick={() => setAddModalOpen(false)}>Cancel</Button>
+                              <Button onClick={handleCreatePlan} disabled={submitting || !formName.trim()}>
+                                   {submitting ? 'Creating…' : 'Create'}
+                              </Button>
+                         </DialogFooter>
+                    </DialogContent>
+               </Dialog>
           </div>
      );
 };

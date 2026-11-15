@@ -1,5 +1,5 @@
 import React from 'react';
-import { styled } from '@nextui-org/react';
+import { styled } from '@/components/ui/legacy';
 
 interface MenuProps {
      size?: number;

@@ -1,7 +1,10 @@
 import React from 'react';
 import { Goal } from '@/types/api';
 import { useRouter } from 'next/router';
-import { Card, Grid, Text, Badge, Button } from '@nextui-org/react';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { X } from 'lucide-react';
 
 interface GoalsTableProps {
      goals: Goal[];
@@ -13,145 +16,99 @@ export const GoalsTable: React.FC<GoalsTableProps> = ({ goals, onDelete }) => {
 
      if (!goals || goals.length === 0) {
           return (
-               <Card css={{ textAlign: 'center', py: '$10', px: '$6' }}>
-                    <Card.Body>
-                         <Text>No goals found for this core value.</Text>
-                    </Card.Body>
+               <Card className="px-6 py-10 text-center">
+                    <CardContent>
+                         <p className="text-muted-foreground">No goals found for this core value.</p>
+                    </CardContent>
                </Card>
           );
      }
 
-     const getStatusColor = (status: string) => {
+     const getStatusVariant = (status: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
           switch (status?.toLowerCase()) {
                case 'mastered':
-                    return 'success';
+                    return 'default';
                case 'working on':
                case 'in progress':
-                    return 'warning';
+                    return 'secondary';
                case 'not started':
-                    return 'error';
+                    return 'destructive';
                default:
-                    return 'primary';
+                    return 'outline';
           }
      };
 
-     const getStatusBadge = (status: string) => {
-          const color = getStatusColor(status) as any;
-          return (
-               <Badge color={color} variant="flat" size="sm">
-                    {status || 'Not Started'}
-               </Badge>
-          );
-     };
+     const getStatusBadge = (status: string) => (
+          <Badge variant={getStatusVariant(status)} className="text-xs">
+               {status || 'Not Started'}
+          </Badge>
+     );
 
      const handleGoalClick = (goalId: number) => {
           router.push(`/goals/details/${goalId}`);
      };
 
      return (
-          <Grid.Container gap={1.5}>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
                {goals.map((goal) => (
-                    <Grid key={goal.id} xs={12} sm={6} md={4}>
-                         <div style={{ position: 'relative', width: '100%' }}>
-                              {onDelete && (
-                                   <Button
-                                        auto
-                                        size="xs"
-                                        color="error"
-                                        flat
-                                        css={{
-                                             position: 'absolute',
-                                             top: 8,
-                                             right: 8,
-                                             zIndex: 10,
-                                             minWidth: 'auto',
-                                             px: '$4',
-                                        }}
-                                        onPress={(e) => {
-                                             onDelete(goal.id);
-                                        }}
-                                   >
-                                        ✕
-                                   </Button>
-                              )}
-                              <Card
-                                   isPressable
-                                   isHoverable
-                                   onClick={() => handleGoalClick(goal.id)}
-                                   css={{
-                                        width: '100%',
-                                        $$cardColor: '$colors$white60',
-                                        border: '3px solid $gray600',
-                                        transition: 'transform 0.2s, box-shadow 0.2s',
-                                        '&:hover': {
-                                             transform: 'translateY(-2px)',
-                                             boxShadow: '$lg',
-                                             borderColor: '$primary',
-                                        },
+                    <div key={goal.id} className="relative w-full">
+                         {onDelete && (
+                              <Button
+                                   variant="destructive"
+                                   size="icon"
+                                   className="absolute right-2 top-2 z-10 h-7 w-7 rounded-full p-0"
+                                   onClick={(e) => {
+                                        e.stopPropagation();
+                                        onDelete(goal.id);
                                    }}
                               >
-                                   <Card.Header css={{
-                                        pb: 0,
-                                        flexDirection: 'column',
-                                        alignItems: 'flex-start',
-                                        gap: '$2'
-                                   }}>
-                                        <div style={{
-                                             display: 'flex',
-                                             justifyContent: 'space-between',
-                                             alignItems: 'center',
-                                             width: '100%'
-                                        }}>
-                                             <Text h4 css={{ m: 0, color: '#FF8C01' }}>
-                                                  {goal.goal || goal.title}
-                                             </Text>
-                                             {getStatusBadge(goal.status)}
-                                        </div>
-                                        {goal.area && (
-                                             <Text small css={{ color: '$gray600' }}>
-                                                  Area: {goal.area}
-                                             </Text>
-                                        )}
-                                   </Card.Header>
+                                   <X size={14} />
+                              </Button>
+                         )}
 
-                                   <Card.Body css={{ py: '$4' }}>
-                                        {/* SMART Criteria Section */}
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                             {goal.smart_specific && (
-                                                  <Text size="sm" css={{ color: '$gray' }}>
-                                                       <strong>Specific:</strong> {goal.smart_specific}
-                                                  </Text>
-                                             )}
-                                             {goal.smart_measurable && (
-                                                  <Text size="sm" css={{ color: '$gray' }}>
-                                                       <strong>Measurable:</strong> {goal.smart_measurable}
-                                                  </Text>
-                                             )}
-                                             {!goal.smart_specific && !goal.smart_measurable && goal.description && (
-                                                  <Text size="sm" css={{ color: '$gray' }}>
-                                                       {goal.description}
-                                                  </Text>
-                                             )}
-                                        </div>
-                                   </Card.Body>
+                         <Card
+                              onClick={() => handleGoalClick(goal.id)}
+                              className="w-full cursor-pointer border-[3px] border-gray-600 bg-white/60 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:shadow-lg dark:bg-card/60"
+                         >
+                              <CardHeader className="flex flex-col items-start gap-2 pb-0">
+                                   <div className="flex w-full items-center justify-between">
+                                        <h4 className="m-0 text-lg font-semibold" style={{ color: '#FF8C01' }}>
+                                             {goal.goal || goal.title}
+                                        </h4>
+                                        {getStatusBadge(goal.status)}
+                                   </div>
+                                   {goal.area && (
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">Area: {goal.area}</p>
+                                   )}
+                              </CardHeader>
 
-                                   <Card.Footer css={{
-                                        flexWrap: 'wrap',
-                                        gap: '$4',
-                                        borderTop: '1px solid $gray200',
-                                        bg: '$gray50'
-                                   }}>
-                                        {/* Time-bound info if available */}
-                                        {goal.time_bound_count > 0 && (
-                                             <Text size="sm" css={{ color: '$gray200', width: '100%' }}>
-                                                  Frequency: {goal.time_bound_count} times per {goal.time_bound_value} {goal.time_bound_period}
-                                             </Text>
-                                        )}
-                                   </Card.Footer>
-                              </Card>
-                         </div>
-                    </Grid>
+                              <CardContent className="flex flex-col gap-2 py-4">
+                                   {goal.smart_specific && (
+                                        <p className="text-sm text-muted-foreground">
+                                             <strong>Specific:</strong> {goal.smart_specific}
+                                        </p>
+                                   )}
+                                   {goal.smart_measurable && (
+                                        <p className="text-sm text-muted-foreground">
+                                             <strong>Measurable:</strong> {goal.smart_measurable}
+                                        </p>
+                                   )}
+                                   {!goal.smart_specific && !goal.smart_measurable && goal.description && (
+                                        <p className="text-sm text-muted-foreground">{goal.description}</p>
+                                   )}
+                              </CardContent>
+
+                              <CardFooter className="flex flex-wrap gap-4 border-t border-gray-200 bg-gray-50 dark:bg-muted/50">
+                                   {goal.time_bound_count > 0 && (
+                                        <p className="w-full text-sm text-gray-200">
+                                             Frequency: {goal.time_bound_count} times per {goal.time_bound_value}{' '}
+                                             {goal.time_bound_period}
+                                        </p>
+                                   )}
+                              </CardFooter>
+                         </Card>
+                    </div>
                ))}
-          </Grid.Container>
+          </div>
      );
 };

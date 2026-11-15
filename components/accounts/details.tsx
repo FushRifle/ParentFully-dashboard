@@ -1,19 +1,17 @@
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { HouseIcon } from '../icons/breadcrumb/house-icon';
-import { UsersIcon } from '../icons/breadcrumb/users-icon';
-import { Flex } from '../styles/flex';
-import { Box } from '../styles/box';
-import { DeleteUserModal } from './modals/delete';
-import { SidebarContext } from '../layout/layout-context';
-import type { User } from '../../types/api';
+import { HouseIcon } from '@/components/icons/breadcrumb/house-icon';
+import { UsersIcon } from '@/components/icons/breadcrumb/users-icon';
+import { DeleteUserModal } from '@/components/accounts/modals/delete';
+import { SidebarContext } from '@/components/layout/layout-context';
+import type { User } from '@/types/api';
 import ChatAvatarWrapper from '@/components/Avatar/ChatAvatarWrapper';
 import React, { useCallback, useMemo, useState, useContext } from 'react';
-import { Breadcrumbs, Crumb, CrumbLink } from '../breadcrumb/breadcrumb.styled';
-import {
-     Button, Card, Divider, Input, Text,
-     Badge, User as NextUser, Grid, Spacer
-} from '@nextui-org/react';
+import { Breadcrumbs, Crumb, CrumbLink } from '@/components/breadcrumb/breadcrumb.styled';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import { updateAppUserStatus } from '@/services/adminService';
 
 type Props = {
@@ -47,6 +45,7 @@ export const AccountDetails = ({ user }: Props) => {
                subscription: user.subscriptions?.[0] || user.active_subscription,
           };
      }, [user]);
+
      const u = user.user ?? user;
      const profileImage = user.user?.profile_image || u.profile_image;
      const photo = user.user?.photo || u.photo;
@@ -75,7 +74,7 @@ export const AccountDetails = ({ user }: Props) => {
      }, [profile, router, showToast]);
 
      return (
-          <Flex css={{ mt: '$5', px: '$6', '@sm': { mt: '$10', px: '$16' } }} direction="column">
+          <div className="mt-5 flex flex-col px-6 sm:mt-10 sm:px-16">
                <DeleteUserModal
                     visible={deleteVisible}
                     closeHandler={() => setDeleteVisible(false)}
@@ -84,159 +83,145 @@ export const AccountDetails = ({ user }: Props) => {
                />
 
                {/* Navigation Section */}
-               <Box>
+               <div>
                     <Breadcrumbs>
                          <Crumb>
                               <HouseIcon />
                               <Link href="/overview"><CrumbLink>Overview</CrumbLink></Link>
-                              <Text css={{ mx: '$2' }}>/</Text>
+                              <span className="mx-2">/</span>
                          </Crumb>
                          <Crumb>
                               <UsersIcon />
                               <Link href="/customers"><CrumbLink>Customers</CrumbLink></Link>
-                              <Text css={{ mx: '$2' }}>/</Text>
+                              <span className="mx-2">/</span>
                          </Crumb>
                          <Crumb><CrumbLink>{profile.fullName}</CrumbLink></Crumb>
                     </Breadcrumbs>
-               </Box>
+               </div>
 
                {/* Page Header */}
-               <Box css={{ mt: '$8', mb: '$12' }}>
-                    <Grid.Container justify="space-between" alignItems="center">
-                         <Grid>
-                              <Flex align="center" css={{ gap: '$10' }}>
-                                   <ChatAvatarWrapper
-                                        photo={userPhoto}
-                                        profile_image={profile_image}
-                                        contactName={profile.fullName}
-                                        size={100}
-                                        variant={'primary'}
-                                        borderWidth={1}
-                                   />
+               <div className="mt-8 mb-12 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+                    <div className="flex items-center gap-6">
+                         <ChatAvatarWrapper
+                              photo={userPhoto}
+                              profile_image={profile_image}
+                              contactName={profile.fullName}
+                              size={100}
+                              variant="primary"
+                              borderWidth={1}
+                         />
+                         <Badge
+                              className="rounded-full px-4 py-1"
+                              variant="secondary"
+                              data-state={profile.isPremium ? 'warning' : 'success'}
+                         >
+                              {profile.status.toUpperCase()}
+                         </Badge>
+                    </div>
+                    <div className="flex w-full gap-4 sm:w-auto">
+                         <Button
+                              variant="destructive"
+                              disabled={updatingStatus || profile.status === 'suspended'}
+                              onClick={() => setDeleteVisible(true)}
+                         >
+                              {profile.status === 'suspended' ? 'Account Suspended' : 'Suspend Account'}
+                         </Button>
+                    </div>
+               </div>
 
-                                   <Badge
-                                        color={profile.isPremium ? 'warning' : 'success'}
-                                        variant="flat"
-                                        css={{ height: '$fit', px: '$6', borderRadius: '$pill', border: 'none' }}
-                                   >
-                                        {profile.status.toUpperCase()}
-                                   </Badge>
-                              </Flex>
-                         </Grid>
-                         <Grid css={{ '@xsMax': { mt: '$8', width: '100%' } }}>
-                              <Flex css={{ gap: '$6' }}>
-                                   <Button auto color="error" disabled={updatingStatus || profile.status === 'suspended'} onClick={() => setDeleteVisible(true)}>
-                                        {profile.status === 'suspended' ? 'Account Suspended' : 'Suspend Account'}
-                                   </Button>
-                              </Flex>
-                         </Grid>
-                    </Grid.Container>
-               </Box>
-
-               <Grid.Container gap={2.5}>
+               <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
                     {/* Main Content Column */}
-                    <Grid xs={12} md={8}>
-                         <Flex direction="column" css={{ gap: '$10', width: '100%' }}>
+                    <div className="flex flex-col gap-6 md:col-span-8">
+                         {/* Card: Profile Information */}
+                         <Card className="rounded-xl bg-background">
+                              <CardHeader className="px-8 pt-8">
+                                   <div className="flex flex-col">
+                                        <h4 className="text-lg font-semibold">Profile Information</h4>
+                                        <p className="text-sm text-muted-foreground">
+                                             User personal details and contact information.
+                                        </p>
+                                   </div>
+                              </CardHeader>
+                              <CardContent className="grid grid-cols-1 gap-6 px-8 py-8 sm:grid-cols-2">
+                                   <div className="flex flex-col gap-1">
+                                        <span className="text-sm text-muted-foreground">First Name</span>
+                                        <span className="text-lg font-semibold">{profile.firstName}</span>
+                                   </div>
+                                   <div className="flex flex-col gap-1">
+                                        <span className="text-sm text-muted-foreground">Last Name</span>
+                                        <span className="text-lg font-semibold">{profile.lastName || '—'}</span>
+                                   </div>
+                                   <div className="flex flex-col gap-1 sm:col-span-2">
+                                        <span className="text-sm text-muted-foreground">Email Address</span>
+                                        <span className="text-lg font-semibold">{profile.email}</span>
+                                   </div>
+                                   <div className="flex flex-col gap-1">
+                                        <span className="text-sm text-muted-foreground">Country</span>
+                                        <span className="text-lg font-semibold">{profile.country || '—'}</span>
+                                   </div>
+                                   <div className="flex flex-col gap-1">
+                                        <span className="text-sm text-muted-foreground">Registered</span>
+                                        <span className="text-lg font-semibold">{formatDate(profile.registeredAt)}</span>
+                                   </div>
+                              </CardContent>
+                         </Card>
 
-                              {/* Card: Profile Information (Read Only) */}
-                              <Card variant="bordered" css={{ borderRadius: '$xl', bg: '$backgroundContrast' }}>
-                                   <Card.Header css={{ px: '$10', pt: '$10' }}>
-                                        <Flex direction="column">
-                                             <Text h4 css={{ m: 0 }}>Profile Information</Text>
-                                             <Text size="$sm" color="$accents7">User personal details and contact information.</Text>
-                                        </Flex>
-                                   </Card.Header>
-                                   <Card.Body css={{ px: '$10', py: '$12' }}>
-                                        <Grid.Container gap={3}>
-                                             <Grid xs={12} sm={6}>
-                                                  <Flex direction="column" css={{ gap: '$2' }}>
-                                                       <Text size="$sm" color="$accents7">First Name</Text>
-                                                       <Text size="$lg" b>{profile.firstName}</Text>
-                                                  </Flex>
-                                             </Grid>
-                                             <Grid xs={12} sm={6}>
-                                                  <Flex direction="column" css={{ gap: '$2' }}>
-                                                       <Text size="$sm" color="$accents7">Last Name</Text>
-                                                       <Text size="$lg" b>{profile.lastName || '—'}</Text>
-                                                  </Flex>
-                                             </Grid>
-                                             <Grid xs={12}>
-                                                  <Flex direction="column" css={{ gap: '$2' }}>
-                                                       <Text size="$sm" color="$accents7">Email Address</Text>
-                                                       <Text size="$lg" b>{profile.email}</Text>
-                                                  </Flex>
-                                             </Grid>
-                                             <Grid xs={12} sm={6}>
-                                                  <Flex direction="column" css={{ gap: '$2' }}>
-                                                       <Text size="$sm" color="$accents7">Country</Text>
-                                                       <Text size="$lg" b>{profile.country || '—'}</Text>
-                                                  </Flex>
-                                             </Grid>
-                                             <Grid xs={12} sm={6}>
-                                                  <Flex direction="column" css={{ gap: '$2' }}>
-                                                       <Text size="$sm" color="$accents7">Registered</Text>
-                                                       <Text size="$lg" b>{formatDate(profile.registeredAt)}</Text>
-                                                  </Flex>
-                                             </Grid>
-                                        </Grid.Container>
-                                   </Card.Body>
-                              </Card>
-
-                              {/* Card: Subscription Management */}
-                              <Card variant="bordered" css={{ borderRadius: '$xl', borderStyle: 'dashed', borderColor: '$accents3' }}>
-                                   <Card.Body css={{ py: '$10', px: '$10' }}>
-                                        <Flex justify="between" align="center" wrap="wrap" css={{ gap: '$8' }}>
-                                             <Box>
-                                                  <Text h5 css={{ m: 0 }}>Subscription Management</Text>
-                                                  <Text size="$sm" color="$accents7">
-                                                       {profile.subscription
-                                                            ? `${profile.subscription.plan_type} · ${profile.subscription.status}`
-                                                            : 'No current subscription'}
-                                                  </Text>
-                                             </Box>
-                                             {profile.subscription && <Flex css={{ gap: '$6' }}>
-                                                  <Button auto flat size="sm" onClick={() => router.push(`/plans/${profile.id}`)}>
-                                                       Plan Details
-                                                  </Button>
-                                             </Flex>}
-                                        </Flex>
-                                   </Card.Body>
-                              </Card>
-                         </Flex>
-                    </Grid>
+                         {/* Card: Subscription Management */}
+                         <Card className="rounded-xl border-dashed">
+                              <CardContent className="flex flex-wrap items-center justify-between gap-6 px-8 py-8">
+                                   <div>
+                                        <h5 className="font-semibold">Subscription Management</h5>
+                                        <p className="text-sm text-muted-foreground">
+                                             {profile.subscription
+                                                  ? `${profile.subscription.plan_type} · ${profile.subscription.status}`
+                                                  : 'No current subscription'}
+                                        </p>
+                                   </div>
+                                   {profile.subscription && (
+                                        <div className="flex gap-4">
+                                             <Button
+                                                  variant="secondary"
+                                                  size="sm"
+                                                  onClick={() => router.push(`/plans/${profile.id}`)}
+                                             >
+                                                  Plan Details
+                                             </Button>
+                                        </div>
+                                   )}
+                              </CardContent>
+                         </Card>
+                    </div>
 
                     {/* Sidebar Column */}
-                    <Grid xs={12} md={4}>
-                         <Flex direction="column" css={{ gap: '$10', width: '100%' }}>
-
-                              {/* Account data from the customer record */}
-                              <Card variant="bordered" css={{ borderRadius: '$xl', bg: '$backgroundContrast' }}>
-                                   <Card.Header css={{ px: '$8', pt: '$8' }}>
-                                        <Text b size="$md" transform="uppercase" color="$accents7">Account details</Text>
-                                   </Card.Header>
-                                   <Divider css={{ opacity: 0.5 }} />
-                                   <Card.Body css={{ px: '$8', py: '$8' }}>
-                                        <Flex direction="column" css={{ gap: '$8' }}>
-                                             <Flex justify="between" align="center">
-                                                  <Text size="$sm">Onboarding</Text>
-                                                  <Badge variant="flat" size="xs" color={profile.onboardingComplete ? 'success' : 'warning'}>
-                                                       {profile.onboardingComplete ? 'Complete' : 'Incomplete'}
-                                                  </Badge>
-                                             </Flex>
-                                             <Flex justify="between" align="center">
-                                                  <Text size="$sm">Family</Text>
-                                                  <Text size="$sm" b>{profile.family?.name || '—'}</Text>
-                                             </Flex>
-                                             <Flex justify="between" align="center">
-                                                  <Text size="$sm">Email verified</Text>
-                                                  <Text size="$sm" b>{user.user.email_verified_at ? 'Yes' : 'No'}</Text>
-                                             </Flex>
-                                        </Flex>
-                                   </Card.Body>
-                              </Card>
-                         </Flex>
-                    </Grid>
-               </Grid.Container>
-          </Flex>
+                    <div className="flex flex-col gap-6 md:col-span-4">
+                         <Card className="rounded-xl bg-background">
+                              <CardHeader className="px-6 pt-6">
+                                   <span className="text-md font-semibold uppercase text-muted-foreground">
+                                        Account details
+                                   </span>
+                              </CardHeader>
+                              <Separator className="opacity-50" />
+                              <CardContent className="flex flex-col gap-4 px-6 py-6">
+                                   <div className="flex items-center justify-between">
+                                        <span className="text-sm">Onboarding</span>
+                                        <Badge variant={profile.onboardingComplete ? 'default' : 'secondary'}>
+                                             {profile.onboardingComplete ? 'Complete' : 'Incomplete'}
+                                        </Badge>
+                                   </div>
+                                   <div className="flex items-center justify-between">
+                                        <span className="text-sm">Family</span>
+                                        <span className="text-sm font-semibold">{profile.family?.name || '—'}</span>
+                                   </div>
+                                   <div className="flex items-center justify-between">
+                                        <span className="text-sm">Email verified</span>
+                                        <span className="text-sm font-semibold">
+                                             {user.user.email_verified_at ? 'Yes' : 'No'}
+                                        </span>
+                                   </div>
+                              </CardContent>
+                         </Card>
+                    </div>
+               </div>
+          </div>
      );
 };

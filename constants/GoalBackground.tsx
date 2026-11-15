@@ -1,33 +1,27 @@
-import React from 'react';
-import { useTheme } from '@nextui-org/react';
+import React, { useEffect, useState } from 'react';
+import { useTheme } from 'next-themes';
 
-export const GOAL_BACKGROUND = "/backgrounds/bg_main3.png";
-export const GOAL_BACKGROUND_DARK = "/backgrounds/bg_main4.png";
+export const GOAL_BACKGROUND = '/backgrounds/bg_main3.png';
+export const GOAL_BACKGROUND_DARK = '/backgrounds/bg_main4.png';
 
 export const GoalBackground = ({ children }: { children: React.ReactNode }) => {
-    const { isDark } = useTheme();
+    const { resolvedTheme } = useTheme();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => setMounted(true), []);
+
+    const isDark = mounted && resolvedTheme === 'dark';
 
     return (
-        <div style={{ position: 'relative', minHeight: '100vh', width: '100%' }}>
+        <div className="relative min-h-screen w-full">
             <div
+                className="pointer-events-none fixed inset-0 -z-10 bg-cover bg-center"
                 style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    zIndex: -1,
                     backgroundImage: `url(${isDark ? GOAL_BACKGROUND_DARK : GOAL_BACKGROUND})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
                     opacity: isDark ? 0.09 : 0.14,
-                    pointerEvents: 'none',
                 }}
             />
-            {/* Content Layer */}
-            <div style={{ position: 'relative', zIndex: 1, height: '100%' }}>
-                {children}
-            </div>
+            <div className="relative z-10 h-full">{children}</div>
         </div>
     );
 };

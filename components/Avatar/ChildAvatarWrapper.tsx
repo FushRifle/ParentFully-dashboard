@@ -1,7 +1,5 @@
 import React from 'react';
-import { Avatar, H4, YStack } from 'tamagui';
-import { Image } from 'tamagui';
-import { useTheme } from '@/styles/ThemeContext';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface ChildAvatarWrapperProps {
      imageUrl?: string | null;
@@ -24,99 +22,60 @@ const ChildAvatarWrapper: React.FC<ChildAvatarWrapperProps> = ({
      borderColor,
      useThemeColors = false,
 }) => {
-     const { colors } = useTheme();
      const [hasError, setHasError] = React.useState(false);
 
      React.useEffect(() => {
           setHasError(false);
      }, [imageUrl]);
 
-     const handleImageError = () => {
-          setHasError(true);
-     };
-
-     const handleImageLoad = () => {
-          setHasError(false);
-     };
-
      const getInitials = () => {
           if (!childName) return 'C';
-
           const names = childName.trim().split(' ');
           if (names.length === 1) return names[0].charAt(0).toUpperCase();
-
           return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
-     };
-
-     const getBackgroundColor = () => {
-          if (backgroundColor) return backgroundColor;
-          if (useThemeColors) return colors.secondaryContainer || '#4CAF50';
-          return '#4CAF50';
-     };
-
-     const getTextColor = () => {
-          if (textColor) return textColor;
-          if (useThemeColors) return colors.onSecondaryContainer || 'white';
-          return 'white';
-     };
-
-     const getBorderColor = () => {
-          if (borderColor) return borderColor;
-          if (useThemeColors) return colors.accent || '#388E3C';
-          return '#388E3C';
      };
 
      const resolveImageUrl = (uri?: string | null) => {
           if (!uri) return null;
           let cleaned = uri;
           cleaned = cleaned.replace(/\/(\w+)\/\1\//g, '/$1/');
-          if (cleaned.startsWith('http')) {
-               return cleaned;
-          }
-          const finalUrl = `https://production-api.parentfullyapp.com/storage/${cleaned.replace(/^\/+/, '')}`;
-          return finalUrl;
+          if (cleaned.startsWith('http')) return cleaned;
+          return `https://production-api.parentfullyapp.com/storage/${cleaned.replace(/^\/+/, '')}`;
      };
 
      const initials = getInitials();
-     const bgColor = getBackgroundColor();
-     const txtColor = getTextColor();
-     const brdColor = getBorderColor();
-
+     const bgColor = backgroundColor || (useThemeColors ? '#4CAF50' : '#4CAF50');
+     const txtColor = textColor || (useThemeColors ? 'white' : 'white');
+     const brdColor = borderColor || (useThemeColors ? '#388E3C' : '#388E3C');
      const resolvedUrl = resolveImageUrl(imageUrl);
-     const source = !hasError && resolvedUrl ? { uri: resolvedUrl } : undefined;
-     const shouldShowImage = !!source;
+     const shouldShowImage = !hasError && resolvedUrl;
 
      return (
           <Avatar
-               size={size}
-               br={size / 2}
-               borderWidth={borderWidth}
-               borderColor={brdColor}
-               overflow="hidden"
-               jc="center"
-               ai="center"
-               backgroundColor={bgColor}
+               style={{
+                    width: size,
+                    height: size,
+                    minWidth: size,
+                    minHeight: size,
+                    borderWidth,
+                    borderColor: brdColor,
+                    borderStyle: 'solid',
+                    backgroundColor: bgColor,
+               }}
           >
                {shouldShowImage ? (
-                    <Image
-                         source={source}
-                         style={{ width: size, height: size, borderRadius: size / 2 }}
-                         onError={handleImageError}
-                         onLoad={handleImageLoad}
-                         resizeMode="cover"
+                    <AvatarImage
+                         src={resolvedUrl!}
+                         alt={childName}
+                         className="object-cover w-full h-full"
+                         onError={() => setHasError(true)}
                     />
                ) : (
-                    <YStack jc="center" ai="center" width={size} height={size} backgroundColor={bgColor}>
-                         <H4
-                              color={txtColor}
-                              fontSize={size / 3}
-                              fontWeight="bold"
-                              textAlign="center"
-                              lineHeight={size * 0.4}
-                         >
-                              {initials}
-                         </H4>
-                    </YStack>
+                    <AvatarFallback
+                         style={{ backgroundColor: bgColor, color: txtColor, fontSize: size / 3, fontWeight: 'bold' }}
+                    >
+                         {initials}
+                    </AvatarFallback>
                )}
           </Avatar>
      );

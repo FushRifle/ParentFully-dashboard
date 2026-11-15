@@ -1,6 +1,5 @@
 import React from 'react';
-import { Card, Text, Progress } from '@nextui-org/react';
-import { Flex } from '../styles/flex';
+import { Card, CardContent } from '@/components/ui/card';
 import { SystemMetric } from './data';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { StatusBadge } from './status-badge';
@@ -12,9 +11,9 @@ interface MetricGaugeProps {
 
 export const MetricGauge: React.FC<MetricGaugeProps> = ({ metric, compact = false }) => {
      const getStatusColor = () => {
-          if (metric.value >= metric.threshold) return 'error';
-          if (metric.value >= metric.threshold * 0.8) return 'warning';
-          return 'success';
+          if (metric.value >= metric.threshold) return 'bg-red-500';
+          if (metric.value >= metric.threshold * 0.8) return 'bg-amber-500';
+          return 'bg-emerald-500';
      };
 
      const getTrendIcon = () => {
@@ -29,61 +28,38 @@ export const MetricGauge: React.FC<MetricGaugeProps> = ({ metric, compact = fals
      };
 
      return (
-          <Card
-               css={{
-                    p: compact ? '$4' : '$6',
-                    height: '100%'
-               }}
-               variant="flat"
-          >
-               <Card.Body>
-                    <Flex direction="column" css={{ gap: compact ? '$2' : '$4' }}>
-                         <Flex justify="between" align="center">
-                              <Flex align="center" css={{ gap: '$2' }}>
-                                   <Text size="$sm" css={{ fontWeight: 500 }}>
-                                        {metric.name}
-                                   </Text>
-                              </Flex>
-                              {!compact && getTrendIcon()}
-                         </Flex>
+          <Card className={`h-full ${compact ? 'p-4' : 'p-6'}`}>
+               <CardContent className="flex flex-col gap-4 p-0">
+                    <div className="flex items-center justify-between">
+                         <span className="text-sm font-medium">{metric.name}</span>
+                         {!compact && getTrendIcon()}
+                    </div>
 
-                         <Flex direction="column" css={{ gap: compact ? '$1' : '$2' }}>
-                              <Flex justify="between" align="end">
-                                   <Text
-                                        css={{
-                                             fontSize: compact ? '$2xl' : '$3xl',
-                                             fontWeight: '$bold',
-                                             lineHeight: 1
-                                        }}
-                                   >
-                                        {metric.value}{metric.unit}
-                                   </Text>
-                                   {!compact && (
-                                        <Text size="$xs" color="$accents7">
-                                             Max: {metric.max}{metric.unit}
-                                        </Text>
-                                   )}
-                              </Flex>
-
-                              <Progress
-                                   value={metric.value}
-                                   max={metric.max}
-                                   color={getStatusColor()}
-                                   size={compact ? 'sm' : 'md'}
-                                   css={{ mt: compact ? '$1' : '$2' }}
-                              />
-
+                    <div className="flex flex-col gap-2">
+                         <div className="flex items-end justify-between">
+                              <span className={`font-bold leading-none ${compact ? 'text-2xl' : 'text-3xl'}`}>
+                                   {metric.value}{metric.unit}
+                              </span>
                               {!compact && (
-                                   <Flex justify="between">
-                                        <Text size="$xs" color="$accents7">
-                                             Threshold: {metric.threshold}{metric.unit}
-                                        </Text>
-                                        <StatusBadge status={metric.status} size="sm" withText={false} />
-                                   </Flex>
+                                   <span className="text-xs text-muted-foreground">Max: {metric.max}{metric.unit}</span>
                               )}
-                         </Flex>
-                    </Flex>
-               </Card.Body>
+                         </div>
+
+                         <div className={`h-2 w-full overflow-hidden rounded-full bg-muted ${compact ? 'mt-1' : 'mt-2'}`}>
+                              <div
+                                   className={`h-full rounded-full transition-all ${getStatusColor()}`}
+                                   style={{ width: `${Math.min(100, (metric.value / metric.max) * 100)}%` }}
+                              />
+                         </div>
+
+                         {!compact && (
+                              <div className="flex justify-between">
+                                   <span className="text-xs text-muted-foreground">Threshold: {metric.threshold}{metric.unit}</span>
+                                   <StatusBadge status={metric.status} size="sm" withText={false} />
+                              </div>
+                         )}
+                    </div>
+               </CardContent>
           </Card>
      );
 };

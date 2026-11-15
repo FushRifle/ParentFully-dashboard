@@ -8,7 +8,7 @@ import React, {
   useId,
   useCallback,
 } from 'react';
-import { Text } from '@nextui-org/react';
+import { Text } from '@/components/ui/legacy';
 import { Box } from './box';
 
 interface SelectOption {

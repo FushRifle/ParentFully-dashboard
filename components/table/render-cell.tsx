@@ -1,28 +1,19 @@
 import React, { memo, useCallback } from 'react';
-import { Box } from '../styles/box';
 import { useRouter } from 'next/router';
-import { IconButton } from './table.styled';
-import { EyeIcon } from '../icons/table/eye-icon';
-import { EditIcon } from '../icons/table/edit-icon';
-import { DeleteIcon } from '../icons/table/delete-icon';
-import ChatAvatarWrapper from '../Avatar/ChatAvatarWrapper';
-import {
-   User as NextUser,
-   Tooltip,
-   Badge,
-   Text,
-} from '@nextui-org/react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { EyeIcon } from '@/components/icons/table/eye-icon';
+import { EditIcon } from '@/components/icons/table/edit-icon';
+import { DeleteIcon } from '@/components/icons/table/delete-icon';
+import ChatAvatarWrapper from '@/components/Avatar/ChatAvatarWrapper';
 
-const getStatusColor = (
-   status: string
-): 'success' | 'error' | 'warning' | 'default' => {
-   if (!status) return 'default';
-
+const getStatusVariant = (status: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
+   if (!status) return 'outline';
    const s = status.toLowerCase();
-   if (s.includes('active') || s.includes('enabled')) return 'success';
-   if (s.includes('inactive') || s.includes('disabled') || s.includes('suspended')) return 'error';
-   if (s.includes('pending') || s.includes('waiting')) return 'warning';
-   return 'default';
+   if (s.includes('active') || s.includes('enabled')) return 'default';
+   if (s.includes('inactive') || s.includes('disabled') || s.includes('suspended')) return 'destructive';
+   if (s.includes('pending') || s.includes('waiting')) return 'secondary';
+   return 'outline';
 };
 
 interface RenderCellProps {
@@ -37,7 +28,6 @@ const RenderCellComponent = ({ user, columnKey }: RenderCellProps) => {
    const userPhoto = user.user?.profile_image || u.photo;
 
    const {
-      avatar = '',
       name = 'Unknown',
       email = 'N/A',
       role = 'N/A',
@@ -52,23 +42,13 @@ const RenderCellComponent = ({ user, columnKey }: RenderCellProps) => {
    const resolvedUserId = id ?? userId ?? _id;
 
    const handleDetails = useCallback(() => {
-      if (resolvedUserId) {
-         router.push(`/customers/${resolvedUserId}`);
-      }
+      if (resolvedUserId) router.push(`/customers/${resolvedUserId}`);
    }, [router, resolvedUserId]);
 
    switch (columnKey) {
       case 'avatar':
          return (
-            <Box
-               css={{
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-               }}
-               onClick={handleDetails}
-            >
+            <div className="flex cursor-pointer items-center justify-center" onClick={handleDetails}>
                <ChatAvatarWrapper
                   photo={userPhoto}
                   profile_image={profile_image}
@@ -78,90 +58,53 @@ const RenderCellComponent = ({ user, columnKey }: RenderCellProps) => {
                   variant={is_premium ? 'primary' : 'secondary'}
                   borderWidth={is_premium ? 2 : 1}
                />
-            </Box>
+            </div>
          );
 
       case 'name':
          return (
-            <Text
-               css={{
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                  '&:hover': { textDecoration: 'underline' },
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '$2',
-               }}
+            <button
                onClick={handleDetails}
+               className="flex cursor-pointer items-center gap-2 font-semibold hover:underline"
             >
                {name}
-               {is_premium && (
-                  <Badge
-                     color="success"
-                     variant="flat"
-                     size="sm"
-                  >
-                     Premium
-                  </Badge>
-               )}
-            </Text>
+               {is_premium && <Badge variant="default">Premium</Badge>}
+            </button>
          );
 
       case 'email':
-         return <Text size="sm">{email}</Text>;
+         return <span className="text-sm">{email}</span>;
 
       case 'role':
-         return (
-            <Badge variant="flat" color="primary" size="sm">
-               {role}
-            </Badge>
-         );
+         return <Badge variant="default">{role}</Badge>;
 
       case 'status':
-         return (
-            <Badge
-               variant="flat"
-               color={getStatusColor(status)}
-               size="sm"
-            >
-               {status}
-            </Badge>
-         );
+         return <Badge variant={getStatusVariant(status)}>{status}</Badge>;
 
       case 'points':
-         return <Text size="sm">{points}</Text>;
+         return <span className="text-sm">{points}</span>;
 
       case 'actions':
          return (
-            <Box css={{ display: 'flex', gap: 12 }}>
-               <Tooltip content="Details" color="primary">
-                  <IconButton onClick={handleDetails}>
-                     <EyeIcon size={20} fill="#0072F5" />
-                  </IconButton>
-               </Tooltip>
-
-               <Tooltip content="Edit user" color="secondary">
-                  <IconButton onClick={() => console.log('Edit', resolvedUserId)}>
-                     <EditIcon size={20} fill="#7828C8" />
-                  </IconButton>
-               </Tooltip>
-
-               <Tooltip content="Delete user" color="error">
-                  <IconButton onClick={() => console.log('Delete', resolvedUserId)}>
-                     <DeleteIcon size={20} fill="#FF0080" />
-                  </IconButton>
-               </Tooltip>
-            </Box>
+            <div className="flex gap-3">
+               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDetails} aria-label="Details">
+                  <EyeIcon size={20} fill="#0072F5" />
+               </Button>
+               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => console.log('Edit', resolvedUserId)} aria-label="Edit">
+                  <EditIcon size={20} fill="#7828C8" />
+               </Button>
+               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => console.log('Delete', resolvedUserId)} aria-label="Delete">
+                  <DeleteIcon size={20} fill="#FF0080" />
+               </Button>
+            </div>
          );
 
       default:
-         return <Text size="sm">{u[columnKey] ?? 'N/A'}</Text>;
+         return <span className="text-sm">{u[columnKey] ?? 'N/A'}</span>;
    }
 };
 
 export const RenderCell = memo(
    RenderCellComponent,
-   (prev, next) =>
-      prev.columnKey === next.columnKey &&
-      prev.user === next.user
+   (prev, next) => prev.columnKey === next.columnKey && prev.user === next.user,
 );

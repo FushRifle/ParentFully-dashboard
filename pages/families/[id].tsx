@@ -1,20 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import NextLink from 'next/link';
 import { useRouter } from 'next/router';
-import { Badge, Button, Text } from '@nextui-org/react';
-import {
-   ArrowLeft,
-   Baby,
-   ChevronRight,
-   Home,
-   Mail,
-   UserRound,
-   UsersRound,
-} from 'lucide-react';
-import { api } from '../../lib';
-import { Box } from '../../components/styles/box';
-import { Flex } from '../../components/styles/flex';
-import { AppLoadingState } from '../../components/shared/app-loading-state';
+import { ArrowLeft, Baby, ChevronRight, Home, Mail, UserRound, UsersRound } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { api } from '@/lib';
+import { AppLoadingState } from '@/components/shared/app-loading-state';
 
 export default function FamilyDetailPage() {
    const router = useRouter();
@@ -57,12 +48,7 @@ export default function FamilyDetailPage() {
    };
 
    const removeMember = async (member: any) => {
-      if (
-         !window.confirm(
-            `Remove ${member.user?.name ?? 'this invitation'} from the family?`,
-         )
-      )
-         return;
+      if (!window.confirm(`Remove ${member.user?.name ?? 'this invitation'} from the family?`)) return;
       setUpdatingMember(member.id);
       setError(null);
       try {
@@ -87,10 +73,7 @@ export default function FamilyDetailPage() {
       [family, members],
    );
    const invitations = useMemo(
-      () =>
-         members.filter(
-            (member: any) => member.status !== 'accepted' || !member.user?.id,
-         ),
+      () => members.filter((member: any) => member.status !== 'accepted' || !member.user?.id),
       [members],
    );
    const peopleCount = (family?.owner ? 1 : 0) + acceptedMembers.length;
@@ -98,78 +81,63 @@ export default function FamilyDetailPage() {
 
    if (loading)
       return (
-         <Box className="glass-panel admin-empty-state">
+         <div className="glass-panel admin-empty-state">
             <AppLoadingState message="Loading family…" />
-         </Box>
+         </div>
       );
+
    if (error && !family)
       return (
-         <Box className="glass-panel admin-empty-state">
-            <Text color="error">{error}</Text>
-            <Button auto flat onPress={() => router.push('/families')}>
-               Back to families
-            </Button>
-         </Box>
+         <div className="glass-panel admin-empty-state flex flex-col items-center gap-3 py-12 text-center">
+            <p className="text-sm text-red-500">{error}</p>
+            <Button variant="secondary" onClick={() => router.push('/families')}>Back to families</Button>
+         </div>
       );
+
    if (!family) return null;
 
    return (
-      <Box className="admin-page family-detail-page">
-         <button
-            className="admin-back-link"
-            type="button"
-            onClick={() => router.push('/families')}
-         >
+      <div className="admin-page family-detail-page">
+         <button className="admin-back-link" type="button" onClick={() => router.push('/families')}>
             <ArrowLeft size={15} />
             Back to families
          </button>
 
-         {/* ---- Hero with inline stats ---- */}
-         <Box className="glass-panel glass-hero">
-            <Flex
-               justify="between"
-               align="center"
-               css={{ gap: '$5', flexWrap: 'wrap', position: 'relative', zIndex: 1 }}
-            >
-               <Flex align="center" css={{ gap: '$4', minWidth: 0 }}>
+         <div className="glass-panel glass-hero">
+            <div className="relative z-10 flex flex-wrap items-center justify-between gap-5">
+               <div className="flex min-w-0 items-center gap-4">
                   <span className="families-hero-mark">
                      <Home size={20} />
                   </span>
-                  <Box css={{ minWidth: 0 }}>
-                     <Text className="section-kicker">Family #{family.id}</Text>
-                     <Text h2 css={{ m: 0, mt: '$1', fontSize: '1.4rem' }}>
+                  <div className="min-w-0">
+                     <p className="section-kicker">Family #{family.id}</p>
+                     <h2 className="m-0 mt-1 text-[1.4rem] font-semibold">
                         {family.name || `Family #${family.id}`}
-                     </Text>
-                     <Text size="$sm" css={{ color: '$accents7', mt: '$1' }}>
+                     </h2>
+                     <p className="mt-1 text-sm text-muted-foreground">
                         Created{' '}
                         {family.created_at
                            ? new Date(family.created_at).toLocaleDateString()
                            : 'date unavailable'}
-                     </Text>
-                  </Box>
-               </Flex>
+                     </p>
+                  </div>
+               </div>
 
-               {/* Inline stat chips replace the separate metric grid */}
-               <Flex css={{ gap: '$3', flexWrap: 'wrap' }} align="center">
-                  <StatChip
-                     label="Members"
-                     value={peopleCount}
-                     hint="Owner + accepted members"
-                  />
-                  <StatChip
-                     label="Invitations"
-                     value={invitations.length}
-                     hint="Pending or declined"
-                  />
+               <div className="flex flex-wrap items-center gap-3">
+                  <StatChip label="Members" value={peopleCount} hint="Owner + accepted members" />
+                  <StatChip label="Invitations" value={invitations.length} hint="Pending or declined" />
                   <StatChip label="Children" value={childrenCount} hint="Linked children" />
-               </Flex>
-            </Flex>
-         </Box>
+               </div>
+            </div>
+         </div>
 
-         {error && <div className="feedback-error">{error}</div>}
+         {error && (
+            <div className="mt-4 rounded-lg border border-red-300 bg-red-500/10 p-4 text-sm text-red-500">
+               {error}
+            </div>
+         )}
 
          <div className="family-detail-grid">
-            {/* ---- People ---- */}
             <section className="glass-panel family-section">
                <SectionHeader
                   title="Family people"
@@ -187,15 +155,11 @@ export default function FamilyDetailPage() {
                            <small>{family.owner.email || 'Email unavailable'}</small>
                         </div>
                         <div className="family-person-actions">
-                           <Badge color="success" variant="flat">
-                              Owner
-                           </Badge>
+                           <Badge variant="default">Owner</Badge>
                         </div>
                      </article>
                   ) : (
-                     <div className="family-inline-empty">
-                        This family has no linked owner.
-                     </div>
+                     <div className="family-inline-empty">This family has no linked owner.</div>
                   )}
 
                   {acceptedMembers.map((member: any) => (
@@ -214,24 +178,21 @@ export default function FamilyDetailPage() {
                         </div>
                         <div className="family-person-actions">
                            <select
-                              className="family-role-select"
+                              className="family-role-select rounded-md border bg-background px-2 py-1 text-sm"
                               aria-label={`Role for ${member.user?.name ?? 'member'}`}
                               value={member.role ?? ''}
                               disabled={updatingMember === member.id}
-                              onChange={(event) =>
-                                 updateRole(member.id, event.target.value)
-                              }
+                              onChange={(event) => updateRole(member.id, event.target.value)}
                            >
                               <option value="co_parent">Co-parent</option>
                               <option value="third_party">Third party</option>
                            </select>
                            <Button
-                              auto
-                              light
+                              variant="ghost"
                               size="sm"
-                              color="error"
+                              className="text-red-500"
                               disabled={updatingMember === member.id}
-                              onPress={() => removeMember(member)}
+                              onClick={() => removeMember(member)}
                            >
                               Remove
                            </Button>
@@ -240,14 +201,11 @@ export default function FamilyDetailPage() {
                   ))}
 
                   {!acceptedMembers.length && (
-                     <div className="family-inline-empty">
-                        No additional accepted members.
-                     </div>
+                     <div className="family-inline-empty">No additional accepted members.</div>
                   )}
                </div>
             </section>
 
-            {/* ---- Children ---- */}
             <section className="glass-panel family-section">
                <SectionHeader
                   title="Children"
@@ -259,38 +217,32 @@ export default function FamilyDetailPage() {
                      <NextLink
                         href={`/families/${family.id}/children/${child.id}`}
                         key={child.id}
+                        className="family-person-row family-child-link"
                      >
-                        <a className="family-person-row family-child-link">
-                           <span className="family-person-avatar child">
-                              <Baby size={17} />
+                        <span className="family-person-avatar child">
+                           <Baby size={17} />
+                        </span>
+                        <div className="family-person-identity">
+                           <strong>{child.name || 'Unnamed child'}</strong>
+                           <small>
+                              {child.dob
+                                 ? `Born ${new Date(`${child.dob}T00:00:00`).toLocaleDateString()}`
+                                 : 'Date of birth unavailable'}
+                           </small>
+                        </div>
+                        <div className="family-person-actions">
+                           <span className="family-child-open">
+                              View profile <ChevronRight size={15} />
                            </span>
-                           <div className="family-person-identity">
-                              <strong>{child.name || 'Unnamed child'}</strong>
-                              <small>
-                                 {child.dob
-                                    ? `Born ${new Date(
-                                       `${child.dob}T00:00:00`,
-                                    ).toLocaleDateString()}`
-                                    : 'Date of birth unavailable'}
-                              </small>
-                           </div>
-                           <div className="family-person-actions">
-                              <span className="family-child-open">
-                                 View profile <ChevronRight size={15} />
-                              </span>
-                           </div>
-                        </a>
+                        </div>
                      </NextLink>
                   ))}
                   {!childrenCount && (
-                     <div className="family-inline-empty">
-                        No children linked to this family.
-                     </div>
+                     <div className="family-inline-empty">No children linked to this family.</div>
                   )}
                </div>
             </section>
 
-            {/* ---- Invitations (full width) ---- */}
             <section className="glass-panel family-section family-invitations">
                <SectionHeader
                   title="Member invitations"
@@ -305,25 +257,18 @@ export default function FamilyDetailPage() {
                         </span>
                         <div className="family-person-identity">
                            <strong>{member.user?.name ?? 'Pending invitation'}</strong>
-                           <small>
-                              {member.user?.email ??
-                                 'Invite email is not returned by the API'}
-                           </small>
+                           <small>{member.user?.email ?? 'Invite email is not returned by the API'}</small>
                         </div>
                         <div className="family-person-actions">
-                           <Badge
-                              variant="flat"
-                              color={member.status === 'declined' ? 'error' : 'warning'}
-                           >
+                           <Badge variant={member.status === 'declined' ? 'destructive' : 'secondary'}>
                               {member.status ?? 'pending'}
                            </Badge>
                            <Button
-                              auto
-                              light
+                              variant="ghost"
                               size="sm"
-                              color="error"
+                              className="text-red-500"
                               disabled={updatingMember === member.id}
-                              onPress={() => removeMember(member)}
+                              onClick={() => removeMember(member)}
                            >
                               Remove
                            </Button>
@@ -331,78 +276,29 @@ export default function FamilyDetailPage() {
                      </article>
                   ))}
                   {!invitations.length && (
-                     <div className="family-inline-empty">
-                        No pending or declined invitations.
-                     </div>
+                     <div className="family-inline-empty">No pending or declined invitations.</div>
                   )}
                </div>
             </section>
          </div>
-      </Box>
+      </div>
    );
 }
 
-/* ---------- Small shared subcomponents ---------- */
-
-const StatChip = ({
-   label,
-   value,
-   hint,
-}: {
-   label: string;
-   value: number;
-   hint?: string;
-}) => (
-   <Flex
-      direction="column"
-      css={{
-         gap: '2px',
-         px: '$4',
-         py: '$3',
-         borderRadius: '$lg',
-         minWidth: '120px',
-         bg: 'rgba(255,255,255,.04)',
-         border: '1px solid rgba(139,131,255,.18)',
-      }}
-   >
-      <Text
-         size="$xs"
-         css={{
-            color: '$accents7',
-            textTransform: 'uppercase',
-            letterSpacing: '0.06em',
-            fontWeight: 600,
-         }}
-      >
-         {label}
-      </Text>
-      <Text h3 css={{ m: 0, fontSize: '1.25rem', lineHeight: 1.1 }}>
-         {String(value ?? 0)}
-      </Text>
-      {hint && (
-         <Text size="$xs" css={{ color: '$accents7' }}>
-            {hint}
-         </Text>
-      )}
-   </Flex>
+const StatChip = ({ label, value, hint }: { label: string; value: number; hint?: string }) => (
+   <div className="flex min-w-[120px] flex-col gap-0.5 rounded-lg border border-indigo-300/20 bg-white/[0.04] px-4 py-3">
+      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
+      <span className="text-xl font-semibold leading-none">{String(value ?? 0)}</span>
+      {hint && <span className="text-xs text-muted-foreground">{hint}</span>}
+   </div>
 );
 
-const SectionHeader = ({
-   title,
-   hint,
-   count,
-}: {
-   title: string;
-   hint: string;
-   count: number | string;
-}) => (
-   <header className="family-section-header">
-      <div className="family-section-heading">
-         <Text b>{title}</Text>
-         <Text size="$xs" css={{ color: '$accents7' }}>
-            {hint}
-         </Text>
+const SectionHeader = ({ title, hint, count }: { title: string; hint: string; count: number | string }) => (
+   <header className="family-section-header flex items-start justify-between gap-3">
+      <div className="flex flex-col">
+         <span className="text-sm font-semibold">{title}</span>
+         <span className="text-xs text-muted-foreground">{hint}</span>
       </div>
-      <Badge variant="flat">{count}</Badge>
+      <Badge variant="secondary">{count}</Badge>
    </header>
 );

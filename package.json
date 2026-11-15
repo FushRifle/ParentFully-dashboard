@@ -12,25 +12,29 @@
       "lint": "next lint"
    },
    "dependencies": {
-      "@nextui-org/react": "1.0.0-beta.10",
+      "@base-ui/react": "^1.9.0",
       "@react-native-async-storage/async-storage": "^2.2.0",
-      "@stitches/react": "^1.2.8",
       "@supabase/supabase-js": "^2.99.2",
       "@tanstack/react-query": "^5.90.21",
       "apexcharts": "^4.0.0",
       "axios": "^1.13.2",
       "caniuse-lite": "^1.0.30001826",
+      "class-variance-authority": "^0.7.1",
+      "cn": "^0.5.2",
       "date-fns": "^4.1.0",
       "dotenv": "^17.3.1",
-      "framer-motion": "^14.14.0",
       "lodash": "^4.17.23",
       "lucide-react": "^0.562.0",
-      "next": "15.5.29",
+      "next": "16.2.12",
       "next-themes": "^0.2.1",
       "react": "18.2.0",
       "react-apexcharts": "^1.4.0",
       "react-dom": "18.2.0",
-      "tailwind-variants": "^4.0.2"
+      "recharts": "^3.10.1",
+      "shadcn": "^4.23.0",
+      "sonner": "^2.0.8",
+      "tailwind-variants": "^4.0.2",
+      "tw-animate-css": "^1.4.0"
    },
    "devDependencies": {
       "@swc/helpers": "^0.5.21",
@@ -38,9 +42,12 @@
       "@types/node": "18.7.18",
       "@types/react": "18.0.20",
       "@types/react-dom": "18.0.6",
+      "autoprefixer": "^10.6.2",
       "eslint": "9.7.0",
-      "eslint-config-next": "15.5.29",
-      "typescript": "4.8.3"
+      "eslint-config-next": "^16.2.12",
+      "postcss": "^8.5.33",
+      "tailwindcss": "^4.3.5",
+      "typescript": "7.0.2"
    },
    "packageManager": "yarn@4.18.0"
 }

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, Text, Badge } from '@nextui-org/react';
-import { Flex } from '../styles/flex';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { AnalyticsMetric } from './data';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
@@ -21,64 +21,44 @@ export const MetricCard: React.FC<MetricCardProps> = ({ metric, compact = false 
           }
      };
 
-     const getChangeColor = () => {
+     const getChangeVariant = (): 'default' | 'secondary' | 'destructive' | 'outline' => {
           switch (metric.changeType) {
                case 'increase':
-                    return 'success';
-               case 'decrease':
-                    return 'error';
-               default:
                     return 'default';
+               case 'decrease':
+                    return 'destructive';
+               default:
+                    return 'secondary';
           }
      };
 
      return (
           <Card
-               css={{
-                    p: compact ? '$4' : '$6',
-                    height: '100%',
-                    borderLeft: `4px solid ${metric.color}`
-               }}
-               variant="flat"
+               className={`h-full ${compact ? 'p-4' : 'p-6'}`}
+               style={{ borderLeft: `4px solid ${metric.color}` }}
           >
-               <Card.Body>
-                    <Flex direction="column" css={{ gap: compact ? '$2' : '$4' }}>
-                         <Flex justify="between" align="center">
-                              <Text size="$sm" color="$accents7" css={{ fontWeight: 500 }}>
-                                   {metric.name}
-                              </Text>
-                              <Badge
-                                   size="xs"
-                                   variant="flat"
-                                   color={getChangeColor()}
-                                   css={{ gap: '$1' }}
-                              >
-                                   {getChangeIcon()}
-                                   <Text size="$xs">
-                                        {metric.change > 0 ? '+' : ''}{metric.change}%
-                                   </Text>
-                              </Badge>
-                         </Flex>
+               <CardContent className="flex flex-col gap-4 p-0">
+                    <div className="flex items-center justify-between">
+                         <span className="text-sm font-medium text-muted-foreground">{metric.name}</span>
+                         <Badge variant={getChangeVariant()} className="gap-1">
+                              {getChangeIcon()}
+                              <span className="text-xs">
+                                   {metric.change > 0 ? '+' : ''}
+                                   {metric.change}%
+                              </span>
+                         </Badge>
+                    </div>
 
-                         <Flex align="center" css={{ gap: '$3' }}>
-                              <Text
-                                   css={{
-                                        fontSize: compact ? '$xl' : '$2xl',
-                                        fontWeight: '$bold',
-                                        lineHeight: 1
-                                   }}
-                              >
-                                   {metric.value}
-                              </Text>
-                         </Flex>
+                    <div className="flex items-center gap-3">
+                         <span className={`font-bold leading-none ${compact ? 'text-xl' : 'text-2xl'}`}>
+                              {metric.value}
+                         </span>
+                    </div>
 
-                         {!compact && (
-                              <Text size="$xs" color="$accents7">
-                                   Compared to previous period
-                              </Text>
-                         )}
-                    </Flex>
-               </Card.Body>
+                    {!compact && (
+                         <span className="text-xs text-muted-foreground">Compared to previous period</span>
+                    )}
+               </CardContent>
           </Card>
      );
 };

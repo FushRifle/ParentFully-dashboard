@@ -18,7 +18,7 @@ import {
      Col,
      Spacer,
      Badge
-} from '@nextui-org/react';
+} from '@/components/ui/legacy';
 
 interface SmartFieldProps {
      label: string;

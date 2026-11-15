@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { BackendCollectionPage } from '../../../components/shared/backend-collection-page';
+import { BackendCollectionPage } from '@/components/shared/backend-collection-page';
 
 export default function PlanRulesPage() {
    const router = useRouter();

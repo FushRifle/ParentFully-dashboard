@@ -1,24 +1,14 @@
 import '../styles/globals.css';
 import type { AppProps } from 'next/app';
-import { createTheme, NextUIProvider } from '@nextui-org/react';
 import { ThemeProvider as NextThemesProvider } from 'next-themes';
-import { Layout } from '../components/layout/layout';
-import { GoalBackground } from '../constants/GoalBackground';
-import { AuthProvider, useAuth } from '../lib/context/authContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { PageSearchProvider } from '../lib/context/searchContext';
-
-// NextUI themes
-const lightTheme = createTheme({
-   type: 'light',
-   theme: { colors: { primary: '#3f3bef' } },
-});
-const darkTheme = createTheme({
-   type: 'dark',
-   theme: { colors: { primary: '#3f3bef' } },
-});
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { Layout } from '@/components/layout/layout';
+import { GoalBackground } from '@/constants/GoalBackground';
+import { AuthProvider, useAuth } from '@/lib/context/authContext';
+import { PageSearchProvider } from '@/lib/context/searchContext';
 
 const AuthGuard = ({ children }: { children: React.ReactNode }) => {
    const { user, isLoading } = useAuth();
@@ -35,25 +25,25 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
 
 export default function MyApp({ Component, pageProps }: AppProps) {
    const router = useRouter();
-   // One cache per app/request keeps SSR requests isolated from each other.
-   const [queryClient] = useState(() => new QueryClient({
-      defaultOptions: {
-         queries: { staleTime: 60 * 1000, gcTime: 10 * 60 * 1000, refetchOnWindowFocus: false, retry: 1 },
-      },
-   }));
-
-   const isAuthPage = ['/login'].some((path) =>
-      router.pathname.startsWith(path)
+   const [queryClient] = useState(
+      () =>
+         new QueryClient({
+            defaultOptions: {
+               queries: {
+                  staleTime: 60 * 1000,
+                  gcTime: 10 * 60 * 1000,
+                  refetchOnWindowFocus: false,
+                  retry: 1,
+               },
+            },
+         }),
    );
 
+   const isAuthPage = ['/login'].some((path) => router.pathname.startsWith(path));
+
    return (
-      <NextThemesProvider
-         defaultTheme="system"
-         enableSystem
-         attribute="class"
-         value={{ light: lightTheme.className, dark: darkTheme.className }}
-      >
-         <NextUIProvider>
+      <NextThemesProvider defaultTheme="system" enableSystem attribute="class">
+         <TooltipProvider>
             <QueryClientProvider client={queryClient}>
                <AuthProvider>
                   {isAuthPage ? (
@@ -71,7 +61,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
                   )}
                </AuthProvider>
             </QueryClientProvider>
-         </NextUIProvider>
+         </TooltipProvider>
       </NextThemesProvider>
    );
 }

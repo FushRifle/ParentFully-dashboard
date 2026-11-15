@@ -4,9 +4,7 @@ const nextConfig = {
   staticPageGenerationTimeout: 180,
   experimental: {
     cpus: 1,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
+    useTypeScriptCli: true,
   },
   typescript: {
     ignoreBuildErrors: true,

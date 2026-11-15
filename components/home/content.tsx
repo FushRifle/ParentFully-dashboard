@@ -135,11 +135,7 @@ export const Content = () => {
                      return (
                         <NextLink
                            href={action.href}
-                           passHref
-                           legacyBehavior
                            key={action.label}
-                        >
-                           <a
                               className="overview-quick-card"
                               style={
                                  { '--quick-color': action.color } as React.CSSProperties
@@ -163,9 +159,9 @@ export const Content = () => {
                                     <Image
                                        src={action.illustration}
                                        alt=""
-                                       layout="fill"
-                                       objectFit="contain"
-                                       objectPosition="right bottom"
+                                       fill
+                                       sizes="(max-width: 720px) 140px, 12vw"
+                                       style={{ objectFit: 'contain', objectPosition: 'right bottom' }}
                                        loading="lazy"
                                     />
                                  ) : (
@@ -179,7 +175,6 @@ export const Content = () => {
                                  className="overview-quick-arrow"
                                  size={15}
                               />
-                           </a>
                         </NextLink>
                      );
                   })}
@@ -197,7 +192,7 @@ export const Content = () => {
                         <p>Latest sessions recorded by analytics</p>
                      </div>
                   </div>
-                  <Flex align="center" css={{ gap: '$3' }}>{overview.data?.sessions?.length ? <TableExport rows={overview.data.sessions} filename="recent-app-sessions" title="Recent app sessions" columns={[{ key: 'user_name', label: 'User' }, { key: 'user_email', label: 'Email' }, { key: 'platform', label: 'Platform' }, { key: 'last_screen', label: 'Last screen', value: (session) => formatScreenName(session.last_screen) }, { key: 'duration_seconds', label: 'Duration', value: (session) => formatDuration(session.duration_seconds) }, { key: 'opened_at', label: 'Opened' }]} /> : null}<NextLink href="/analytics" passHref legacyBehavior><a className="overview-panel-link">View analytics <ArrowRight size={14} /></a></NextLink></Flex>
+                  <Flex align="center" css={{ gap: '$3' }}>{overview.data?.sessions?.length ? <TableExport rows={overview.data.sessions} filename="recent-app-sessions" title="Recent app sessions" columns={[{ key: 'user_name', label: 'User' }, { key: 'user_email', label: 'Email' }, { key: 'platform', label: 'Platform' }, { key: 'last_screen', label: 'Last screen', value: (session) => formatScreenName(session.last_screen) }, { key: 'duration_seconds', label: 'Duration', value: (session) => formatDuration(session.duration_seconds) }, { key: 'opened_at', label: 'Opened' }]} /> : null}<NextLink href="/analytics" className="overview-panel-link">View analytics <ArrowRight size={14} /></NextLink></Flex>
                </header>
                {overview.isLoading ? (
                   <PanelSkeleton />

@@ -1,6 +1,4 @@
 import React from 'react';
-import { Flex } from '../styles/flex';
-import { Text } from '@nextui-org/react';
 
 interface SidebarMenuProps {
    title: string;
@@ -11,28 +9,15 @@ interface SidebarMenuProps {
 
 export const SidebarMenu = ({ title, compact = false, children }: SidebarMenuProps) => {
    return (
-      <Flex direction="column" css={{ mb: '$4' }}>
-         {!compact && <Flex
-            align="center"
-            css={{
-               px: '$4',
-               pb: '$2',
-               userSelect: 'none',
-            }}
-         >
-            <Text
-               size="11px"
-               weight="semibold"
-               css={{
-                  color: 'var(--pf-text-subtle)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-               }}
-            >
-               {title}
-            </Text>
-         </Flex>}
-         <Flex direction="column" css={{ gap: '3px' }}>{children}</Flex>
-      </Flex>
+      <div className="mb-4 flex flex-col">
+         {!compact && (
+            <div className="flex select-none items-center px-4 pb-2">
+               <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  {title}
+               </span>
+            </div>
+         )}
+         <div className="flex flex-col gap-[3px]">{children}</div>
+      </div>
    );
 };

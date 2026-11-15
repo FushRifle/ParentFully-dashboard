@@ -1,9 +1,8 @@
 import React from 'react';
-import { Text, Button, Badge, Tooltip } from '@nextui-org/react';
-import { Flex } from '../../components/styles/flex';
-import { Box } from '../../components/styles/box';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { User } from '@/types/api';
-import ChatAvatarWrapper from '../Avatar/ChatAvatarWrapper';
+import ChatAvatarWrapper from '@/components/Avatar/ChatAvatarWrapper';
 
 interface ChatHeaderProps {
      user: User;
@@ -20,55 +19,17 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
      onViewDetails,
      isClosed = false,
      isAgent = false,
-     showOnlineStatus = true
+     showOnlineStatus = true,
 }) => {
-
-     const formatLastSeen = () => {
-          return 'Active now';
-     };
-
-     const handleCloseTicket = () => {
-          if (onCloseTicket) {
-               onCloseTicket();
-          }
-     };
-
      const handleViewDetails = () => {
-          if (onViewDetails) {
-               onViewDetails();
-          } else {
-               console.log('View details clicked for user:', user.id);
-          }
+          if (onViewDetails) onViewDetails();
+          else console.log('View details clicked for user:', user.id);
      };
 
      return (
-          <Flex
-               align="center"
-               justify="between"
-               css={{
-                    p: '$6',
-                    '@sm': { p: '$8' },
-                    bg: '$background',
-                    borderBottom: '1px solid $border',
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 10,
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
-               }}
-          >
-               <Flex align="center" css={{ gap: '$4' }}>
-                    <Badge
-                         variant={showOnlineStatus ? "dot" : "flat"}
-                         placement="bottom-right"
-                         color="default"
-                         size="md"
-                         css={{
-                              '& .nextui-badge': {
-                                   transform: 'scale(1)',
-                                   border: '2px solid $background'
-                              }
-                         }}
-                    >
+          <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-background p-6 shadow-sm sm:p-8">
+               <div className="flex items-center gap-4">
+                    <div className="relative">
                          <ChatAvatarWrapper
                               profile_image={user?.user?.profile_image as any}
                               contactName={user?.user?.name}
@@ -78,86 +39,59 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
                               borderWidth={2}
                               borderColor={isAgent ? '#17C964' : '#F5A623'}
                          />
-                    </Badge>
+                         {showOnlineStatus && (
+                              <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-background bg-emerald-500" />
+                         )}
+                    </div>
 
-                    <Box>
-                         <Flex align="center" css={{ gap: '$2', mb: '$2' }}>
-                              <Text b size="$md" css={{ lineHeight: 1 }}>
+                    <div>
+                         <div className="mb-2 flex items-center gap-2">
+                              <span className="text-base font-semibold leading-none">
                                    {user?.user?.name || 'Support User'}
-                              </Text>
+                              </span>
                               {isAgent && (
-                                   <Badge size="xs" color="success" variant="flat">
-                                        Agent
-                                   </Badge>
+                                   <Badge variant="secondary" className="text-xs">Agent</Badge>
                               )}
-                         </Flex>
+                         </div>
 
-                         <Flex align="center" css={{ gap: '$4' }}>
-                              <Text size="$xs" color="$accents7">
+                         <div className="flex items-center gap-4">
+                              <span className="text-xs text-muted-foreground">
                                    {user?.email || 'No email provided'}
-                              </Text>
+                              </span>
                               {showOnlineStatus && (
                                    <>
-                                        <Text size="$xs" color="$accents5">•</Text>
-                                        <Text
-                                             size="$xs"
-                                             color="$success"
-                                             css={{
-                                                  display: 'flex',
-                                                  alignItems: 'center',
-                                                  gap: '$1'
-                                             }}
-                                        >
-                                             <Badge
-                                                  variant="dot"
-                                                  color="primary"
-                                                  size="xs"
-                                                  css={{ mr: '$1' }}
-                                             />
-                                             {formatLastSeen()}
-                                        </Text>
+                                        <span className="text-xs text-muted-foreground">•</span>
+                                        <span className="flex items-center gap-1 text-xs text-emerald-500">
+                                             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                             Active now
+                                        </span>
                                    </>
                               )}
-                         </Flex>
-                    </Box>
-               </Flex>
+                         </div>
+                    </div>
+               </div>
 
-               <Flex align="center" css={{ gap: '$2' }}>
+               <div className="flex items-center gap-2">
                     {!isClosed && (
-                         <Tooltip content="Close this ticket" placement="bottom">
-                              <Button
-                                   size="sm"
-                                   flat
-                                   color="error"
-                                   auto
-                                   onPress={handleCloseTicket}
-                                   css={{
-                                        minWidth: 'auto',
-                                        '@sm': { minWidth: '100px' }
-                                   }}
-                              >
-                                   Close
-                              </Button>
-                         </Tooltip>
-                    )}
-
-                    <Tooltip content="View user details" placement="bottom">
                          <Button
                               size="sm"
-                              light
-                              color="primary"
-                              auto
-                              onPress={handleViewDetails}
-                              css={{
-                                   minWidth: 'auto',
-                                   '@sm': { minWidth: '100px' }
-                              }}
+                              variant="destructive"
+                              onClick={onCloseTicket}
+                              className="min-w-auto sm:min-w-[100px]"
                          >
-                              Details
+                              Close
                          </Button>
-                    </Tooltip>
-               </Flex>
-          </Flex>
+                    )}
+                    <Button
+                         size="sm"
+                         variant="ghost"
+                         onClick={handleViewDetails}
+                         className="min-w-auto sm:min-w-[100px]"
+                    >
+                         Details
+                    </Button>
+               </div>
+          </div>
      );
 };
 

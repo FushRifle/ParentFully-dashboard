@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import {
      Card, Text, Button, Avatar,
      Badge, Progress, Grid, Divider
-} from '@nextui-org/react';
+} from '@/components/ui/legacy';
 
 import { Tabs } from '../styles/tabs';
 import { Flex } from '../styles/flex';

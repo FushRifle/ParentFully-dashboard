@@ -1,10 +1,15 @@
 import React from 'react';
-import { Card, Avatar, Badge, Text, Button, Divider } from '@nextui-org/react';
-import { Flex } from '../styles/flex';
-import { Box } from '../styles/box';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+     DropdownMenu,
+     DropdownMenuContent,
+     DropdownMenuItem,
+     DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { TeamMember } from './data';
 import { MoreVertical, Mail, Phone, UserCheck, UserX, Edit } from 'lucide-react';
-import { Dropdown } from '../styles/dropdown';
 
 interface TeamCardProps {
      member: TeamMember;
@@ -18,168 +23,147 @@ export const TeamCard: React.FC<TeamCardProps> = ({
      member,
      onEdit,
      onRemove,
-     onChangeRole,
-     onChangeStatus
+     onChangeStatus,
 }) => {
-     const getStatusColor = (status: TeamMember['status']) => {
+     const getStatusVariant = (status: TeamMember['status']): 'default' | 'secondary' | 'destructive' | 'outline' => {
           switch (status) {
-               case 'active': return 'success';
-               case 'inactive': return 'error';
-               case 'pending': return 'warning';
-               default: return 'default';
+               case 'active':
+                    return 'default';
+               case 'inactive':
+                    return 'destructive';
+               case 'pending':
+                    return 'secondary';
+               default:
+                    return 'outline';
           }
      };
 
-     const getRoleColor = (role: TeamMember['role']) => {
+     const getRoleVariant = (role: TeamMember['role']): 'default' | 'secondary' | 'destructive' | 'outline' => {
           switch (role) {
-               case 'admin': return 'primary';
-               case 'editor': return 'secondary';
-               case 'viewer': return 'warning';
-               case 'support': return 'gradient';
-               case 'billing': return 'error';
-               default: return 'default';
+               case 'admin':
+                    return 'default';
+               case 'editor':
+                    return 'secondary';
+               case 'viewer':
+                    return 'outline';
+               case 'support':
+                    return 'secondary';
+               case 'billing':
+                    return 'destructive';
+               default:
+                    return 'outline';
           }
      };
-
-     // Dropdown items configuration
-     const dropdownItems = [
-          {
-               key: 'edit',
-               label: 'Edit Member',
-               icon: <Edit size={16} />,
-               onClick: () => onEdit?.(member)
-          },
-          {
-               key: 'status',
-               label: member.status === 'active' ? 'Deactivate' : 'Activate',
-               icon: member.status !== 'active' ? <UserCheck size={16} /> : <UserX size={16} />,
-               color: member.status === 'active' ? 'warning' : 'success' as const,
-               onClick: () => onChangeStatus?.(member, member.status === 'active' ? 'inactive' : 'active')
-          },
-          {
-               key: 'remove',
-               label: 'Remove from Team',
-               icon: <UserX size={16} />,
-               color: 'error' as const,
-               onClick: () => onRemove?.(member)
-          }
-     ];
 
      return (
-          <Card css={{ p: '$6', mw: '100%' }} variant="flat">
-               <Card.Body>
-                    <Flex justify="between" align="start">
-                         <Flex css={{ gap: '$6' }}>
-                              <Avatar
-                                   src={member.avatar}
-                                   size="lg"
-                                   bordered
-                                   color={getStatusColor(member.status) as any}
-                              />
-                              <Flex direction="column" css={{ gap: '$2' }}>
-                                   <Flex align="center" css={{ gap: '$3' }}>
-                                        <Text b>{member.name}</Text>
-                                        <Badge
-                                             size="sm"
-                                             variant="flat"
-                                             color={getStatusColor(member.status)}
-                                        >
-                                             {member.status}
-                                        </Badge>
-                                   </Flex>
+          <Card className="p-6">
+               <CardContent className="p-0">
+                    <div className="flex items-start justify-between">
+                         <div className="flex gap-6">
+                              <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border-2 border-muted">
+                                   {member.avatar ? (
+                                        <img src={member.avatar} alt={member.name} className="h-full w-full object-cover" />
+                                   ) : (
+                                        <span className="text-lg font-semibold text-muted-foreground">
+                                             {member.name.charAt(0)}
+                                        </span>
+                                   )}
+                              </div>
+                              <div className="flex flex-col gap-2">
+                                   <div className="flex items-center gap-3">
+                                        <span className="font-semibold">{member.name}</span>
+                                        <Badge variant={getStatusVariant(member.status)}>{member.status}</Badge>
+                                   </div>
 
-                                   <Flex align="center" css={{ gap: '$2' }}>
+                                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                         <Mail size={14} />
-                                        <Text size="$sm" color="$accents7">
-                                             {member.email}
-                                        </Text>
-                                   </Flex>
+                                        {member.email}
+                                   </div>
 
                                    {member.phone && (
-                                        <Flex align="center" css={{ gap: '$2' }}>
+                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                              <Phone size={14} />
-                                             <Text size="$sm" color="$accents7">
-                                                  {member.phone}
-                                             </Text>
-                                        </Flex>
+                                             {member.phone}
+                                        </div>
                                    )}
 
                                    {member.department && (
-                                        <Badge size="xs" variant="flat" css={{ alignSelf: 'flex-start' }}>
+                                        <Badge variant="secondary" className="w-fit text-xs">
                                              {member.department}
                                         </Badge>
                                    )}
-                              </Flex>
-                         </Flex>
+                              </div>
+                         </div>
 
-                         {/* Custom Dropdown */}
-                         <Dropdown
-                              items={dropdownItems as any}
-                              placement="bottom-right"
-                              trigger="click"
-                         >
-                              <Button
-                                   auto
-                                   light
-                                   css={{
-                                        minWidth: 'auto',
-                                        px: '$2',
-                                        '&:hover': {
-                                             bg: '$accents0'
-                                        }
-                                   }}
-                              >
+                         <DropdownMenu>
+                              <DropdownMenuTrigger className="rounded-md p-2 hover:bg-muted">
                                    <MoreVertical size={20} />
-                              </Button>
-                         </Dropdown>
-                    </Flex>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                   <DropdownMenuItem onClick={() => onEdit?.(member)}>
+                                        <Edit size={16} className="mr-2" />
+                                        Edit Member
+                                   </DropdownMenuItem>
+                                   <DropdownMenuItem
+                                        onClick={() =>
+                                             onChangeStatus?.(member, member.status === 'active' ? 'inactive' : 'active')
+                                        }
+                                   >
+                                        {member.status !== 'active' ? (
+                                             <UserCheck size={16} className="mr-2" />
+                                        ) : (
+                                             <UserX size={16} className="mr-2" />
+                                        )}
+                                        {member.status === 'active' ? 'Deactivate' : 'Activate'}
+                                   </DropdownMenuItem>
+                                   <DropdownMenuItem onClick={() => onRemove?.(member)} className="text-red-500">
+                                        <UserX size={16} className="mr-2" />
+                                        Remove from Team
+                                   </DropdownMenuItem>
+                              </DropdownMenuContent>
+                         </DropdownMenu>
+                    </div>
 
-                    <Divider y={1.5} />
+                    <div className="my-4 h-px bg-border" />
 
-                    <Flex justify="between" align="center">
-                         <Flex direction="column" css={{ gap: '$1' }}>
-                              <Text size="$xs" color="$accents7">Role</Text>
-                              <Badge
-                                   size="sm"
-                                   variant="flat"
-                                   color={getRoleColor(member.role) as any}
-                              >
+                    <div className="flex items-center justify-between">
+                         <div className="flex flex-col gap-1">
+                              <span className="text-xs text-muted-foreground">Role</span>
+                              <Badge variant={getRoleVariant(member.role)}>
                                    {member.role.charAt(0).toUpperCase() + member.role.slice(1)}
                               </Badge>
-                         </Flex>
+                         </div>
 
-                         <Flex direction="column" css={{ gap: '$1', alignItems: 'flex-end' }}>
-                              <Text size="$xs" color="$accents7">Joined</Text>
-                              <Text size="$sm">{member.joinDate}</Text>
-                         </Flex>
+                         <div className="flex flex-col items-end gap-1">
+                              <span className="text-xs text-muted-foreground">Joined</span>
+                              <span className="text-sm">{member.joinDate}</span>
+                         </div>
 
-                         <Flex direction="column" css={{ gap: '$1', alignItems: 'flex-end' }}>
-                              <Text size="$xs" color="$accents7">Last Active</Text>
-                              <Text size="$sm" color="$accents7">{member.lastActive}</Text>
-                         </Flex>
-                    </Flex>
+                         <div className="flex flex-col items-end gap-1">
+                              <span className="text-xs text-muted-foreground">Last Active</span>
+                              <span className="text-sm text-muted-foreground">{member.lastActive}</span>
+                         </div>
+                    </div>
 
                     {member.permissions && member.permissions.length > 0 && (
                          <>
-                              <Divider y={1.5} />
-                              <Text size="$xs" color="$accents7" css={{ mb: '$2' }}>
-                                   Permissions
-                              </Text>
-                              <Flex wrap="wrap" css={{ gap: '$2' }}>
+                              <div className="my-4 h-px bg-border" />
+                              <span className="mb-2 block text-xs text-muted-foreground">Permissions</span>
+                              <div className="flex flex-wrap gap-2">
                                    {member.permissions.slice(0, 3).map((permission, index) => (
-                                        <Badge key={index} size="xs" variant="flat" color="default">
+                                        <Badge key={index} variant="secondary" className="text-xs">
                                              {permission.replace(/_/g, ' ')}
                                         </Badge>
                                    ))}
                                    {member.permissions.length > 3 && (
-                                        <Badge size="xs" variant="flat" color="default">
+                                        <Badge variant="outline" className="text-xs">
                                              +{member.permissions.length - 3} more
                                         </Badge>
                                    )}
-                              </Flex>
+                              </div>
                          </>
                     )}
-               </Card.Body>
+               </CardContent>
           </Card>
      );
 };

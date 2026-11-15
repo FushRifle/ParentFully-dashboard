@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box } from '../styles/box';
 import { Flex } from '../styles/flex';
-import { Text, Link, Button, Card, Divider, Avatar } from '@nextui-org/react';
+import { Text, Link, Button, Card, Divider, Avatar } from '@/components/ui/legacy';
 
 export const CommunityNewsFeed = () => (
      <Card variant="flat" css={{ bg: '$background', border: '1px solid $border', p: '$4' }}>

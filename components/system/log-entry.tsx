@@ -1,109 +1,59 @@
 import React from 'react';
-import { Card, Text } from '@nextui-org/react';
-import { Flex } from '../styles/flex';
-import { Box } from '../styles/box';
 import { LogEntry } from './data';
-import { Info, AlertTriangle, AlertCircle, Clock, Badge } from 'lucide-react';
+import { Info, AlertTriangle, AlertCircle, Clock } from 'lucide-react';
 
 interface LogEntryProps {
      log: LogEntry;
      showTimestamp?: boolean;
 }
 
-export const LogEntryComponent: React.FC<LogEntryProps> = ({
-     log,
-     showTimestamp = true
-}) => {
+export const LogEntryComponent: React.FC<LogEntryProps> = ({ log, showTimestamp = true }) => {
      const getLevelConfig = () => {
           switch (log.level) {
                case 'info':
-                    return {
-                         icon: <Info size={14} />,
-                         color: '#3f3bef',
-                         bg: '#3f3bef10'
-                    };
+                    return { icon: <Info size={14} />, color: '#3f3bef', bg: '#3f3bef10' };
                case 'warning':
-                    return {
-                         icon: <AlertTriangle size={14} />,
-                         color: '#f59e0b',
-                         bg: '#f59e0b10'
-                    };
+                    return { icon: <AlertTriangle size={14} />, color: '#f59e0b', bg: '#f59e0b10' };
                case 'error':
-                    return {
-                         icon: <AlertCircle size={14} />,
-                         color: '#ef4444',
-                         bg: '#ef444410'
-                    };
+                    return { icon: <AlertCircle size={14} />, color: '#ef4444', bg: '#ef444410' };
                default:
-                    return {
-                         icon: <Info size={14} />,
-                         color: '#6b7280',
-                         bg: '#6b728010'
-                    };
+                    return { icon: <Info size={14} />, color: '#6b7280', bg: '#6b728010' };
           }
      };
 
      const levelConfig = getLevelConfig();
 
      return (
-          <Flex
-               align="start"
-               css={{
-                    p: '$3',
-                    borderBottom: '1px solid $border',
-                    '&:last-child': { borderBottom: 'none' }
-               }}
-          >
-               <Box
-                    css={{
-                         flexShrink: 0,
-                         width: '24px',
-                         height: '24px',
-                         borderRadius: '$sm',
-                         bg: levelConfig.bg,
-                         display: 'flex',
-                         alignItems: 'center',
-                         justifyContent: 'center',
-                         mr: '$3'
-                    }}
+          <div className="flex items-start border-b p-3 last:border-b-0">
+               <div
+                    className="mr-3 flex h-6 w-6 shrink-0 items-center justify-center rounded"
+                    style={{ background: levelConfig.bg, color: levelConfig.color }}
                >
-                    <Box css={{ color: levelConfig.color }}>
-                         {levelConfig.icon}
-                    </Box>
-               </Box>
+                    {levelConfig.icon}
+               </div>
 
-               <Box css={{ flex: 1 }}>
-                    <Flex justify="between" align="start" css={{ mb: '$1' }}>
-                         <Flex align="center" css={{ gap: '$2' }}>
-                              <Text size="$sm" css={{ fontWeight: 500 }}>
-                                   {log.service}
-                              </Text>
-                              <Badge
-                                   size="xs"
-                                   style={{
-                                        background: levelConfig.bg,
-                                        color: levelConfig.color,
-                                        textTransform: 'uppercase'
-                                   }}
+               <div className="flex-1">
+                    <div className="mb-1 flex items-start justify-between">
+                         <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium">{log.service}</span>
+                              <span
+                                   className="rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase"
+                                   style={{ background: levelConfig.bg, color: levelConfig.color }}
                               >
                                    {log.level}
-                              </Badge>
-                         </Flex>
+                              </span>
+                         </div>
 
                          {showTimestamp && (
-                              <Flex align="center" css={{ gap: '$1' }}>
-                                   <Clock size={12} color="$accents7" />
-                                   <Text size="$xs" color="$accents7">
-                                        {log.timestamp.split(' ')[1]}
-                                   </Text>
-                              </Flex>
+                              <div className="flex items-center gap-1">
+                                   <Clock size={12} className="text-muted-foreground" />
+                                   <span className="text-xs text-muted-foreground">{log.timestamp.split(' ')[1]}</span>
+                              </div>
                          )}
-                    </Flex>
+                    </div>
 
-                    <Text size="$sm" color="$accents7">
-                         {log.message}
-                    </Text>
-               </Box>
-          </Flex>
+                    <p className="text-sm text-muted-foreground">{log.message}</p>
+               </div>
+          </div>
      );
 };

@@ -1,171 +1,50 @@
-import React from 'react';
-import { Card, Text, Tooltip } from '@nextui-org/react';
-import { Flex } from '../styles/flex';
-import { Box } from '../styles/box';
+'use client';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { BarChartData } from '../analytics/data';
 
-interface BarChartProps {
+interface Props {
      data: BarChartData[];
      height?: number;
-     showValues?: boolean;
      title?: string;
 }
 
-export const BarChart: React.FC<BarChartProps> = ({
-     data,
-     height = 200,
-     showValues = true,
-     title
-}) => {
-     const maxValue = Math.max(...data.map(d => d.value));
-     const barWidth = 100 / data.length - 2;
-     const chartHeight = height - 40;
+export const BarChartComponent: React.FC<Props> = ({ data, height = 250, title }) => {
+     // Transform your data: Recharts expects an array of objects, each with a key for the x-axis and the value.
+     const chartData = data.map((item) => ({
+          label: item.label,
+          value: item.value,
+          fill: item.color, // Use the color from your data for each bar
+     }));
+
+     const chartConfig = {
+          value: { label: 'Value' },
+     } satisfies ChartConfig;
 
      return (
-          <Card css={{ p: '$6' }} variant="flat">
+          <Card>
                {title && (
-                    <Card.Header>
-                         <Text h4>{title}</Text>
-                    </Card.Header>
+                    <CardHeader>
+                         <h4 className="text-lg font-semibold">{title}</h4>
+                    </CardHeader>
                )}
-
-               <Card.Body>
-                    <Box css={{ position: 'relative', height: `${height}px` }}>
-                         {/* Bars */}
-                         <Flex
-                              align="end"
-                              css={{
-                                   height: `${chartHeight}px`,
-                                   gap: '2%',
-                                   position: 'relative',
-                                   zIndex: 1
-                              }}
-                         >
-                              {data.map((item, index) => {
-                                   const barHeight = (item.value / maxValue) * chartHeight;
-
-                                   return (
-                                        <Tooltip
-                                             key={index}
-                                             content={
-                                                  <Box css={{ p: '$2' }}>
-                                                       <Text size="$sm">{item.label}</Text>
-                                                       <Text b size="$sm">{item.value.toLocaleString()}</Text>
-                                                  </Box>
-                                             }
-                                             placement="top"
-                                        >
-                                             <Box
-                                                  css={{
-                                                       flex: 1,
-                                                       height: `${barHeight}px`,
-                                                       bg: item.color,
-                                                       borderRadius: '$sm',
-                                                       cursor: 'pointer',
-                                                       transition: 'all 0.2s ease',
-                                                       '&:hover': {
-                                                            opacity: 0.8,
-                                                            transform: 'translateY(-2px)'
-                                                       }
-                                                  }}
-                                             />
-                                        </Tooltip>
-                                   );
-                              })}
-                         </Flex>
-
-                         {/* X-axis labels */}
-                         <Flex
-                              justify="between"
-                              css={{
-                                   position: 'absolute',
-                                   bottom: '-20px',
-                                   left: '0',
-                                   right: '0',
-                                   mt: '$2'
-                              }}
-                         >
-                              {data.map((item, index) => (
-                                   <Text
-                                        key={index}
-                                        size="$xs"
-                                        color="$accents7"
-                                        css={{
-                                             textAlign: 'center',
-                                             flex: 1,
-                                             transform: 'rotate(-45deg)',
-                                             transformOrigin: 'top left',
-                                             whiteSpace: 'nowrap'
-                                        }}
-                                   >
-                                        {item.label}
-                                   </Text>
-                              ))}
-                         </Flex>
-
-                         {/* Y-axis grid lines */}
-                         <Box
-                              css={{
-                                   position: 'absolute',
-                                   top: 0,
-                                   left: 0,
-                                   right: 0,
-                                   bottom: 0,
-                                   display: 'flex',
-                                   flexDirection: 'column',
-                                   justifyContent: 'space-between'
-                              }}
-                         >
-                              {[0, 0.25, 0.5, 0.75, 1].map((ratio, index) => (
-                                   <Box
-                                        key={index}
-                                        css={{
-                                             width: '100%',
-                                             height: '1px',
-                                             bg: '$accents1'
-                                        }}
-                                   />
-                              ))}
-                         </Box>
-
-                         {/* Y-axis labels */}
-                         <Flex
-                              direction="column"
-                              justify="between"
-                              css={{
-                                   position: 'absolute',
-                                   top: '0',
-                                   left: '-40px',
-                                   bottom: '0',
-                                   width: '30px'
-                              }}
-                         >
-                              {[1, 0.75, 0.5, 0.25, 0].map((ratio, index) => (
-                                   <Text key={index} size="$xs" color="$accents7" css={{ textAlign: 'right' }}>
-                                        {Math.round(maxValue * ratio).toLocaleString()}
-                                   </Text>
-                              ))}
-                         </Flex>
-                    </Box>
-
-                    {/* Value labels on bars */}
-                    {showValues && (
-                         <Flex justify="between" css={{ mt: '$2' }}>
-                              {data.map((item, index) => (
-                                   <Text
-                                        key={index}
-                                        size="$xs"
-                                        color="$accents7"
-                                        css={{ textAlign: 'center', flex: 1 }}
-                                   >
-                                        {item.value > 1000
-                                             ? `${(item.value / 1000).toFixed(1)}k`
-                                             : item.value}
-                                   </Text>
-                              ))}
-                         </Flex>
-                    )}
-               </Card.Body>
+               <CardContent>
+                    <ChartContainer config={chartConfig} className="w-full" style={{ height }}>
+                         <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+                              <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                              <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} />
+                              <YAxis tickLine={false} axisLine={false} tickMargin={8} />
+                              <ChartTooltip content={<ChartTooltipContent hideLabel />} />
+                              {/* Using Cell to color each bar individually based on your data */}
+                              <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                                   {chartData.map((entry, index) => (
+                                        <rect key={`cell-${index}`} fill={entry.fill} />
+                                   ))}
+                              </Bar>
+                         </BarChart>
+                    </ChartContainer>
+               </CardContent>
           </Card>
      );
 };

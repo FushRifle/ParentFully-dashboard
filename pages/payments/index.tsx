@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, User, Text, Badge, Grid } from '@nextui-org/react';
+import { Table, User, Text, Badge, Grid } from '@/components/ui/legacy';
 
 import { Box } from '../../components/styles/box';
 import { Flex } from '../../components/styles/flex';

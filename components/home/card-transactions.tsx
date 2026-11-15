@@ -1,4 +1,4 @@
-import { Avatar, Card, Text } from '@nextui-org/react';
+import { Avatar, Card, Text } from '@/components/ui/legacy';
 import React from 'react';
 import { Box } from '../styles/box';
 import { Flex } from '../styles/flex';

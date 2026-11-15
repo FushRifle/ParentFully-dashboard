@@ -1,125 +1,69 @@
-import { Button, Divider, Input, Modal, Text } from '@nextui-org/react';
 import React from 'react';
-import { Flex } from '../styles/flex';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+   Dialog,
+   DialogContent,
+   DialogHeader,
+   DialogTitle,
+   DialogFooter,
+} from '@/components/ui/dialog';
 
 export const AddUser = () => {
    const [visible, setVisible] = React.useState(false);
    const handler = () => setVisible(true);
-
-   const closeHandler = () => {
-      setVisible(false);
-      console.log('closed');
-   };
+   const closeHandler = () => setVisible(false);
 
    return (
       <div>
-         <Button auto onClick={handler}>
-            Add User
-         </Button>
-         <Modal
-            closeButton
-            aria-labelledby="modal-title"
-            width="600px"
-            open={visible}
-            onClose={closeHandler}
-         >
-            <Modal.Header css={{ justifyContent: 'start' }}>
-               <Text id="modal-title" h4>
-                  Add new user
-               </Text>
-            </Modal.Header>
-            <Divider css={{ my: '$5' }} />
-            <Modal.Body css={{ py: '$10' }}>
-               <Flex
-                  direction={'column'}
-                  css={{
-                     'flexWrap': 'wrap',
-                     'gap': '$8',
-                     '@lg': { flexWrap: 'nowrap', gap: '$12' },
-                  }}
-               >
-                  <Flex
-                     css={{
-                        'gap': '$10',
-                        'flexWrap': 'wrap',
-                        '@lg': { flexWrap: 'nowrap' },
-                     }}
-                  >
-                     <Input
-                        label="First Name"
-                        bordered
-                        clearable
-                        fullWidth
-                        size="lg"
-                        placeholder="First Name"
-                     />
-                     <Input
-                        label="Last Name"
-                        clearable
-                        bordered
-                        fullWidth
-                        size="lg"
-                        placeholder="Last Name"
-                     />
-                  </Flex>
+         <Button onClick={handler}>Add User</Button>
+         <Dialog open={visible} onOpenChange={setVisible}>
+            <DialogContent className="sm:max-w-[600px]">
+               <DialogHeader>
+                  <DialogTitle>Add new user</DialogTitle>
+               </DialogHeader>
 
-                  <Flex
-                     css={{
-                        'gap': '$10',
-                        'flexWrap': 'wrap',
-                        '@lg': { flexWrap: 'nowrap' },
-                     }}
-                  >
-                     <Input
-                        label="Email"
-                        clearable
-                        bordered
-                        fullWidth
-                        size="lg"
-                        placeholder="Email"
-                     />
-                     <Input
-                        label="Phone Number"
-                        clearable
-                        bordered
-                        fullWidth
-                        size="lg"
-                        placeholder="Phone Number"
-                     />
-                  </Flex>
-                  <Flex
-                     css={{
-                        'gap': '$10',
-                        'flexWrap': 'wrap',
-                        '@lg': { flexWrap: 'nowrap' },
-                     }}
-                  >
-                     <Input
-                        label="Department"
-                        clearable
-                        bordered
-                        fullWidth
-                        size="lg"
-                        placeholder="Department"
-                     />
-                     <Input
-                        label="Company"
-                        clearable
-                        bordered
-                        fullWidth
-                        size="lg"
-                        placeholder="Company"
-                     />
-                  </Flex>
-               </Flex>
-            </Modal.Body>
-            <Divider css={{ my: '$5' }} />
-            <Modal.Footer>
-               <Button auto onClick={closeHandler}>
-                  Add User
-               </Button>
-            </Modal.Footer>
-         </Modal>
+               <div className="flex flex-col gap-6 py-4">
+                  <div className="flex flex-col gap-4 sm:flex-row">
+                     <div className="flex-1 space-y-2">
+                        <Label htmlFor="firstName">First Name</Label>
+                        <Input id="firstName" placeholder="First Name" />
+                     </div>
+                     <div className="flex-1 space-y-2">
+                        <Label htmlFor="lastName">Last Name</Label>
+                        <Input id="lastName" placeholder="Last Name" />
+                     </div>
+                  </div>
+
+                  <div className="flex flex-col gap-4 sm:flex-row">
+                     <div className="flex-1 space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input id="email" type="email" placeholder="Email" />
+                     </div>
+                     <div className="flex-1 space-y-2">
+                        <Label htmlFor="phone">Phone Number</Label>
+                        <Input id="phone" placeholder="Phone Number" />
+                     </div>
+                  </div>
+
+                  <div className="flex flex-col gap-4 sm:flex-row">
+                     <div className="flex-1 space-y-2">
+                        <Label htmlFor="department">Department</Label>
+                        <Input id="department" placeholder="Department" />
+                     </div>
+                     <div className="flex-1 space-y-2">
+                        <Label htmlFor="company">Company</Label>
+                        <Input id="company" placeholder="Company" />
+                     </div>
+                  </div>
+               </div>
+
+               <DialogFooter>
+                  <Button onClick={closeHandler}>Add User</Button>
+               </DialogFooter>
+            </DialogContent>
+         </Dialog>
       </div>
    );
 };

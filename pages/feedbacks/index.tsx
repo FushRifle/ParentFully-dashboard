@@ -12,7 +12,7 @@ import {
      Input,
      Pagination,
      Avatar
-} from '@nextui-org/react';
+} from '@/components/ui/legacy';
 import { AppLoadingState } from '@/components/shared/app-loading-state';
 import { formatDistanceToNow } from 'date-fns';
 import { useRouter } from 'next/router';

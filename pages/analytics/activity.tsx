@@ -1,32 +1,42 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Grid, Text, Button, Card, Table } from '@nextui-org/react';
-
-import { Select } from '../../components/styles/select';
-import { Box } from '../../components/styles/box';
-import { Flex } from '../../components/styles/flex';
-
-import { LineChart } from '../../components/charts/line-chart';
-import { MetricCard } from '../../components/analytics/metric-card';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
+import { MetricCard } from '@/components/analytics/metric-card';
 import { TableExport } from '@/components/shared/table-export';
 import { AppLoadingState } from '@/components/shared/app-loading-state';
-
+import { LineChartComponent } from '@/components/charts/line-chart';
 import {
     getSessionStats,
     getSessions,
     SessionStats,
     UserSession,
-} from '../../services/sessionService';
+} from '@/services/sessionService';
 
 const platformOptions = [
-    { value: '', label: <Text size="$sm">All Platforms</Text> },
-    { value: 'ios', label: <Text size="$sm">iOS</Text> },
-    { value: 'android', label: <Text size="$sm">Android</Text> },
+    { value: 'all', label: 'All Platforms' },
+    { value: 'ios', label: 'iOS' },
+    { value: 'android', label: 'Android' },
 ];
 
 const dateRangeOptions = [
-    { value: '7', label: <Text size="$sm">Last 7 days</Text> },
-    { value: '30', label: <Text size="$sm">Last 30 days</Text> },
-    { value: '90', label: <Text size="$sm">Last 90 days</Text> },
+    { value: '7', label: 'Last 7 days' },
+    { value: '30', label: 'Last 30 days' },
+    { value: '90', label: 'Last 90 days' },
 ];
 
 function formatDuration(seconds: number | null): string {
@@ -70,9 +80,8 @@ function getTopPlatform(breakdown: Record<string, number>): string {
 
 const ActivityPage = () => {
     const [dateRange, setDateRange] = useState('30');
-    const [platform, setPlatform] = useState('');
+    const [platform, setPlatform] = useState('all');
     const [isLoading, setIsLoading] = useState(false);
-
     const [stats, setStats] = useState<SessionStats | null>(null);
     const [sessions, setSessions] = useState<UserSession[]>([]);
     const [sessionsMeta, setSessionsMeta] = useState<any>(null);
@@ -83,8 +92,8 @@ const ActivityPage = () => {
         const { date_from, date_to } = getDateRange(dateRange);
         try {
             const [statsRes, sessionsRes] = await Promise.all([
-                getSessionStats({ date_from, date_to, platform: platform || undefined }),
-                getSessions({ date_from, date_to, platform: platform || undefined, page, per_page: 20 }),
+                getSessionStats({ date_from, date_to, platform: platform === 'all' ? undefined : platform }),
+                getSessions({ date_from, date_to, platform: platform === 'all' ? undefined : platform, page, per_page: 20 }),
             ]);
             setStats(statsRes);
             setSessions(sessionsRes.data);
@@ -101,265 +110,174 @@ const ActivityPage = () => {
     }, [fetchData]);
 
     const dailyChartData = stats
-        ? [
-            {
-                label: 'Daily Opens',
-                color: '#3f3bef',
-                data: stats.daily_opens.map((d) => ({
-                    date: d.date.slice(5), // MM-DD
-                    value: d.count,
-                })),
-            },
-        ]
+        ? [{
+            label: 'Daily Opens',
+            color: '#3f3bef',
+            data: stats.daily_opens.map((d) => ({ date: d.date.slice(5), value: d.count })),
+        }]
         : [];
 
     const statCards = stats
         ? [
-            {
-                id: 'total_sessions',
-                name: 'Total Sessions',
-                value: stats.total_sessions.toLocaleString(),
-                change: 0,
-                changeType: 'neutral' as const,
-                color: '#3f3bef',
-            },
-            {
-                id: 'unique_users',
-                name: 'Unique Users',
-                value: stats.unique_users.toLocaleString(),
-                change: 0,
-                changeType: 'neutral' as const,
-                color: '#10b981',
-            },
-            {
-                id: 'avg_duration',
-                name: 'Avg Session',
-                value: formatDuration(stats.avg_duration_secs),
-                change: 0,
-                changeType: 'neutral' as const,
-                color: '#f59e0b',
-            },
-            {
-                id: 'top_platform',
-                name: 'Top Platform',
-                value: getTopPlatform(stats.platform_breakdown),
-                change: 0,
-                changeType: 'neutral' as const,
-                color: '#6366f1',
-            },
+            { id: 'total_sessions', name: 'Total Sessions', value: stats.total_sessions.toLocaleString(), change: 0, changeType: 'neutral' as const, color: '#3f3bef' },
+            { id: 'unique_users', name: 'Unique Users', value: stats.unique_users.toLocaleString(), change: 0, changeType: 'neutral' as const, color: '#10b981' },
+            { id: 'avg_duration', name: 'Avg Session', value: formatDuration(stats.avg_duration_secs), change: 0, changeType: 'neutral' as const, color: '#f59e0b' },
+            { id: 'top_platform', name: 'Top Platform', value: getTopPlatform(stats.platform_breakdown), change: 0, changeType: 'neutral' as const, color: '#6366f1' },
         ]
         : [];
 
     return (
-        <Box css={{ p: '$10', overflow: 'auto', height: 'calc(100vh - 100px)' }}>
-            {/* Header */}
-            <Flex justify="between" align="center" css={{ mb: '$8' }}>
-                <Box>
-                    <Text h2>User Activity</Text>
-                    <Text color="$accents7" css={{ mt: '$2' }}>
-                        Track who opened the app, when, and what they did
-                    </Text>
-                </Box>
+        <div className="h-[calc(100vh-100px)] overflow-auto p-10">
+            <div className="mb-8 flex items-center justify-between">
+                <div>
+                    <h2 className="text-2xl font-semibold">User Activity</h2>
+                    <p className="mt-2 text-muted-foreground">Track who opened the app, when, and what they did</p>
+                </div>
+                <div className="flex gap-4">
+                    <Select value={platform} onValueChange={(v) => { setPlatform(v); setPage(1); }}>
+                        <SelectTrigger className="w-[150px]"><SelectValue placeholder="Platform" /></SelectTrigger>
+                        <SelectContent>
+                            {platformOptions.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                    <Select value={dateRange} onValueChange={(v) => { setDateRange(v); setPage(1); }}>
+                        <SelectTrigger className="w-[150px]"><SelectValue placeholder="Date Range" /></SelectTrigger>
+                        <SelectContent>
+                            {dateRangeOptions.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
 
-                <Flex css={{ gap: '$4' }}>
-                    <Select
-                        placeholder="Platform"
-                        value={platform}
-                        onChange={(value) => { setPlatform(value); setPage(1); }}
-                        css={{ minWidth: '150px' }}
-                        options={platformOptions}
-                    />
-                    <Select
-                        placeholder="Date Range"
-                        value={dateRange}
-                        onChange={(value) => { setDateRange(value); setPage(1); }}
-                        css={{ minWidth: '150px' }}
-                        options={dateRangeOptions}
-                    />
-                </Flex>
-            </Flex>
-
-            {/* Stat Cards */}
             {isLoading && !stats ? (
-                <Flex justify="center" css={{ py: '$20' }}>
+                <div className="flex justify-center py-20">
                     <AppLoadingState message="Loading activity analytics…" />
-                </Flex>
+                </div>
             ) : (
                 <>
-                    <Grid.Container gap={2} css={{ mb: '$8' }}>
-                        {statCards.map((metric) => (
-                            <Grid xs={12} sm={6} md={3} key={metric.id}>
-                                <MetricCard metric={metric} />
-                            </Grid>
-                        ))}
-                    </Grid.Container>
+                    <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
+                        {statCards.map((metric) => <MetricCard key={metric.id} metric={metric} />)}
+                    </div>
 
-                    {/* Daily Opens Line Chart */}
                     {dailyChartData.length > 0 && dailyChartData[0].data.length > 1 && (
-                        <Box css={{ mb: '$8' }}>
-                            <LineChart
-                                data={dailyChartData}
-                                height={300}
-                                title="Daily App Opens"
-                                showLegend
-                            />
-                        </Box>
+                        <div className="mb-8">
+                            <LineChartComponent data={dailyChartData} height={300} title="Daily App Opens" />
+                        </div>
                     )}
 
-                    {/* Top Screens + Platform Breakdown */}
-                    <Grid.Container gap={2} css={{ mb: '$8' }}>
-                        <Grid xs={12} md={6}>
-                            <Card css={{ p: '$6' }} variant="flat">
-                                <Card.Header>
-                                    <Text h4>Top Screens</Text>
-                                </Card.Header>
-                                <Card.Body>
-                                    {stats?.top_screens && stats.top_screens.length > 0 ? (
-                                        stats.top_screens.map((s, i) => (
-                                            <Flex key={i} justify="between" align="center" css={{ py: '$2', borderBottom: '1px solid $accents1' }}>
-                                                <Text size="$sm">{formatScreenName(s.last_screen)}</Text>
-                                                <Text b size="$sm" css={{ color: '#3f3bef' }}>{s.count}</Text>
-                                            </Flex>
-                                        ))
-                                    ) : (
-                                        <Text color="$accents7" size="$sm">No screen data yet</Text>
-                                    )}
-                                </Card.Body>
-                            </Card>
-                        </Grid>
+                    <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <Card className="p-6">
+                            <CardHeader className="p-0 pb-4"><h4 className="text-lg font-semibold">Top Screens</h4></CardHeader>
+                            <CardContent className="p-0">
+                                {stats?.top_screens && stats.top_screens.length > 0 ? (
+                                    stats.top_screens.map((s, i) => (
+                                        <div key={i} className="flex items-center justify-between border-b py-2 last:border-b-0">
+                                            <span className="text-sm">{formatScreenName(s.last_screen)}</span>
+                                            <span className="text-sm font-semibold" style={{ color: '#3f3bef' }}>{s.count}</span>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-sm text-muted-foreground">No screen data yet</p>
+                                )}
+                            </CardContent>
+                        </Card>
 
-                        <Grid xs={12} md={6}>
-                            <Card css={{ p: '$6' }} variant="flat">
-                                <Card.Header>
-                                    <Text h4>Platform Breakdown</Text>
-                                </Card.Header>
-                                <Card.Body>
-                                    {stats?.platform_breakdown && Object.keys(stats.platform_breakdown).length > 0 ? (
-                                        Object.entries(stats.platform_breakdown).map(([plat, count]) => {
-                                            const total = Object.values(stats.platform_breakdown).reduce((a, b) => a + b, 0);
-                                            const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-                                            return (
-                                                <Flex key={plat} direction="column" css={{ mb: '$4' }}>
-                                                    <Flex justify="between" css={{ mb: '$1' }}>
-                                                        <Text size="$sm" css={{ textTransform: 'capitalize' }}>{plat}</Text>
-                                                        <Text size="$sm" b>{count} ({pct}%)</Text>
-                                                    </Flex>
-                                                    <Box css={{ height: '6px', bg: '$accents2', borderRadius: '$full', overflow: 'hidden' }}>
-                                                        <Box css={{ width: `${pct}%`, height: '100%', bg: plat === 'ios' ? '#3f3bef' : '#10b981', borderRadius: '$full' }} />
-                                                    </Box>
-                                                </Flex>
-                                            );
-                                        })
-                                    ) : (
-                                        <Text color="$accents7" size="$sm">No platform data yet</Text>
-                                    )}
-                                </Card.Body>
-                            </Card>
-                        </Grid>
-                    </Grid.Container>
+                        <Card className="p-6">
+                            <CardHeader className="p-0 pb-4"><h4 className="text-lg font-semibold">Platform Breakdown</h4></CardHeader>
+                            <CardContent className="p-0">
+                                {stats?.platform_breakdown && Object.keys(stats.platform_breakdown).length > 0 ? (
+                                    Object.entries(stats.platform_breakdown).map(([plat, count]) => {
+                                        const total = Object.values(stats.platform_breakdown).reduce((a, b) => a + b, 0);
+                                        const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+                                        return (
+                                            <div key={plat} className="mb-4 flex flex-col">
+                                                <div className="mb-1 flex justify-between">
+                                                    <span className="text-sm capitalize">{plat}</span>
+                                                    <span className="text-sm font-semibold">{count} ({pct}%)</span>
+                                                </div>
+                                                <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                                                    <div className="h-full rounded-full" style={{ width: `${pct}%`, background: plat === 'ios' ? '#3f3bef' : '#10b981' }} />
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                ) : (
+                                    <p className="text-sm text-muted-foreground">No platform data yet</p>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </div>
 
-                    {/* Sessions Table */}
-                    <Card css={{ p: '$6' }} variant="flat">
-                        <Card.Header>
-                            <Flex justify="between" align="center" css={{ width: '100%' }}>
-                                <Text h4>Sessions</Text>
-                                <Flex align="center" css={{ gap: '$3' }}>{sessionsMeta && (
-                                    <Text size="$sm" color="$accents7">
-                                        {sessionsMeta.total.toLocaleString()} total
-                                    </Text>
-                                )}<TableExport rows={sessions} filename="activity-sessions" title="Activity sessions" columns={[{ key: 'user.name', label: 'User' }, { key: 'user.email', label: 'Email' }, { key: 'platform', label: 'Platform' }, { key: 'device_model', label: 'Device' }, { key: 'last_screen', label: 'Last screen', value: (session) => formatScreenName(session.last_screen) }, { key: 'duration_seconds', label: 'Duration', value: (session) => formatDuration(session.duration_seconds) }, { key: 'opened_at', label: 'Opened' }]} /></Flex>
-                            </Flex>
-                        </Card.Header>
-                        <Card.Body>
+                    <Card className="p-6">
+                        <CardHeader className="p-0 pb-4">
+                            <div className="flex w-full items-center justify-between">
+                                <h4 className="text-lg font-semibold">Sessions</h4>
+                                <div className="flex items-center gap-3">
+                                    {sessionsMeta && <span className="text-sm text-muted-foreground">{sessionsMeta.total.toLocaleString()} total</span>}
+                                    <TableExport
+                                        rows={sessions}
+                                        filename="activity-sessions"
+                                        title="Activity sessions"
+                                        columns={[
+                                            { key: 'user.name', label: 'User' },
+                                            { key: 'user.email', label: 'Email' },
+                                            { key: 'platform', label: 'Platform' },
+                                            { key: 'device_model', label: 'Device' },
+                                            { key: 'last_screen', label: 'Last screen', value: (s) => formatScreenName(s.last_screen) },
+                                            { key: 'duration_seconds', label: 'Duration', value: (s) => formatDuration(s.duration_seconds) },
+                                            { key: 'opened_at', label: 'Opened' },
+                                        ]}
+                                    />
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-0">
                             {sessions.length === 0 ? (
-                                <Text color="$accents7" size="$sm">No sessions found for the selected filters.</Text>
+                                <p className="text-sm text-muted-foreground">No sessions found for the selected filters.</p>
                             ) : (
-                                <Table
-                                    aria-label="Sessions table"
-                                    css={{ minWidth: '100%', height: 'auto' }}
-                                    shadow={false}
-                                >
-                                    <Table.Header>
-                                        <Table.Column>User</Table.Column>
-                                        <Table.Column>Platform</Table.Column>
-                                        <Table.Column>Device</Table.Column>
-                                        <Table.Column>Last Screen</Table.Column>
-                                        <Table.Column>Duration</Table.Column>
-                                        <Table.Column>Opened At</Table.Column>
-                                    </Table.Header>
-                                    <Table.Body>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>User</TableHead>
+                                            <TableHead>Platform</TableHead>
+                                            <TableHead>Device</TableHead>
+                                            <TableHead>Last Screen</TableHead>
+                                            <TableHead>Duration</TableHead>
+                                            <TableHead>Opened At</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
                                         {sessions.map((session) => (
-                                            <Table.Row key={session.id}>
-                                                <Table.Cell>
-                                                    <Flex direction="column">
-                                                        <Text size="$sm" b>{session.user?.name ?? `User #${session.user_id}`}</Text>
-                                                        <Text size="$xs" color="$accents7">{session.user?.email ?? ''}</Text>
-                                                    </Flex>
-                                                </Table.Cell>
-                                                <Table.Cell>
-                                                    <Text size="$sm" css={{ textTransform: 'capitalize' }}>
-                                                        {session.platform ?? '—'}
-                                                    </Text>
-                                                </Table.Cell>
-                                                <Table.Cell>
-                                                    <Text size="$sm">{session.device_model ?? '—'}</Text>
-                                                </Table.Cell>
-                                                <Table.Cell>
-                                                    <Text size="$sm">{formatScreenName(session.last_screen)}</Text>
-                                                </Table.Cell>
-                                                <Table.Cell>
-                                                    <Text size="$sm">{formatDuration(session.duration_seconds)}</Text>
-                                                </Table.Cell>
-                                                <Table.Cell>
-                                                    <Text size="$sm">{formatDate(session.opened_at)}</Text>
-                                                </Table.Cell>
-                                            </Table.Row>
+                                            <TableRow key={session.id}>
+                                                <TableCell>
+                                                    <div className="flex flex-col">
+                                                        <span className="text-sm font-semibold">{session.user?.name ?? `User #${session.user_id}`}</span>
+                                                        <span className="text-xs text-muted-foreground">{session.user?.email ?? ''}</span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell><span className="text-sm capitalize">{session.platform ?? '—'}</span></TableCell>
+                                                <TableCell><span className="text-sm">{session.device_model ?? '—'}</span></TableCell>
+                                                <TableCell><span className="text-sm">{formatScreenName(session.last_screen)}</span></TableCell>
+                                                <TableCell><span className="text-sm">{formatDuration(session.duration_seconds)}</span></TableCell>
+                                                <TableCell><span className="text-sm">{formatDate(session.opened_at)}</span></TableCell>
+                                            </TableRow>
                                         ))}
-                                    </Table.Body>
+                                    </TableBody>
                                 </Table>
                             )}
 
-                            {/* Pagination */}
                             {sessionsMeta && sessionsMeta.last_page > 1 && (
-                                <Flex justify="center" css={{ mt: '$6', gap: '$4' }}>
-                                    <Button
-                                        auto
-                                        flat
-                                        disabled={page <= 1}
-                                        onPress={() => setPage((p) => Math.max(1, p - 1))}
-                                        size="sm"
-                                    >
-                                        Previous
-                                    </Button>
-                                    <Text size="$sm" css={{ alignSelf: 'center' }}>
-                                        Page {sessionsMeta.current_page} of {sessionsMeta.last_page}
-                                    </Text>
-                                    <Button
-                                        auto
-                                        flat
-                                        disabled={page >= sessionsMeta.last_page}
-                                        onPress={() => setPage((p) => p + 1)}
-                                        size="sm"
-                                    >
-                                        Next
-                                    </Button>
-                                </Flex>
+                                <div className="mt-6 flex items-center justify-center gap-4">
+                                    <Button variant="secondary" size="sm" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>Previous</Button>
+                                    <span className="text-sm">Page {sessionsMeta.current_page} of {sessionsMeta.last_page}</span>
+                                    <Button variant="secondary" size="sm" disabled={page >= sessionsMeta.last_page} onClick={() => setPage((p) => p + 1)}>Next</Button>
+                                </div>
                             )}
-                        </Card.Body>
+                        </CardContent>
                     </Card>
                 </>
             )}
-
-            <style jsx>{`
-                @keyframes spin {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
-                }
-                .spin {
-                    animation: spin 1s linear infinite;
-                }
-            `}</style>
-        </Box>
+        </div>
     );
 };
 

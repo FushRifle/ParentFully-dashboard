@@ -1,4 +1,4 @@
-import { Badge, Card, Loading, Text } from '@nextui-org/react';
+import { Badge, Card, Loading, Text } from '@/components/ui/legacy';
 import React from 'react';
 import { Community } from '../icons/community';
 import { Box } from '../styles/box';

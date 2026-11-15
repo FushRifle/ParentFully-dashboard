@@ -1,7 +1,7 @@
 import React from 'react';
-import { Input, Button } from '@nextui-org/react';
-import { Flex } from '../../components/styles/flex';
-import { SendIcon } from '../../components/icons/support/send-icon';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { SendIcon } from '@/components/icons/support/send-icon';
 
 interface ChatInputProps {
      value: string;
@@ -15,10 +15,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
      value,
      onChange,
      onSend,
-     placeholder = "Type your message...",
-     disabled = false
+     placeholder = 'Type your message...',
+     disabled = false,
 }) => {
-     const handleKeyPress = (e: React.KeyboardEvent) => {
+     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
           if (e.key === 'Enter' && !e.shiftKey) {
                e.preventDefault();
                onSend();
@@ -26,46 +26,24 @@ export const ChatInput: React.FC<ChatInputProps> = ({
      };
 
      return (
-          <Flex css={{ gap: '$4' }} align="center">
+          <div className="flex items-center gap-4">
                <Input
-                    fullWidth
                     placeholder={placeholder}
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
-                    onKeyPress={handleKeyPress}
+                    onKeyDown={handleKeyDown}
                     disabled={disabled}
                     aria-label="Message input"
-                    css={{
-                         '& .nextui-input-wrapper': {
-                              borderRadius: '$xl',
-                              bg: '$accents0',
-                              transition: 'all 0.2s ease',
-                              '&:focus-within': {
-                                   bg: '$accents1',
-                                   boxShadow: '$md'
-                              }
-                         },
-                         '& .nextui-input': {
-                              px: '$6',
-                              py: '$8'
-                         }
-                    }}
+                    className="h-12 rounded-xl bg-muted px-6 transition-all focus-within:bg-accent focus-within:shadow-md"
                />
                <Button
-                    auto
-                    color="primary"
-                    css={{
-                         borderRadius: '$xl',
-                         px: '$10',
-                         height: '48px',
-                         minWidth: '48px'
-                    }}
-                    onPress={onSend}
+                    onClick={onSend}
                     disabled={disabled || !value.trim()}
                     aria-label="Send message"
+                    className="h-12 w-12 shrink-0 rounded-xl p-0"
                >
                     <SendIcon />
                </Button>
-          </Flex>
+          </div>
      );
 };

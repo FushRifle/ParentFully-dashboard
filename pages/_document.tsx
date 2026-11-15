@@ -7,12 +7,9 @@ import Document, {
    DocumentContext,
    DocumentInitialProps,
 } from 'next/document';
-import { CssBaseline } from '@nextui-org/react';
 
 class MyDocument extends Document {
-   static async getInitialProps(
-      ctx: DocumentContext
-   ): Promise<DocumentInitialProps> {
+   static async getInitialProps(ctx: DocumentContext): Promise<DocumentInitialProps> {
       const initialProps = await Document.getInitialProps(ctx);
       return {
          ...initialProps,
@@ -23,8 +20,7 @@ class MyDocument extends Document {
    render() {
       return (
          <Html lang="en">
-            <Head>{CssBaseline.flush()}</Head>
-
+            <Head />
             <body>
                <Main />
                <NextScript />

@@ -1,11 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Table, Text } from '@nextui-org/react';
 import { Activity, BarChart3, Clock3, Globe2, MonitorSmartphone, Route, Users } from 'lucide-react';
-import { api } from '../../lib';
-import { Box } from '../../components/styles/box';
-import { Flex } from '../../components/styles/flex';
-import { usePageSearch } from '../../lib/context/searchContext';
-import { OverviewCard, OverviewCardGrid } from '../../components/shared/overview-card';
+import {
+   Table,
+   TableBody,
+   TableCell,
+   TableHead,
+   TableHeader,
+   TableRow,
+} from '@/components/ui/table';
+import { api } from '@/lib';
+import { usePageSearch } from '@/lib/context/searchContext';
+import { OverviewCard, OverviewCardGrid } from '@/components/shared/overview-card';
 import { TableExport } from '@/components/shared/table-export';
 import { AppLoadingState } from '@/components/shared/app-loading-state';
 
@@ -27,7 +32,12 @@ type DemographicsData = {
    top_countries: { country: string; count: number }[];
 };
 
-const periods = [{ value: '7d', label: '7 days' }, { value: '30d', label: '30 days' }, { value: 'all', label: 'All time' }];
+const periods = [
+   { value: '7d', label: '7 days' },
+   { value: '30d', label: '30 days' },
+   { value: 'all', label: 'All time' },
+];
+
 const formatDuration = (seconds?: number | null) => {
    if (seconds == null || !Number.isFinite(Number(seconds))) return '—';
    const roundedSeconds = Math.max(0, Math.round(Number(seconds)));
@@ -36,7 +46,9 @@ const formatDuration = (seconds?: number | null) => {
    const remainingSeconds = roundedSeconds % 60;
    return remainingSeconds ? `${minutes}m ${remainingSeconds}s` : `${minutes}m`;
 };
-const formatScreenName = (value?: string | null) => value?.trim() === '/' ? 'Homescreen' : value || '—';
+
+const formatScreenName = (value?: string | null) =>
+   value?.trim() === '/' ? 'Homescreen' : value || '—';
 
 export default function AnalyticsPage() {
    const { search } = usePageSearch();
@@ -51,7 +63,8 @@ export default function AnalyticsPage() {
    const [sessionMeta, setSessionMeta] = useState({ current_page: 1, last_page: 1, total: 0 });
 
    const load = useCallback(async () => {
-      setLoading(true); setError(null);
+      setLoading(true);
+      setError(null);
       try {
          const [activityResponse, demographicsResponse, sessionsResponse] = await Promise.all([
             api.get('/v1/admin/analytics/activity', { params: { period, ...(platform !== 'all' ? { platform } : {}) } }),
@@ -61,60 +74,344 @@ export default function AnalyticsPage() {
          setActivity(activityResponse.data.data);
          setDemographics(demographicsResponse.data.data);
          setSessions(sessionsResponse.data.data?.data ?? []);
-         setSessionMeta({ current_page: sessionsResponse.data.data?.current_page ?? sessionPage, last_page: sessionsResponse.data.data?.last_page ?? 1, total: sessionsResponse.data.data?.total ?? 0 });
-      } catch (err: any) { setError(err?.response?.data?.message ?? err?.message ?? 'Unable to load analytics.'); }
-      finally { setLoading(false); }
+         setSessionMeta({
+            current_page: sessionsResponse.data.data?.current_page ?? sessionPage,
+            last_page: sessionsResponse.data.data?.last_page ?? 1,
+            total: sessionsResponse.data.data?.total ?? 0,
+         });
+      } catch (err: any) {
+         setError(err?.response?.data?.message ?? err?.message ?? 'Unable to load analytics.');
+      } finally {
+         setLoading(false);
+      }
    }, [period, platform, sessionPage]);
 
-   useEffect(() => { load(); }, [load]);
-   useEffect(() => { setSessionPage(1); }, [period, platform]);
+   useEffect(() => {
+      load();
+   }, [load]);
+
+   useEffect(() => {
+      setSessionPage(1);
+   }, [period, platform]);
 
    const maxDailyOpens = Math.max(...(activity?.daily_app_opens ?? []).map((item) => item.count), 1);
    const maxScreenViews = Math.max(...(activity?.top_screens ?? []).map((item) => item.count), 1);
    const maxCountryUsers = Math.max(...(demographics?.top_countries ?? []).map((item) => item.count), 1);
-   const metrics = useMemo(() => [
-      { label: 'Total sessions', value: activity?.total_sessions, detail: 'Recorded app visits', icon: Activity, color: '#8b83ff' },
-      { label: 'Unique users', value: activity?.unique_users, detail: 'People using the app', icon: Users, color: '#10b981' },
-      { label: 'Average session', value: formatDuration(activity?.avg_duration_seconds), detail: 'Time spent per visit', icon: Clock3, color: '#f97316' },
-      { label: 'Onboarding', value: demographics ? `${demographics.onboarding_rate}%` : undefined, detail: 'Completion rate', icon: Route, color: '#3b82f6' },
-      { label: 'Countries', value: demographics?.country_count, detail: 'Customer locations', icon: Globe2, color: '#ec4899' },
-      { label: 'Top platform', value: activity?.top_platform ?? '—', detail: 'Most-used platform', icon: MonitorSmartphone, color: '#14b8a6' },
-   ], [activity, demographics]);
+
+   const metrics = useMemo(
+      () => [
+         { label: 'Total sessions', value: activity?.total_sessions, detail: 'Recorded app visits', icon: Activity, color: '#8b83ff' },
+         { label: 'Unique users', value: activity?.unique_users, detail: 'People using the app', icon: Users, color: '#10b981' },
+         { label: 'Average session', value: formatDuration(activity?.avg_duration_seconds), detail: 'Time spent per visit', icon: Clock3, color: '#f97316' },
+         { label: 'Onboarding', value: demographics ? `${demographics.onboarding_rate}%` : undefined, detail: 'Completion rate', icon: Route, color: '#3b82f6' },
+         { label: 'Countries', value: demographics?.country_count, detail: 'Customer locations', icon: Globe2, color: '#ec4899' },
+         { label: 'Top platform', value: activity?.top_platform ?? '—', detail: 'Most-used platform', icon: MonitorSmartphone, color: '#14b8a6' },
+      ],
+      [activity, demographics],
+   );
+
    const visibleSessions = useMemo(() => {
       const query = search.trim().toLowerCase();
-      return sessions.filter((session) => !query || [session.user_name, session.user_email, session.platform, session.device_model, session.app_version, formatScreenName(session.last_screen)].some((value) => String(value ?? '').toLowerCase().includes(query)));
+      return sessions.filter(
+         (session) =>
+            !query ||
+            [session.user_name, session.user_email, session.platform, session.device_model, session.app_version, formatScreenName(session.last_screen)].some(
+               (value) => String(value ?? '').toLowerCase().includes(query),
+            ),
+      );
    }, [search, sessions]);
 
-   return <Box className="admin-page analytics-page">
-      <Box className="glass-panel glass-hero"><Flex justify="between" align="center" css={{ gap: '$5', flexWrap: 'wrap' }}>
-         <Flex align="center" css={{ gap: '$4' }}><span className="analytics-hero-icon"><BarChart3 size={20} /></span><Box><Text className="section-kicker">Product intelligence</Text><Text h2 css={{ m: 0, mt: '$1', fontSize: '1.4rem' }}>Analytics</Text><Text size="$sm" css={{ color: '$accents7', mt: '$1' }}>Understand app usage, engagement and customer behaviour.</Text></Box></Flex>
-         <Flex align="center" css={{ gap: '$3', flexWrap: 'wrap' }}><div className="analytics-periods">{periods.map((item) => <button key={item.value} className={period === item.value ? 'active' : ''} onClick={() => setPeriod(item.value)} type="button">{item.label}</button>)}</div><select value={platform} onChange={(event) => setPlatform(event.target.value)} aria-label="Platform"><option value="all">All platforms</option><option value="ios">iOS</option><option value="android">Android</option></select></Flex>
-      </Flex></Box>
+   return (
+      <div className="admin-page analytics-page">
+         <div className="glass-panel glass-hero">
+            <div className="flex flex-wrap items-center justify-between gap-5">
+               <div className="flex items-center gap-4">
+                  <span className="analytics-hero-icon"><BarChart3 size={20} /></span>
+                  <div>
+                     <p className="section-kicker">Product intelligence</p>
+                     <h2 className="m-0 mt-1 text-[1.4rem] font-semibold">Analytics</h2>
+                     <p className="mt-1 text-sm text-muted-foreground">
+                        Understand app usage, engagement and customer behaviour.
+                     </p>
+                  </div>
+               </div>
+               <div className="flex flex-wrap items-center gap-3">
+                  <div className="analytics-periods">
+                     {periods.map((item) => (
+                        <button
+                           key={item.value}
+                           className={period === item.value ? 'active' : ''}
+                           onClick={() => setPeriod(item.value)}
+                           type="button"
+                        >
+                           {item.label}
+                        </button>
+                     ))}
+                  </div>
+                  <select
+                     value={platform}
+                     onChange={(event) => setPlatform(event.target.value)}
+                     aria-label="Platform"
+                     className="rounded-md border bg-background px-3 py-2 text-sm"
+                  >
+                     <option value="all">All platforms</option>
+                     <option value="ios">iOS</option>
+                     <option value="android">Android</option>
+                  </select>
+               </div>
+            </div>
+         </div>
 
-      {error && <div className="analytics-error">{error}</div>}
-      <OverviewCardGrid columns={3}>{metrics.map((metric) => <OverviewCard key={metric.label} label={metric.label} value={typeof metric.value === 'number' ? metric.value.toLocaleString() : metric.value ?? '—'} description={metric.detail} icon={metric.icon} color={metric.color} loading={loading} />)}</OverviewCardGrid>
+         {error && <div className="analytics-error">{error}</div>}
 
-      <div className="analytics-primary-grid">
-         <section className="analytics-panel analytics-trend glass-panel"><PanelTitle icon={<Activity size={17} />} title="App opens" subtitle={`Daily activity · ${periods.find((item) => item.value === period)?.label}`} />
-            {loading ? <PanelLoading /> : activity?.daily_app_opens?.length ? <div className="analytics-chart" aria-label="Daily app opens chart">{activity.daily_app_opens.map((item) => <div className="analytics-bar-column" key={item.date} title={`${new Date(item.date).toLocaleDateString()}: ${item.count} opens`}><span>{item.count}</span><i style={{ height: `${Math.max((item.count / maxDailyOpens) * 100, 4)}%` }} /><small>{new Date(item.date).toLocaleDateString([], { month: 'short', day: 'numeric' })}</small></div>)}</div> : <Empty text="No app-open activity recorded for this period." />}
-         </section>
-         <section className="analytics-panel glass-panel"><PanelTitle icon={<MonitorSmartphone size={17} />} title="Platform mix" subtitle="Sessions by operating system" />
-            {loading ? <PanelLoading /> : activity?.platform_breakdown?.length ? <div className="analytics-breakdown">{activity.platform_breakdown.map((item) => <div key={item.platform}><div><strong>{item.platform || 'Unknown'}</strong><span>{item.count.toLocaleString()} · {item.percentage}%</span></div><i><b style={{ width: `${item.percentage}%` }} /></i></div>)}</div> : <Empty text="No platform data recorded." />}
+         <OverviewCardGrid columns={3}>
+            {metrics.map((metric) => (
+               <OverviewCard
+                  key={metric.label}
+                  label={metric.label}
+                  value={typeof metric.value === 'number' ? metric.value.toLocaleString() : metric.value ?? '—'}
+                  description={metric.detail}
+                  icon={metric.icon}
+                  color={metric.color}
+                  loading={loading}
+               />
+            ))}
+         </OverviewCardGrid>
+
+         <div className="analytics-primary-grid">
+            <section className="analytics-panel analytics-trend glass-panel">
+               <PanelTitle
+                  icon={<Activity size={17} />}
+                  title="App opens"
+                  subtitle={`Daily activity · ${periods.find((item) => item.value === period)?.label}`}
+               />
+               {loading ? (
+                  <PanelLoading />
+               ) : activity?.daily_app_opens?.length ? (
+                  <div className="analytics-chart" aria-label="Daily app opens chart">
+                     {activity.daily_app_opens.map((item) => (
+                        <div
+                           className="analytics-bar-column"
+                           key={item.date}
+                           title={`${new Date(item.date).toLocaleDateString()}: ${item.count} opens`}
+                        >
+                           <span>{item.count}</span>
+                           <i style={{ height: `${Math.max((item.count / maxDailyOpens) * 100, 4)}%` }} />
+                           <small>{new Date(item.date).toLocaleDateString([], { month: 'short', day: 'numeric' })}</small>
+                        </div>
+                     ))}
+                  </div>
+               ) : (
+                  <Empty text="No app-open activity recorded for this period." />
+               )}
+            </section>
+
+            <section className="analytics-panel glass-panel">
+               <PanelTitle
+                  icon={<MonitorSmartphone size={17} />}
+                  title="Platform mix"
+                  subtitle="Sessions by operating system"
+               />
+               {loading ? (
+                  <PanelLoading />
+               ) : activity?.platform_breakdown?.length ? (
+                  <div className="analytics-breakdown">
+                     {activity.platform_breakdown.map((item) => (
+                        <div key={item.platform}>
+                           <div>
+                              <strong>{item.platform || 'Unknown'}</strong>
+                              <span>{item.count.toLocaleString()} · {item.percentage}%</span>
+                           </div>
+                           <i><b style={{ width: `${item.percentage}%` }} /></i>
+                        </div>
+                     ))}
+                  </div>
+               ) : (
+                  <Empty text="No platform data recorded." />
+               )}
+            </section>
+         </div>
+
+         <div className="analytics-secondary-grid">
+            <section className="analytics-panel glass-panel">
+               <PanelTitle icon={<Route size={17} />} title="Top screens" subtitle="Most visited areas" />
+               {loading ? (
+                  <PanelLoading />
+               ) : activity?.top_screens?.length ? (
+                  <RankedList
+                     items={activity.top_screens.map((item) => ({ label: formatScreenName(item.screen), value: item.count }))}
+                     maximum={maxScreenViews}
+                     suffix="views"
+                  />
+               ) : (
+                  <Empty text="No screen activity recorded." />
+               )}
+            </section>
+
+            <section className="analytics-panel glass-panel">
+               <PanelTitle
+                  icon={<Globe2 size={17} />}
+                  title="Top countries"
+                  subtitle={`${demographics?.demographics_filled_rate ?? 0}% demographic coverage`}
+               />
+               {loading ? (
+                  <PanelLoading />
+               ) : demographics?.top_countries?.length ? (
+                  <RankedList
+                     items={demographics.top_countries.map((item) => ({ label: item.country || 'Unknown', value: item.count }))}
+                     maximum={maxCountryUsers}
+                     suffix="users"
+                  />
+               ) : (
+                  <Empty text="No country data recorded." />
+               )}
+            </section>
+         </div>
+
+         <section className="analytics-panel analytics-sessions glass-panel">
+            <div className="analytics-session-header">
+               <PanelTitle
+                  icon={<Clock3 size={17} />}
+                  title="Individual sessions"
+                  subtitle={`${sessionMeta.total.toLocaleString()} sessions`}
+               />
+               <div className="flex flex-wrap items-center gap-3">
+                  <select
+                     value={platform}
+                     onChange={(event) => setPlatform(event.target.value)}
+                     aria-label="Filter sessions by platform"
+                     className="rounded-md border bg-background px-3 py-2 text-sm"
+                  >
+                     <option value="all">All platforms</option>
+                     <option value="ios">iOS only</option>
+                     <option value="android">Android only</option>
+                  </select>
+                  <TableExport
+                     rows={visibleSessions}
+                     filename="analytics-sessions"
+                     title="Analytics sessions"
+                     columns={[
+                        { key: 'user_name', label: 'User' },
+                        { key: 'user_email', label: 'Email' },
+                        { key: 'platform', label: 'Platform' },
+                        { key: 'device_model', label: 'Device' },
+                        { key: 'app_version', label: 'Version' },
+                        { key: 'last_screen', label: 'Last screen', value: (session) => formatScreenName(session.last_screen) },
+                        { key: 'duration_seconds', label: 'Duration', value: (session) => formatDuration(session.duration_seconds) },
+                        { key: 'opened_at', label: 'Opened' },
+                     ]}
+                  />
+               </div>
+            </div>
+
+            {loading ? (
+               <PanelLoading />
+            ) : visibleSessions.length ? (
+               <>
+                  <div className="analytics-table-wrap">
+                     <Table>
+                        <TableHeader>
+                           <TableRow>
+                              <TableHead>USER</TableHead>
+                              <TableHead>PLATFORM</TableHead>
+                              <TableHead>DEVICE</TableHead>
+                              <TableHead>VERSION</TableHead>
+                              <TableHead>LAST SCREEN</TableHead>
+                              <TableHead>DURATION</TableHead>
+                              <TableHead>OPENED</TableHead>
+                           </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                           {visibleSessions.map((session) => (
+                              <TableRow key={session.id}>
+                                 <TableCell>
+                                    <span className="block text-sm font-semibold">{session.user_name ?? 'Unknown'}</span>
+                                    <span className="block text-xs text-muted-foreground">{session.user_email ?? '—'}</span>
+                                 </TableCell>
+                                 <TableCell>
+                                    <span className="analytics-platform-pill">{session.platform ?? '—'}</span>
+                                 </TableCell>
+                                 <TableCell>{session.device_model ?? '—'}</TableCell>
+                                 <TableCell>{session.app_version ?? '—'}</TableCell>
+                                 <TableCell>{formatScreenName(session.last_screen)}</TableCell>
+                                 <TableCell>{formatDuration(session.duration_seconds)}</TableCell>
+                                 <TableCell>
+                                    {session.opened_at ? new Date(session.opened_at).toLocaleString() : '—'}
+                                 </TableCell>
+                              </TableRow>
+                           ))}
+                        </TableBody>
+                     </Table>
+                  </div>
+
+                  {sessionMeta.last_page > 1 && (
+                     <nav className="admin-pagination" aria-label="Session pages">
+                        <button
+                           disabled={sessionPage <= 1 || loading}
+                           onClick={() => setSessionPage((value) => value - 1)}
+                           type="button"
+                        >
+                           Previous
+                        </button>
+                        <span>Page {sessionMeta.current_page} of {sessionMeta.last_page}</span>
+                        <button
+                           disabled={sessionPage >= sessionMeta.last_page || loading}
+                           onClick={() => setSessionPage((value) => value + 1)}
+                           type="button"
+                        >
+                           Next
+                        </button>
+                     </nav>
+                  )}
+               </>
+            ) : (
+               <Empty text={search ? 'No sessions match this search.' : 'No sessions recorded for these filters.'} />
+            )}
          </section>
       </div>
-
-      <div className="analytics-secondary-grid">
-         <section className="analytics-panel glass-panel"><PanelTitle icon={<Route size={17} />} title="Top screens" subtitle="Most visited areas" />{loading ? <PanelLoading /> : activity?.top_screens?.length ? <RankedList items={activity.top_screens.map((item) => ({ label: formatScreenName(item.screen), value: item.count }))} maximum={maxScreenViews} suffix="views" /> : <Empty text="No screen activity recorded." />}</section>
-         <section className="analytics-panel glass-panel"><PanelTitle icon={<Globe2 size={17} />} title="Top countries" subtitle={`${demographics?.demographics_filled_rate ?? 0}% demographic coverage`} />{loading ? <PanelLoading /> : demographics?.top_countries?.length ? <RankedList items={demographics.top_countries.map((item) => ({ label: item.country || 'Unknown', value: item.count }))} maximum={maxCountryUsers} suffix="users" /> : <Empty text="No country data recorded." />}</section>
-      </div>
-
-      <section className="analytics-panel analytics-sessions glass-panel"><div className="analytics-session-header"><PanelTitle icon={<Clock3 size={17} />} title="Individual sessions" subtitle={`${sessionMeta.total.toLocaleString()} sessions`} /><Flex align="center" css={{ gap: '$3', flexWrap: 'wrap' }}><select value={platform} onChange={(event) => setPlatform(event.target.value)} aria-label="Filter sessions by platform"><option value="all">All platforms</option><option value="ios">iOS only</option><option value="android">Android only</option></select><TableExport rows={visibleSessions} filename="analytics-sessions" title="Analytics sessions" columns={[{ key: 'user_name', label: 'User' }, { key: 'user_email', label: 'Email' }, { key: 'platform', label: 'Platform' }, { key: 'device_model', label: 'Device' }, { key: 'app_version', label: 'Version' }, { key: 'last_screen', label: 'Last screen', value: (session) => formatScreenName(session.last_screen) }, { key: 'duration_seconds', label: 'Duration', value: (session) => formatDuration(session.duration_seconds) }, { key: 'opened_at', label: 'Opened' }]} /></Flex></div>
-         {loading ? <PanelLoading /> : visibleSessions.length ? <><div className="analytics-table-wrap"><Table aria-label="Individual app sessions" shadow={false}><Table.Header><Table.Column>USER</Table.Column><Table.Column>PLATFORM</Table.Column><Table.Column>DEVICE</Table.Column><Table.Column>VERSION</Table.Column><Table.Column>LAST SCREEN</Table.Column><Table.Column>DURATION</Table.Column><Table.Column>OPENED</Table.Column></Table.Header><Table.Body items={visibleSessions}>{(session) => <Table.Row key={session.id}><Table.Cell><Text b size="$sm">{session.user_name ?? 'Unknown'}</Text><Text size="$xs" css={{ color: '$accents7' }}>{session.user_email ?? '—'}</Text></Table.Cell><Table.Cell><span className="analytics-platform-pill">{session.platform ?? '—'}</span></Table.Cell><Table.Cell>{session.device_model ?? '—'}</Table.Cell><Table.Cell>{session.app_version ?? '—'}</Table.Cell><Table.Cell>{formatScreenName(session.last_screen)}</Table.Cell><Table.Cell>{formatDuration(session.duration_seconds)}</Table.Cell><Table.Cell>{session.opened_at ? new Date(session.opened_at).toLocaleString() : '—'}</Table.Cell></Table.Row>}</Table.Body></Table></div>{sessionMeta.last_page > 1 && <nav className="admin-pagination" aria-label="Session pages"><button disabled={sessionPage <= 1 || loading} onClick={() => setSessionPage((value) => value - 1)} type="button">Previous</button><span>Page {sessionMeta.current_page} of {sessionMeta.last_page}</span><button disabled={sessionPage >= sessionMeta.last_page || loading} onClick={() => setSessionPage((value) => value + 1)} type="button">Next</button></nav>}</> : <Empty text={search ? "No sessions match this search." : "No sessions recorded for these filters."} />}
-      </section>
-   </Box>;
+   );
 }
 
-const PanelTitle = ({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle: string }) => <header className="analytics-panel-title"><span>{icon}</span><div><h3>{title}</h3><p>{subtitle}</p></div></header>;
+const PanelTitle = ({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle: string }) => (
+   <header className="analytics-panel-title">
+      <span>{icon}</span>
+      <div>
+         <h3>{title}</h3>
+         <p>{subtitle}</p>
+      </div>
+   </header>
+);
+
 const PanelLoading = () => <AppLoadingState message="Loading analytics…" minHeight={150} />;
-const Empty = ({ text }: { text: string }) => <div className="analytics-empty"><BarChart3 size={20} /><p>{text}</p></div>;
-const RankedList = ({ items, maximum, suffix }: { items: { label: string; value: number }[]; maximum: number; suffix: string }) => <div className="analytics-ranked-list">{items.slice(0, 8).map((item, index) => <div key={`${item.label}-${index}`}><span>{String(index + 1).padStart(2, '0')}</span><section><div><strong>{item.label}</strong><small>{item.value.toLocaleString()} {suffix}</small></div><i><b style={{ width: `${Math.max((item.value / maximum) * 100, 4)}%` }} /></i></section></div>)}</div>;
+
+const Empty = ({ text }: { text: string }) => (
+   <div className="analytics-empty">
+      <BarChart3 size={20} />
+      <p>{text}</p>
+   </div>
+);
+
+const RankedList = ({
+   items,
+   maximum,
+   suffix,
+}: {
+   items: { label: string; value: number }[];
+   maximum: number;
+   suffix: string;
+}) => (
+   <div className="analytics-ranked-list">
+      {items.slice(0, 8).map((item, index) => (
+         <div key={`${item.label}-${index}`}>
+            <span>{String(index + 1).padStart(2, '0')}</span>
+            <section>
+               <div>
+                  <strong>{item.label}</strong>
+                  <small>{item.value.toLocaleString()} {suffix}</small>
+               </div>
+               <i><b style={{ width: `${Math.max((item.value / maximum) * 100, 4)}%` }} /></i>
+            </section>
+         </div>
+      ))}
+   </div>
+);

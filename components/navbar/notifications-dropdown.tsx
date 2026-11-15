@@ -1,63 +1,33 @@
 import React from 'react';
-import { Dropdown, Text } from '@nextui-org/react';
 import { Bell } from 'lucide-react';
-import { Box } from '../styles/box';
+import {
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuLabel,
+   DropdownMenuSeparator,
+   DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export const NotificationsDropdown = () => {
    return (
-      <Dropdown placement="bottom-right">
-         <Dropdown.Trigger>
-            <div
-               style={{
-                  position: 'relative',
-                  cursor: 'pointer',
-                  width: '38px',
-                  height: '38px',
-                  borderRadius: '10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: 'var(--pf-glass-soft)',
-                  border: '1px solid var(--pf-border)',
-                  transition: 'all 0.2s ease',
-               }}
-               className="nav-action-btn"
-            >
-               <Bell size={18} color="var(--pf-text)" />
-            </div>
-         </Dropdown.Trigger>
-
-         <Dropdown.Menu
-            aria-label="Notification actions"
-            css={{
-               '$$dropdownMenuWidth': '360px',
-               '$$dropdownItemHeight': 'auto',
-               'bg': 'var(--pf-glass-strong) !important',
-               'backdropFilter': 'blur(20px)',
-               'border': '1px solid var(--pf-border)',
-               'borderRadius': '16px',
-               'p': '$3',
-               'boxShadow': '0 20px 40px -15px rgba(0,0,0,0.7)',
-               '& .nextui-dropdown-item': {
-                  'py': '$3',
-                  'px': '$3',
-                  'borderRadius': '10px',
-                  'transition': 'all 0.2s ease',
-                  '&:hover': {
-                     bg: 'var(--pf-hover) !important',
-                  },
-               },
-            }}
+      <DropdownMenu>
+         <DropdownMenuTrigger
+            className="relative flex h-[38px] w-[38px] items-center justify-center rounded-[10px] border bg-muted/50 transition-all duration-200 hover:bg-muted"
+            aria-label="Notifications"
          >
-            <Dropdown.Section title="Notifications">
-               <Dropdown.Item key="empty" textValue="No notifications" css={{ cursor: 'default' }}>
-                  <Box css={{ py: '$6', textAlign: 'center' }}>
-                     <Text b size="$sm" css={{ color: 'var(--pf-text)' }}>No notifications</Text>
-                     <Text size="$xs" css={{ color: 'var(--pf-text-muted)', mt: '$1' }}>New system activity will appear here.</Text>
-                  </Box>
-               </Dropdown.Item>
-            </Dropdown.Section>
-         </Dropdown.Menu>
-      </Dropdown>
+            <Bell size={18} className="text-foreground" />
+         </DropdownMenuTrigger>
+
+         <DropdownMenuContent align="end" className="w-[360px] rounded-2xl p-3 backdrop-blur-xl">
+            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <div className="py-6 text-center">
+               <p className="text-sm font-semibold text-foreground">No notifications</p>
+               <p className="mt-1 text-xs text-muted-foreground">
+                  New system activity will appear here.
+               </p>
+            </div>
+         </DropdownMenuContent>
+      </DropdownMenu>
    );
 };

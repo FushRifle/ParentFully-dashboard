@@ -7,7 +7,7 @@ import {
      Card,
      Badge,
      Divider
-} from '@nextui-org/react';
+} from '@/components/ui/legacy';
 
 import { Tabs } from '../../components/styles/tabs';
 import { Box } from '../../components/styles/box';

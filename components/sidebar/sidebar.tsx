@@ -19,14 +19,11 @@ import {
    Menu,
    Headphones,
 } from 'lucide-react';
-import { Box } from '../styles/box';
-import { Flex } from '../styles/flex';
-import { ParentfullyIcon } from '../icons/parentfully-icon';
-import { SidebarItem } from './sidebar-item';
-import { SidebarMenu } from './sidebar-menu';
-import { Sidebar } from './sidebar.styles';
-import { useSidebarContext } from '../layout/layout-context';
-import { Text } from '@nextui-org/react';
+import { ParentfullyIcon } from '@/components/icons/parentfully-icon';
+import { SidebarItem } from '@/components/sidebar/sidebar-item';
+import { SidebarMenu } from '@/components/sidebar/sidebar-menu';
+import { Sidebar } from '@/components/sidebar/sidebar.styles';
+import { useSidebarContext } from '@/components/layout/layout-context';
 
 const navSections = [
    {
@@ -88,43 +85,15 @@ export const SidebarWrapper = () => {
       section.items.some((item) => isActive(item.href));
 
    return (
-      <Box
-         as="aside"
-         css={{
-            height: '100vh',
-            zIndex: 202,
-            position: 'sticky',
-            top: 0,
-            background: 'var(--pf-sidebar-bg)',
-            borderRight: '1px solid var(--pf-border)',
-            '&::after': {
-               content: '',
-               position: 'absolute',
-               top: 0,
-               right: '-1px',
-               width: '1px',
-               height: '110px',
-               background: 'rgba(242,140,24,.7)',
-               pointerEvents: 'none',
-            },
-         }}
+      <aside
+         className="sticky top-0 z-[202] h-screen border-r bg-background before:pointer-events-none before:absolute before:-right-px before:top-0 before:h-[110px] before:w-px before:bg-orange-500/70"
       >
-         {/* Global Custom Sidebar & Active Glow Animations */}
          <style>{`
-            .sidebar-body::-webkit-scrollbar {
-               width: 4px;
-            }
-            .sidebar-body::-webkit-scrollbar-track {
-               background: transparent;
-            }
-            .sidebar-body::-webkit-scrollbar-thumb {
-               background: rgba(255, 255, 255, 0.1);
-               border-radius: 4px;
-            }
-            .sidebar-body::-webkit-scrollbar-thumb:hover {
-               background: rgba(255, 255, 255, 0.2);
-            }
-         `}</style>
+        .sidebar-body::-webkit-scrollbar { width: 4px; }
+        .sidebar-body::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+        .sidebar-body::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+      `}</style>
 
          {mobileOpen && <Sidebar.Overlay onClick={setCollapsed} />}
 
@@ -133,103 +102,85 @@ export const SidebarWrapper = () => {
                type="button"
                aria-label="Open sidebar"
                onClick={setCollapsed}
-               className="sidebar-mobile-trigger"
-               style={{ position: 'fixed', top: 16, left: 14, zIndex: 203, width: 40, height: 40, borderRadius: 12, border: '1px solid rgba(255,255,255,.1)', background: 'rgba(12,12,16,.86)', backdropFilter: 'blur(18px)', color: 'white', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+               className="sidebar-mobile-trigger fixed left-3.5 top-4 z-[203] flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-[rgba(12,12,16,0.86)] text-white backdrop-blur-xl"
             >
                <Menu size={20} />
             </button>
          )}
 
-         <Sidebar open={mobileOpen} compact={collapsed}>
-            {/* Header Brand / Company Select */}
-            <Sidebar.Header
-               css={{
-                  borderBottom: '1px solid var(--pf-border)',
-                  padding: collapsed ? '14px 12px' : '14px 12px 14px 18px',
-               }}
-            >
-               <div className={`sidebar-brand${collapsed ? ' compact' : ''}`}>
-                  {!collapsed && <span className="sidebar-brand-mark"><ParentfullyIcon /></span>}
-                  {!collapsed && <span className="sidebar-brand-copy"><strong>ParentFully</strong><small>Admin workspace</small></span>}
+         <div
+            className={`flex h-full flex-col border-r bg-background transition-all duration-100 ${mobileOpen ? 'fixed inset-y-0 left-0 w-60 translate-x-0 shadow-md' : 'hidden md:sticky md:flex md:translate-x-0'
+               } ${collapsed ? 'md:w-[4.75rem]' : 'md:w-60'}`}
+         >
+            {/* Header */}
+            <Sidebar.Header className={`border-b px-3 ${collapsed ? 'py-3.5' : 'py-3.5 pl-[18px]'}`}>
+               <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
+                  {!collapsed && (
+                     <>
+                        <span className="shrink-0">
+                           <ParentfullyIcon />
+                        </span>
+                        <span className="flex flex-col leading-tight">
+                           <strong className="text-sm font-semibold">ParentFully</strong>
+                           <small className="text-xs text-muted-foreground">Admin workspace</small>
+                        </span>
+                     </>
+                  )}
                </div>
                <button
                   type="button"
                   aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                   title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                   onClick={setCollapsed}
-                  className="sidebar-collapse-button"
-                  style={{ marginLeft: collapsed ? 0 : 'auto' }}
+                  className={`flex items-center justify-center rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground ${collapsed ? 'mx-auto' : 'ml-auto'}`}
                >
                   <Menu size={18} />
                </button>
             </Sidebar.Header>
 
-            <Flex
-               direction="column"
-               justify="between"
-               css={{
-                  height: 'calc(100% - 73px)',
-                  minHeight: 0,
-               }}
-            >
-               {/* Scrollable Navigation Sections */}
-               <Sidebar.Body
-                  className="sidebar-body"
-                  css={{
-                     py: '$5',
-                     px: '$3',
-                     overflowY: 'auto',
-                     flex: 1,
-                  }}
-               >
-                  {navSections.map((section) => section.title === 'Dashboard' ? (
-                     <Box key={section.title} css={{ mb: '$3' }}>
-                        {section.items.map((item) => {
-                           const Icon = item.icon;
-                           return <SidebarItem key={item.href} title={item.title} icon={<Icon size={16} strokeWidth={2} />} href={item.href} isActive={isActive(item.href)} />;
-                        })}
-                     </Box>
-                  ) : (
-                     <SidebarMenu
-                        key={section.title}
-                        title={section.title}
-                        defaultOpen={isSectionActive(section)}
-                        compact={collapsed}
-                     >
-                        {section.items.map((item) => {
-                           const Icon = item.icon;
-                           return (
-                              <SidebarItem
-                                 key={item.href}
-                                 title={item.title}
-                                 icon={<Icon size={16} strokeWidth={2} />}
-                                 href={item.href}
-                                 isActive={isActive(item.href)}
-                              />
-                           );
-                        })}
-                     </SidebarMenu>
-                  ))}
+            <div className="flex h-[calc(100%-73px)] min-h-0 flex-col justify-between">
+               <Sidebar.Body className="sidebar-body flex-1 overflow-y-auto px-3 py-5">
+                  {navSections.map((section) =>
+                     section.title === 'Dashboard' ? (
+                        <div key={section.title} className="mb-3">
+                           {section.items.map((item) => {
+                              const Icon = item.icon;
+                              return (
+                                 <SidebarItem
+                                    key={item.href}
+                                    title={item.title}
+                                    icon={<Icon size={16} strokeWidth={2} />}
+                                    href={item.href}
+                                    isActive={isActive(item.href)}
+                                 />
+                              );
+                           })}
+                        </div>
+                     ) : (
+                        <SidebarMenu
+                           key={section.title}
+                           title={section.title}
+                           defaultOpen={isSectionActive(section)}
+                           compact={collapsed}
+                        >
+                           {section.items.map((item) => {
+                              const Icon = item.icon;
+                              return (
+                                 <SidebarItem
+                                    key={item.href}
+                                    title={item.title}
+                                    icon={<Icon size={16} strokeWidth={2} />}
+                                    href={item.href}
+                                    isActive={isActive(item.href)}
+                                 />
+                              );
+                           })}
+                        </SidebarMenu>
+                     ),
+                  )}
                </Sidebar.Body>
-
-               {/* Footer copyright
-               <Sidebar.Footer
-                  css={{
-                     borderTop: '1px solid var(--pf-border)',
-                     padding: collapsed ? '14px 10px' : '14px 18px',
-                     background: 'transparent',
-                  }}
-               >
-                  {!collapsed ?
-                     <div className="sidebar-footer-status"><span /><div><strong>Admin console</strong>
-                        <small>Connected to live data</small>
-                     </div>
-                     </div> : <span className="sidebar-footer-dot" title="Connected to live data" />
-                  }
-               </Sidebar.Footer>
-                */}
-            </Flex>
-         </Sidebar>
-      </Box>
+            </div>
+         </div>
+      </aside>
    );
 };

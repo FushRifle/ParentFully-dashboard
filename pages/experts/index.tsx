@@ -1,24 +1,20 @@
 import React, { useState, useMemo } from 'react';
-import { Grid, Text, Button, Input, Badge, Card } from '@nextui-org/react';
-
-import { Select } from '../../components/styles/select';
-import { Box } from '../../components/styles/box';
-import { Flex } from '../../components/styles/flex';
-
+import { Search, Filter } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
 import {
-     Search, Filter, Lock, Video,
-     BookOpen, Clock, Shield
-} from 'lucide-react';
-import { Tabs } from '../../components/styles/tabs';
-
-import {
-     experts, expertiseCategories, filters,
-     consultationTypes, reviews
-} from '../../components/experts/data';
-
-import { ExpertCard } from '../../components/experts/expert-card';
-import { ExpertiseFilter } from '../../components/experts/expert-filter';
-import { ExpertProfile } from '../../components/experts/expert-profile';
+     Select,
+     SelectContent,
+     SelectItem,
+     SelectTrigger,
+     SelectValue,
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { experts, expertiseCategories, filters, consultationTypes, reviews } from '@/components/experts/data';
+import { ExpertCard } from '@/components/experts/expert-card';
+import { ExpertiseFilter } from '@/components/experts/expert-filter';
+import { ExpertProfile } from '@/components/experts/expert-profile';
 
 const ExpertsPage = () => {
      const [selectedTab, setSelectedTab] = useState('browse');
@@ -30,37 +26,47 @@ const ExpertsPage = () => {
      const [selectedAvailability, setSelectedAvailability] = useState('all');
      const [selectedPrice, setSelectedPrice] = useState('all');
 
-     // Options for Selects
-     const languageOptions = [{ label: 'All Languages', value: 'all' }, ...filters.languages.map(lang => ({ label: lang.charAt(0).toUpperCase() + lang.slice(1), value: lang }))];
-     const experienceOptions = [{ label: 'Any Experience', value: 'all' }, ...filters.experience.map(exp => ({ label: `${exp} years`, value: exp }))];
+     const languageOptions = [
+          { label: 'All Languages', value: 'all' },
+          ...filters.languages.map((lang) => ({ label: lang.charAt(0).toUpperCase() + lang.slice(1), value: lang })),
+     ];
+     const experienceOptions = [
+          { label: 'Any Experience', value: 'all' },
+          ...filters.experience.map((exp) => ({ label: `${exp} years`, value: exp })),
+     ];
      const availabilityOptions = [
           { label: 'All', value: 'all' },
           { label: 'Available Now', value: 'available' },
-          { label: 'Busy', value: 'busy' }
+          { label: 'Busy', value: 'busy' },
      ];
      const priceOptions = [
           { label: 'All', value: 'all' },
           { label: '$0 - $100', value: '0-100' },
           { label: '$100 - $150', value: '100-150' },
           { label: '$150 - $200', value: '150-200' },
-          { label: '$200+', value: '200+' }
+          { label: '$200+', value: '200+' },
      ];
 
-     // Get selected expert details
-     const currentExpert = useMemo(() => experts.find(expert => expert.id === selectedExpert) || null, [selectedExpert]);
+     const currentExpert = useMemo(
+          () => experts.find((expert) => expert.id === selectedExpert) || null,
+          [selectedExpert],
+     );
 
-     // Filter experts
      const filteredExperts = useMemo(() => {
-          return experts.filter(expert => {
+          return experts.filter((expert) => {
                const matchesSearch =
                     searchQuery === '' ||
                     expert.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                     expert.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    expert.expertise.some(exp => expertiseCategories.find(c => c.id === exp)?.name.toLowerCase().includes(searchQuery.toLowerCase()));
+                    expert.expertise.some((exp) =>
+                         expertiseCategories.find((c) => c.id === exp)?.name.toLowerCase().includes(searchQuery.toLowerCase()),
+                    );
 
                const matchesExpertise =
                     selectedExpertise.length === 0 ||
-                    selectedExpertise.some(exp => expert.expertise.includes(expertiseCategories.find(c => c.name === exp)?.id as any));
+                    selectedExpertise.some((exp) =>
+                         expert.expertise.includes(expertiseCategories.find((c) => c.name === exp)?.id as any),
+                    );
 
                const matchesLanguage =
                     selectedLanguage === 'all' || expert.languages.includes(selectedLanguage as any);
@@ -90,12 +96,11 @@ const ExpertsPage = () => {
           });
      }, [searchQuery, selectedExpertise, selectedLanguage, selectedExperience, selectedAvailability, selectedPrice]);
 
-     // Stats
      const stats = {
           totalExperts: experts.length,
-          verifiedExperts: experts.filter(e => e.verified).length,
+          verifiedExperts: experts.filter((e) => e.verified).length,
           averageRating: (experts.reduce((sum, e) => sum + e.rating, 0) / experts.length).toFixed(1),
-          totalExperience: experts.reduce((sum, e) => sum + e.experience, 0)
+          totalExperience: experts.reduce((sum, e) => sum + e.experience, 0),
      };
 
      const handleBookExpert = (expertId: string) => {
@@ -112,219 +117,169 @@ const ExpertsPage = () => {
           console.log('Booking consultation:', { expertId, consultationType });
      };
 
-     // Tab items
-     const tabItems = [
-          {
-               key: 'browse',
-               title: 'Browse Experts',
-               content: (
-                    <Flex css={{ gap: '$6', flexWrap: 'wrap' }}>
-                         {/* Left Panel - Filters */}
-                         <Flex direction="column" css={{ width: '100%', maxWidth: '300px', gap: '$6' }}>
-                              <ExpertiseFilter selectedExpertise={selectedExpertise} onChange={setSelectedExpertise} />
+     const clearFilters = () => {
+          setSelectedExpertise([]);
+          setSelectedLanguage('all');
+          setSelectedExperience('all');
+          setSelectedAvailability('all');
+          setSelectedPrice('all');
+     };
 
-                              <Card css={{ p: '$6' }} variant="flat">
-                                   <Text h4 css={{ mb: '$4' }}>Languages</Text>
-                                   <Select
-                                        value={selectedLanguage}
-                                        onChange={setSelectedLanguage}
-                                        options={languageOptions}
-                                        css={{ width: '100%' }}
-                                   />
-                              </Card>
+     return (
+          <div className="h-[calc(100vh-100px)] overflow-auto p-10">
+               <div className="mb-8 flex items-center justify-between">
+                    <div>
+                         <h2 className="text-2xl font-semibold">Parenting Experts</h2>
+                         <p className="mt-2 text-muted-foreground">
+                              Connect with certified parenting advisors, counselors, and specialists
+                         </p>
+                    </div>
+                    <Button onClick={() => console.log('Book consultation')}>Book Free Consultation</Button>
+               </div>
 
-                              <Card css={{ p: '$6' }} variant="flat">
-                                   <Text h4 css={{ mb: '$4' }}>Years of Experience</Text>
-                                   <Select
-                                        value={selectedExperience}
-                                        onChange={setSelectedExperience}
-                                        options={experienceOptions}
-                                        css={{ width: '100%' }}
-                                   />
-                              </Card>
-                         </Flex>
+               <Card className="mb-8 p-6">
+                    <CardContent className="grid grid-cols-1 gap-4 p-0 sm:grid-cols-2 md:grid-cols-4">
+                         <div className="flex flex-col items-center">
+                              <span className="text-2xl font-bold text-primary">{stats.totalExperts}</span>
+                              <span className="text-sm text-muted-foreground">Certified Experts</span>
+                         </div>
+                         <div className="flex flex-col items-center">
+                              <span className="text-2xl font-bold text-emerald-500">{stats.verifiedExperts}</span>
+                              <span className="text-sm text-muted-foreground">Verified Professionals</span>
+                         </div>
+                         <div className="flex flex-col items-center">
+                              <span className="text-2xl font-bold text-amber-500">{stats.averageRating}</span>
+                              <span className="text-sm text-muted-foreground">Average Rating</span>
+                         </div>
+                         <div className="flex flex-col items-center">
+                              <span className="text-2xl font-bold text-indigo-500">{stats.totalExperience}+</span>
+                              <span className="text-sm text-muted-foreground">Years of Experience</span>
+                         </div>
+                    </CardContent>
+               </Card>
 
-                         {/* Right Panel - Expert Cards */}
-                         <Flex direction="column" css={{ flex: 1, gap: '$6' }}>
-                              {filteredExperts.filter(e => e.featured).length > 0 && (
-                                   <Box>
-                                        <Flex align="center" css={{ gap: '$3', mb: '$4' }}>
-                                             <Text h4>Featured Experts</Text>
-                                        </Flex>
+               <Card className="mb-8 p-6">
+                    <CardContent className="flex flex-wrap gap-6 p-0">
+                         <div className="relative min-w-[200px] flex-1">
+                              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                              <Input
+                                   placeholder="Search experts by name, specialty, or keyword..."
+                                   value={searchQuery}
+                                   onChange={(e) => setSearchQuery(e.target.value)}
+                                   className="pl-9"
+                              />
+                         </div>
 
-                                        <Flex direction="column" css={{ gap: '$3' }}>
-                                             {filteredExperts.filter(e => e.featured).map(expert => (
-                                                  <ExpertCard
-                                                       key={expert.id}
-                                                       expert={expert}
-                                                       onBook={handleBookExpert}
-                                                       onViewProfile={handleViewProfile}
-                                                  />
-                                             ))}
-                                        </Flex>
-                                   </Box>
-                              )}
-                         </Flex>
-                         <Flex>
-                              <Text h4 css={{ mb: '$4' }}>
-                                   {filteredExperts.length} Parenting Experts Available
-                              </Text>
+                         <Select value={selectedAvailability} onValueChange={setSelectedAvailability as any}>
+                              <SelectTrigger className="min-w-[150px]"><SelectValue placeholder="Availability" /></SelectTrigger>
+                              <SelectContent>
+                                   {availabilityOptions.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                              </SelectContent>
+                         </Select>
 
-                              <Grid.Container gap={2}>
-                                   {filteredExperts.filter(e => !e.featured).map(expert => (
-                                        <Grid xs={12} md={6} key={expert.id}>
+                         <Select value={selectedPrice} onValueChange={setSelectedPrice as any}>
+                              <SelectTrigger className="min-w-[150px]"><SelectValue placeholder="Price Range" /></SelectTrigger>
+                              <SelectContent>
+                                   {priceOptions.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                              </SelectContent>
+                         </Select>
+
+                         <Button variant="ghost" onClick={clearFilters}>
+                              <Filter size={16} className="mr-2" />
+                              Clear Filters
+                         </Button>
+                    </CardContent>
+               </Card>
+
+               <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mb-8">
+                    <TabsList>
+                         <TabsTrigger value="browse">Browse Experts</TabsTrigger>
+                         <TabsTrigger value="profile">Expert Profile</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="browse" className="mt-4">
+                         <div className="flex flex-wrap gap-6">
+                              <div className="flex w-full max-w-[300px] flex-col gap-6">
+                                   <ExpertiseFilter selectedExpertise={selectedExpertise} onChange={setSelectedExpertise} />
+
+                                   <Card className="p-6">
+                                        <h4 className="mb-4 text-lg font-semibold">Languages</h4>
+                                        <Select value={selectedLanguage} onValueChange={setSelectedLanguage as any}>
+                                             <SelectTrigger className="w-full"><SelectValue placeholder="Language" /></SelectTrigger>
+                                             <SelectContent>
+                                                  {languageOptions.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                                             </SelectContent>
+                                        </Select>
+                                   </Card>
+
+                                   <Card className="p-6">
+                                        <h4 className="mb-4 text-lg font-semibold">Years of Experience</h4>
+                                        <Select value={selectedExperience} onValueChange={setSelectedExperience as any}>
+                                             <SelectTrigger className="w-full"><SelectValue placeholder="Experience" /></SelectTrigger>
+                                             <SelectContent>
+                                                  {experienceOptions.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                                             </SelectContent>
+                                        </Select>
+                                   </Card>
+                              </div>
+
+                              <div className="flex flex-1 flex-col gap-6">
+                                   {filteredExperts.filter((e) => e.featured).length > 0 && (
+                                        <div>
+                                             <div className="mb-4 flex items-center gap-3">
+                                                  <h4 className="text-lg font-semibold">Featured Experts</h4>
+                                             </div>
+                                             <div className="flex flex-col gap-3">
+                                                  {filteredExperts.filter((e) => e.featured).map((expert) => (
+                                                       <ExpertCard
+                                                            key={expert.id}
+                                                            expert={expert}
+                                                            onBook={handleBookExpert}
+                                                            onViewProfile={handleViewProfile}
+                                                       />
+                                                  ))}
+                                             </div>
+                                        </div>
+                                   )}
+                              </div>
+
+                              <div className="w-full">
+                                   <h4 className="mb-4 text-lg font-semibold">
+                                        {filteredExperts.length} Parenting Experts Available
+                                   </h4>
+                                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                        {filteredExperts.filter((e) => !e.featured).map((expert) => (
                                              <ExpertCard
+                                                  key={expert.id}
                                                   expert={expert}
                                                   compact
                                                   onBook={handleBookExpert}
                                                   onViewProfile={handleViewProfile}
                                              />
-                                        </Grid>
-                                   ))}
-                              </Grid.Container>
-                         </Flex>
-                    </Flex>
+                                        ))}
+                                   </div>
+                              </div>
+                         </div>
+                    </TabsContent>
 
-               )
-          },
-          {
-               key: 'profile',
-               title: 'Expert Profile',
-               content: currentExpert ? (
-                    <ExpertProfile
-                         expert={currentExpert}
-                         reviews={reviews.filter(r => r.expertId === currentExpert.id)}
-                         consultationTypes={consultationTypes}
-                         onBookConsultation={handleBookConsultation}
-                    />
-               ) : (
-                    <Box css={{ textAlign: 'center', py: '$20' }}>
-                         <Text h4 color="$accents7">Select an expert to view their profile</Text>
-                    </Box>
-               )
-          }
-     ];
-
-     return (
-          <Box css={{ p: '$10', overflow: 'auto', height: 'calc(100vh - 100px)' }}>
-               {/* Header */}
-               <Flex justify="between" align="center" css={{ mb: '$8' }}>
-                    <Box>
-                         <Text h2>Parenting Experts</Text>
-                         <Text color="$accents7" css={{ mt: '$2' }}>
-                              Connect with certified parenting advisors, counselors, and specialists
-                         </Text>
-                    </Box>
-
-                    <Flex css={{ gap: '$4' }}>
-                         <Button auto css={{ bg: '#3f3bef' }} icon={<BookOpen size={16} />} onPress={() => console.log('Book consultation')}>
-                              Book Free Consultation
-                         </Button>
-                    </Flex>
-               </Flex>
-
-               {/* Stats */}
-               <Card css={{ p: '$6', mb: '$8' }} variant="flat">
-                    <Grid.Container gap={2}>
-                         <Grid xs={12} sm={6} md={3}>
-                              <Flex direction="column" align="center">
-                                   <Text b size="$2xl" css={{ color: '$primary' }}>{stats.totalExperts}</Text>
-                                   <Text size="$sm" color="$accents7">Certified Experts</Text>
-                              </Flex>
-                         </Grid>
-                         <Grid xs={12} sm={6} md={3}>
-                              <Flex direction="column" align="center">
-                                   <Text b size="$2xl" css={{ color: '$success' }}>{stats.verifiedExperts}</Text>
-                                   <Text size="$sm" color="$accents7">Verified Professionals</Text>
-                              </Flex>
-                         </Grid>
-                         <Grid xs={12} sm={6} md={3}>
-                              <Flex direction="column" align="center">
-                                   <Text b size="$2xl" css={{ color: '$warning' }}>{stats.averageRating}</Text>
-                                   <Text size="$sm" color="$accents7">Average Rating</Text>
-                              </Flex>
-                         </Grid>
-                         <Grid xs={12} sm={6} md={3}>
-                              <Flex direction="column" align="center">
-                                   <Text b size="$2xl" css={{ color: '$secondary' }}>{stats.totalExperience}+</Text>
-                                   <Text size="$sm" color="$accents7">Years of Experience</Text>
-                              </Flex>
-                         </Grid>
-                    </Grid.Container>
-               </Card>
-
-               {/* Search & Filters */}
-               <Card css={{ p: '$6', mb: '$8' }} variant="flat">
-                    <Flex css={{ gap: '$6', flexWrap: 'wrap' }}>
-                         <Input
-                              placeholder="Search experts by name, specialty, or keyword..."
-                              value={searchQuery}
-                              onChange={(e) => setSearchQuery(e.target.value)}
-                              contentLeft={<Search size={16} />}
-                              css={{ flex: 1, minWidth: '200px' }}
-                         />
-
-                         <Select placeholder="Availability" value={selectedAvailability} options={availabilityOptions} onChange={setSelectedAvailability} css={{ minWidth: '150px' }} />
-                         <Select placeholder="Price Range" value={selectedPrice} options={priceOptions} onChange={setSelectedPrice} css={{ minWidth: '150px' }} />
-
-                         <Button
-                              auto
-                              light
-                              icon={<Filter size={16} />}
-                              onPress={() => {
-                                   setSelectedExpertise([]);
-                                   setSelectedLanguage('all');
-                                   setSelectedExperience('all');
-                                   setSelectedAvailability('all');
-                                   setSelectedPrice('all');
-                              }}
-                         >
-                              Clear Filters
-                         </Button>
-                    </Flex>
-               </Card>
-
-               {/* Main Tabs */}
-               <Tabs items={tabItems} activeKey={selectedTab} onChange={setSelectedTab} variant="underlined" css={{ mb: '$8' }} />
-
-               {/* Benefits 
-               {selectedTab === 'browse' && (
-                    <Card css={{ p: '$6', mt: '$8' }} variant="flat">
-                         <Text h4 css={{ mb: '$6', textAlign: 'center' }}>Why Choose Our Parenting Experts?</Text>
-                         <Grid.Container gap={4}>
-                              <Grid xs={12} sm={6} md={3}>
-                                   <Flex direction="column" align="center" css={{ gap: '$3', textAlign: 'center' }}>
-                                        <Badge size="lg" color="primary" variant="flat"><Shield size={24} /></Badge>
-                                        <Text b>Verified Credentials</Text>
-                                        <Text size="$sm" color="$accents7">All experts are thoroughly vetted and certified</Text>
-                                   </Flex>
-                              </Grid>
-                              <Grid xs={12} sm={6} md={3}>
-                                   <Flex direction="column" align="center" css={{ gap: '$3', textAlign: 'center' }}>
-                                        <Badge size="lg" color="success" variant="flat"><Clock size={24} /></Badge>
-                                        <Text b>Flexible Scheduling</Text>
-                                        <Text size="$sm" color="$accents7">Book sessions that fit your schedule</Text>
-                                   </Flex>
-                              </Grid>
-                              <Grid xs={12} sm={6} md={3}>
-                                   <Flex direction="column" align="center" css={{ gap: '$3', textAlign: 'center' }}>
-                                        <Badge size="lg" color="warning" variant="flat"><Video size={24} /></Badge>
-                                        <Text b>Multiple Formats</Text>
-                                        <Text size="$sm" color="$accents7">Video, phone, or in-person consultations</Text>
-                                   </Flex>
-                              </Grid>
-                              <Grid xs={12} sm={6} md={3}>
-                                   <Flex direction="column" align="center" css={{ gap: '$3', textAlign: 'center' }}>
-                                        <Badge size="lg" color="error" variant="flat"><Lock size={24} /></Badge>
-                                        <Text b>Confidential & Secure</Text>
-                                        <Text size="$sm" color="$accents7">Your privacy is our top priority</Text>
-                                   </Flex>
-                              </Grid>
-                         </Grid.Container>
-                    </Card>
-               )}
-                    */}
-          </Box>
+                    <TabsContent value="profile" className="mt-4">
+                         {currentExpert ? (
+                              <ExpertProfile
+                                   expert={currentExpert}
+                                   reviews={reviews.filter((r) => r.expertId === currentExpert.id)}
+                                   consultationTypes={consultationTypes}
+                                   onBookConsultation={handleBookConsultation}
+                              />
+                         ) : (
+                              <div className="py-20 text-center">
+                                   <h4 className="text-lg font-semibold text-muted-foreground">
+                                        Select an expert to view their profile
+                                   </h4>
+                              </div>
+                         )}
+                    </TabsContent>
+               </Tabs>
+          </div>
      );
 };
 

@@ -1,23 +1,50 @@
-import React from 'react';
-import { Modal, Button, Text } from '@nextui-org/react';
+import {
+     AlertDialog,
+     AlertDialogAction,
+     AlertDialogCancel,
+     AlertDialogContent,
+     AlertDialogDescription,
+     AlertDialogFooter,
+     AlertDialogHeader,
+     AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "../../ui/button";
 
-export const DeleteUserModal = ({ visible, closeHandler, userName, onConfirm }) => {
+interface DeleteUserModalProps {
+     visible: boolean;
+     closeHandler: () => void;
+     userName: string;
+     onConfirm: () => void;
+}
+
+export const DeleteUserModal = ({
+     visible,
+     closeHandler,
+     userName,
+     onConfirm,
+}: DeleteUserModalProps) => {
      return (
-          <Modal closeButton blur aria-labelledby="modal-title" open={visible} onClose={closeHandler}>
-               <Modal.Header>
-                    <Text id="modal-title" size={18}>
-                         Confirm <Text b size={18}>Suspension</Text>
-                    </Text>
-               </Modal.Header>
-               <Modal.Body>
-                    <Text>
-                         Are you sure you want to suspend <b>{userName}</b>? They will be unable to use their account until reactivated.
-                    </Text>
-               </Modal.Body>
-               <Modal.Footer>
-                    <Button auto flat color="error" onClick={closeHandler}>Cancel</Button>
-                    <Button auto onClick={onConfirm} color="error">Suspend User</Button>
-               </Modal.Footer>
-          </Modal>
+          <AlertDialog open={visible} onOpenChange={(open) => !open && closeHandler()}>
+               <AlertDialogContent>
+                    <AlertDialogHeader>
+                         <AlertDialogTitle>Confirm Suspension</AlertDialogTitle>
+                         <AlertDialogDescription>
+                              Are you sure you want to suspend <strong>{userName}</strong>? They
+                              will be unable to use their account until reactivated.
+                         </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                         <AlertDialogCancel onClick={closeHandler}>
+                              Cancel
+                         </AlertDialogCancel>
+                         <AlertDialogAction
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              onClick={onConfirm}
+                         >
+                              Suspend User
+                         </AlertDialogAction>
+                    </AlertDialogFooter>
+               </AlertDialogContent>
+          </AlertDialog>
      );
 };

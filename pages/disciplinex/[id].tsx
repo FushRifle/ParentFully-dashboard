@@ -10,9 +10,21 @@ import {
      updateRule,
      deleteRule,
 } from '@/services/disciplineService';
-import { Card, Text, Loading, Button, Container, Modal, Input, Textarea, Badge } from '@nextui-org/react';
 import type { DisciplinePlan, Rule } from '@/types/api';
 import { AppLoadingState } from '@/components/shared/app-loading-state';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+     Dialog,
+     DialogContent,
+     DialogFooter,
+     DialogHeader,
+     DialogTitle,
+} from '@/components/ui/dialog';
 
 const DisciplinePlanDetailPage: NextPage = () => {
      const router = useRouter();
@@ -23,21 +35,18 @@ const DisciplinePlanDetailPage: NextPage = () => {
      const [loading, setLoading] = useState(true);
      const [error, setError] = useState<string | null>(null);
 
-     // Edit plan state
      const [editingPlan, setEditingPlan] = useState(false);
      const [editName, setEditName] = useState('');
      const [editDescription, setEditDescription] = useState('');
      const [editNotes, setEditNotes] = useState('');
      const [savingPlan, setSavingPlan] = useState(false);
 
-     // Edit rule state (tracked by rule id)
      const [editingRuleId, setEditingRuleId] = useState<number | null>(null);
      const [editRuleName, setEditRuleName] = useState('');
      const [editRuleConsequences, setEditRuleConsequences] = useState('');
      const [editRuleNotes, setEditRuleNotes] = useState('');
      const [savingRule, setSavingRule] = useState(false);
 
-     // Add rule modal state
      const [addRuleModalOpen, setAddRuleModalOpen] = useState(false);
      const [newRuleName, setNewRuleName] = useState('');
      const [newRuleConsequences, setNewRuleConsequences] = useState('');
@@ -51,10 +60,7 @@ const DisciplinePlanDetailPage: NextPage = () => {
           setLoading(true);
           setError(null);
           try {
-               const [planData, rulesData] = await Promise.all([
-                    getSinglePlan(planId),
-                    getRules(planId),
-               ]);
+               const [planData, rulesData] = await Promise.all([getSinglePlan(planId), getRules(planId)]);
                setPlan(planData);
                setRules(rulesData);
           } catch (err) {
@@ -65,22 +71,15 @@ const DisciplinePlanDetailPage: NextPage = () => {
      };
 
      useEffect(() => {
-          if (id) {
-               fetchData();
-          }
+          if (id) fetchData();
      }, [id]);
 
-     // --- Plan editing ---
      const startEditPlan = () => {
           if (!plan) return;
           setEditName(plan.name);
           setEditDescription(plan.description || '');
           setEditNotes(plan.notes || '');
           setEditingPlan(true);
-     };
-
-     const cancelEditPlan = () => {
-          setEditingPlan(false);
      };
 
      const saveEditPlan = async () => {
@@ -112,16 +111,11 @@ const DisciplinePlanDetailPage: NextPage = () => {
           }
      };
 
-     // --- Rule editing ---
      const startEditRule = (rule: Rule) => {
           setEditingRuleId(rule.id);
           setEditRuleName(rule.name);
           setEditRuleConsequences(rule.consiquences || rule.consequences || '');
           setEditRuleNotes(rule.notes || '');
-     };
-
-     const cancelEditRule = () => {
-          setEditingRuleId(null);
      };
 
      const saveEditRule = async () => {
@@ -152,7 +146,6 @@ const DisciplinePlanDetailPage: NextPage = () => {
           }
      };
 
-     // --- Add rule ---
      const handleAddRule = async () => {
           if (!planId || !newRuleName.trim()) return;
           setSubmittingRule(true);
@@ -175,256 +168,214 @@ const DisciplinePlanDetailPage: NextPage = () => {
           }
      };
 
-     // --- Loading / Error states ---
      if (loading) {
           return (
-               <Container css={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    minHeight: '60vh',
-               }}>
+               <div className="flex min-h-[60vh] items-center justify-center">
                     <AppLoadingState message="Loading discipline plan…" />
-               </Container>
+               </div>
           );
      }
 
      if (error || !plan) {
           return (
-               <Container css={{ textAlign: 'center', py: '$20' }}>
-                    <Text h3 color="error">
-                         {error || 'Plan not found'}
-                    </Text>
-                    <Button auto ghost onPress={fetchData} css={{ mt: '$4' }}>
-                         Retry
-                    </Button>
-                    <Button auto light onPress={() => router.push('/disciplinex')} css={{ mt: '$4', ml: '$4' }}>
-                         Back to Plans
-                    </Button>
-               </Container>
+               <div className="py-20 text-center">
+                    <h3 className="text-xl font-semibold text-red-500">{error || 'Plan not found'}</h3>
+                    <div className="mt-4 flex justify-center gap-4">
+                         <Button variant="secondary" onClick={fetchData}>Retry</Button>
+                         <Button variant="ghost" onClick={() => router.push('/disciplinex')}>Back to Plans</Button>
+                    </div>
+               </div>
           );
      }
 
      return (
-          <Container css={{ py: '$10' }}>
-               {/* Header */}
-               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-                    <Button
-                         auto
-                         light
-                         css={{ minWidth: 'auto', px: '$2' }}
-                         onPress={() => router.back()}
-                    >
+          <div className="py-10">
+               <div className="mb-8 flex items-center gap-4">
+                    <Button variant="ghost" className="px-2" onClick={() => router.back()}>
                          ← Back
                     </Button>
-                    <div style={{ flex: 1 }}>
+                    <div className="flex-1">
                          {editingPlan ? (
-                              <Input
-                                   fullWidth
-                                   bordered
-                                   size="xl"
-                                   value={editName}
-                                   onChange={(e) => setEditName(e.target.value)}
-                                   placeholder="Plan name"
-                              />
+                              <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Plan name" />
                          ) : (
-                              <Text h2 css={{ m: 0 }}>{plan.name}</Text>
+                              <h2 className="m-0 text-2xl font-semibold">{plan.name}</h2>
                          )}
                     </div>
-                    <Badge variant="flat" color={plan.type === 'preset' ? 'secondary' : 'primary'}>
+                    <Badge variant={plan.type === 'preset' ? 'secondary' : 'default'}>
                          {plan.type === 'preset' ? 'Template' : 'Custom'}
                     </Badge>
                </div>
 
-               {/* Plan Info Card */}
-               <Card css={{ mb: '$8', p: '$6' }}>
-                    <Card.Body>
+               <Card className="mb-8 p-6">
+                    <CardContent className="p-0">
                          {editingPlan ? (
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                   <Textarea
-                                        fullWidth
-                                        bordered
-                                        label="Description"
-                                        placeholder="Plan description"
-                                        value={editDescription}
-                                        onChange={(e) => setEditDescription(e.target.value)}
-                                   />
-                                   <Textarea
-                                        fullWidth
-                                        bordered
-                                        label="Notes"
-                                        placeholder="Additional notes"
-                                        value={editNotes}
-                                        onChange={(e) => setEditNotes(e.target.value)}
-                                   />
-                                   <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                        <Button auto shadow color="primary" onPress={saveEditPlan} disabled={savingPlan || !editName.trim()}>
-                                             {savingPlan ? <Loading size="xs" /> : 'Save'}
+                              <div className="flex flex-col gap-4">
+                                   <div className="flex flex-col gap-1.5">
+                                        <Label htmlFor="plan-description">Description</Label>
+                                        <Textarea
+                                             id="plan-description"
+                                             placeholder="Plan description"
+                                             value={editDescription}
+                                             onChange={(e) => setEditDescription(e.target.value)}
+                                        />
+                                   </div>
+                                   <div className="flex flex-col gap-1.5">
+                                        <Label htmlFor="plan-notes">Notes</Label>
+                                        <Textarea
+                                             id="plan-notes"
+                                             placeholder="Additional notes"
+                                             value={editNotes}
+                                             onChange={(e) => setEditNotes(e.target.value)}
+                                        />
+                                   </div>
+                                   <div className="flex gap-2">
+                                        <Button onClick={saveEditPlan} disabled={savingPlan || !editName.trim()}>
+                                             {savingPlan ? 'Saving…' : 'Save'}
                                         </Button>
-                                        <Button auto flat color="error" onPress={cancelEditPlan}>
-                                             Cancel
-                                        </Button>
+                                        <Button variant="secondary" onClick={() => setEditingPlan(false)}>Cancel</Button>
                                    </div>
                               </div>
                          ) : (
                               <>
-                                   {plan.description && (
-                                        <Text css={{ mb: '$4' }}>{plan.description}</Text>
-                                   )}
-                                   {plan.notes && (
-                                        <Text small css={{ color: '$gray600', mb: '$4' }}>
-                                             Notes: {plan.notes}
-                                        </Text>
-                                   )}
-                                   <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                                        <Button auto flat color="primary" size="sm" onPress={startEditPlan}>
-                                             Edit Plan
-                                        </Button>
-                                        <Button auto flat color="error" size="sm" onPress={handleDeletePlan}>
-                                             Delete Plan
-                                        </Button>
+                                   {plan.description && <p className="mb-4">{plan.description}</p>}
+                                   {plan.notes && <p className="mb-4 text-sm text-muted-foreground">Notes: {plan.notes}</p>}
+                                   <div className="mt-2 flex gap-2">
+                                        <Button variant="secondary" size="sm" onClick={startEditPlan}>Edit Plan</Button>
+                                        <Button variant="destructive" size="sm" onClick={handleDeletePlan}>Delete Plan</Button>
                                    </div>
                               </>
                          )}
-                    </Card.Body>
+                    </CardContent>
                </Card>
 
-               {/* Rules Section */}
-               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                    <Text h3 css={{ m: 0 }}>Rules</Text>
-                    <Button auto shadow color="primary" onPress={() => setAddRuleModalOpen(true)}>
-                         + Add Rule
-                    </Button>
+               <div className="mb-4 flex items-center justify-between">
+                    <h3 className="m-0 text-xl font-semibold">Rules</h3>
+                    <Button onClick={() => setAddRuleModalOpen(true)}>+ Add Rule</Button>
                </div>
 
                {rules.length === 0 ? (
-                    <Card css={{ p: '$6', textAlign: 'center' }}>
-                         <Card.Body>
-                              <Text css={{ color: '$gray600' }}>No rules yet. Add a rule to get started.</Text>
-                         </Card.Body>
+                    <Card className="p-6 text-center">
+                         <CardContent className="p-0 text-muted-foreground">
+                              No rules yet. Add a rule to get started.
+                         </CardContent>
                     </Card>
                ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div className="flex flex-col gap-4">
                          {rules.map((rule) => (
-                              <Card key={rule.id} css={{ p: '$6' }}>
-                                   <Card.Body>
+                              <Card key={rule.id} className="p-6">
+                                   <CardContent className="p-0">
                                         {editingRuleId === rule.id ? (
-                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                                  <Input
-                                                       fullWidth
-                                                       bordered
-                                                       label="Rule Name"
-                                                       value={editRuleName}
-                                                       onChange={(e) => setEditRuleName(e.target.value)}
-                                                  />
-                                                  <Textarea
-                                                       fullWidth
-                                                       bordered
-                                                       label="Consequences"
-                                                       value={editRuleConsequences}
-                                                       onChange={(e) => setEditRuleConsequences(e.target.value)}
-                                                  />
-                                                  <Textarea
-                                                       fullWidth
-                                                       bordered
-                                                       label="Notes"
-                                                       value={editRuleNotes}
-                                                       onChange={(e) => setEditRuleNotes(e.target.value)}
-                                                  />
-                                                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                       <Button auto shadow color="primary" onPress={saveEditRule} disabled={savingRule || !editRuleName.trim()}>
-                                                            {savingRule ? <Loading size="xs" /> : 'Save'}
+                                             <div className="flex flex-col gap-4">
+                                                  <div className="flex flex-col gap-1.5">
+                                                       <Label htmlFor={`rule-name-${rule.id}`}>Rule Name</Label>
+                                                       <Input
+                                                            id={`rule-name-${rule.id}`}
+                                                            value={editRuleName}
+                                                            onChange={(e) => setEditRuleName(e.target.value)}
+                                                       />
+                                                  </div>
+                                                  <div className="flex flex-col gap-1.5">
+                                                       <Label htmlFor={`rule-consequences-${rule.id}`}>Consequences</Label>
+                                                       <Textarea
+                                                            id={`rule-consequences-${rule.id}`}
+                                                            value={editRuleConsequences}
+                                                            onChange={(e) => setEditRuleConsequences(e.target.value)}
+                                                       />
+                                                  </div>
+                                                  <div className="flex flex-col gap-1.5">
+                                                       <Label htmlFor={`rule-notes-${rule.id}`}>Notes</Label>
+                                                       <Textarea
+                                                            id={`rule-notes-${rule.id}`}
+                                                            value={editRuleNotes}
+                                                            onChange={(e) => setEditRuleNotes(e.target.value)}
+                                                       />
+                                                  </div>
+                                                  <div className="flex gap-2">
+                                                       <Button onClick={saveEditRule} disabled={savingRule || !editRuleName.trim()}>
+                                                            {savingRule ? 'Saving…' : 'Save'}
                                                        </Button>
-                                                       <Button auto flat color="error" onPress={cancelEditRule}>
-                                                            Cancel
-                                                       </Button>
+                                                       <Button variant="secondary" onClick={() => setEditingRuleId(null)}>Cancel</Button>
                                                   </div>
                                              </div>
                                         ) : (
                                              <>
-                                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                                       <Text b>{rule.name}</Text>
-                                                       <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                            <Button auto flat color="primary" size="xs" onPress={() => startEditRule(rule)}>
-                                                                 Edit
-                                                            </Button>
+                                                  <div className="flex items-start justify-between">
+                                                       <span className="font-semibold">{rule.name}</span>
+                                                       <div className="flex gap-2">
+                                                            <Button variant="secondary" size="sm" onClick={() => startEditRule(rule)}>Edit</Button>
                                                             <Button
-                                                                 auto
-                                                                 flat
-                                                                 color="error"
-                                                                 size="xs"
-                                                                 css={{ minWidth: 'auto', px: '$4' }}
-                                                                 onPress={() => handleDeleteRule(rule.id)}
+                                                                 variant="ghost"
+                                                                 size="icon"
+                                                                 className="h-7 w-7 text-red-500 hover:text-red-500"
+                                                                 onClick={() => handleDeleteRule(rule.id)}
+                                                                 aria-label="Delete rule"
                                                             >
                                                                  ✕
                                                             </Button>
                                                        </div>
                                                   </div>
                                                   {(rule.consiquences || rule.consequences) && (
-                                                       <Text small css={{ color: '$gray700', mt: '$2' }}>
-                                                            <Text b small>Consequences:</Text> {rule.consiquences || rule.consequences}
-                                                       </Text>
+                                                       <p className="mt-2 text-sm text-muted-foreground">
+                                                            <strong>Consequences:</strong> {rule.consiquences || rule.consequences}
+                                                       </p>
                                                   )}
                                                   {rule.notes && (
-                                                       <Text small css={{ color: '$gray600', mt: '$2' }}>
-                                                            <Text b small>Notes:</Text> {rule.notes}
-                                                       </Text>
+                                                       <p className="mt-2 text-sm text-muted-foreground">
+                                                            <strong>Notes:</strong> {rule.notes}
+                                                       </p>
                                                   )}
                                              </>
                                         )}
-                                   </Card.Body>
+                                   </CardContent>
                               </Card>
                          ))}
                     </div>
                )}
 
-               {/* Add Rule Modal */}
-               <Modal
-                    open={addRuleModalOpen}
-                    onClose={() => setAddRuleModalOpen(false)}
-                    closeButton
-                    aria-labelledby="add-rule-modal"
-               >
-                    <Modal.Header>
-                         <Text h4 id="add-rule-modal">Add Rule</Text>
-                    </Modal.Header>
-                    <Modal.Body>
-                         <Input
-                              fullWidth
-                              bordered
-                              label="Rule Name"
-                              placeholder="Enter rule name"
-                              value={newRuleName}
-                              onChange={(e) => setNewRuleName(e.target.value)}
-                              required
-                         />
-                         <Textarea
-                              fullWidth
-                              bordered
-                              label="Consequences"
-                              placeholder="What happens when the rule is broken?"
-                              value={newRuleConsequences}
-                              onChange={(e) => setNewRuleConsequences(e.target.value)}
-                         />
-                         <Textarea
-                              fullWidth
-                              bordered
-                              label="Notes"
-                              placeholder="Additional notes (optional)"
-                              value={newRuleNotes}
-                              onChange={(e) => setNewRuleNotes(e.target.value)}
-                         />
-                    </Modal.Body>
-                    <Modal.Footer>
-                         <Button auto flat color="error" onPress={() => setAddRuleModalOpen(false)}>
-                              Cancel
-                         </Button>
-                         <Button auto shadow color="primary" onPress={handleAddRule} disabled={submittingRule || !newRuleName.trim()}>
-                              {submittingRule ? <Loading size="xs" /> : 'Create Rule'}
-                         </Button>
-                    </Modal.Footer>
-               </Modal>
-          </Container>
+               <Dialog open={addRuleModalOpen} onOpenChange={setAddRuleModalOpen}>
+                    <DialogContent>
+                         <DialogHeader>
+                              <DialogTitle>Add Rule</DialogTitle>
+                         </DialogHeader>
+                         <div className="flex flex-col gap-4 py-4">
+                              <div className="flex flex-col gap-1.5">
+                                   <Label htmlFor="new-rule-name">Rule Name</Label>
+                                   <Input
+                                        id="new-rule-name"
+                                        placeholder="Enter rule name"
+                                        value={newRuleName}
+                                        onChange={(e) => setNewRuleName(e.target.value)}
+                                        required
+                                   />
+                              </div>
+                              <div className="flex flex-col gap-1.5">
+                                   <Label htmlFor="new-rule-consequences">Consequences</Label>
+                                   <Textarea
+                                        id="new-rule-consequences"
+                                        placeholder="What happens when the rule is broken?"
+                                        value={newRuleConsequences}
+                                        onChange={(e) => setNewRuleConsequences(e.target.value)}
+                                   />
+                              </div>
+                              <div className="flex flex-col gap-1.5">
+                                   <Label htmlFor="new-rule-notes">Notes</Label>
+                                   <Textarea
+                                        id="new-rule-notes"
+                                        placeholder="Additional notes (optional)"
+                                        value={newRuleNotes}
+                                        onChange={(e) => setNewRuleNotes(e.target.value)}
+                                   />
+                              </div>
+                         </div>
+                         <DialogFooter>
+                              <Button variant="secondary" onClick={() => setAddRuleModalOpen(false)}>Cancel</Button>
+                              <Button onClick={handleAddRule} disabled={submittingRule || !newRuleName.trim()}>
+                                   {submittingRule ? 'Creating…' : 'Create Rule'}
+                              </Button>
+                         </DialogFooter>
+                    </DialogContent>
+               </Dialog>
+          </div>
      );
 };
 

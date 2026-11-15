@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { Button, Input, Loading, Text } from '@nextui-org/react';
+import { Button, Input, Loading, Text } from '@/components/ui/legacy';
 
 import { Mail } from '@/components/icons/auth/mail';
 import { Password } from '@/components/icons/auth/password';
@@ -46,10 +46,10 @@ const LoginPage = () => {
                   <Image
                      src="/onboarding/login-family.webp"
                      alt=""
-                     layout="fill"
-                     objectFit="contain"
-                     objectPosition="center bottom"
+                     fill
+                     style={{ objectFit: 'contain', objectPosition: 'center bottom' }}
                      sizes="(min-width: 761px) 390px, 1px"
+                     loading="eager"
                   />
                </div>
             </aside>
@@ -61,8 +61,7 @@ const LoginPage = () => {
                      alt="ParentFully"
                      width={132}
                      height={56}
-                     objectFit="contain"
-                     objectPosition="left center"
+                     style={{ objectFit: 'contain', objectPosition: 'left center' }}
                      priority
                   />
 
@@ -74,7 +73,7 @@ const LoginPage = () => {
                         fullWidth
                         size="lg"
                         type="email"
-                        labelPlaceholder="Email address"
+                        placeholder="Email address"
                         contentLeft={<Mail fill="#A1A1AA" />}
                         value={email}
                         autoComplete="email"
@@ -83,13 +82,13 @@ const LoginPage = () => {
                            setEmail(event.target.value);
                            if (error) clearError();
                         }}
-                        css={{ mb: '$11', '& .nextui-input-wrapper': { borderRadius: '12px' } }}
+                        css={{ mb: '$11', borderRadius: '12px' }}
                      />
 
                      <Input.Password
                         fullWidth
                         size="lg"
-                        labelPlaceholder="Password"
+                        placeholder="Password"
                         contentLeft={<Password fill="#A1A1AA" />}
                         value={password}
                         autoComplete="current-password"
@@ -98,7 +97,7 @@ const LoginPage = () => {
                            setPassword(event.target.value);
                            if (error) clearError();
                         }}
-                        css={{ '& .nextui-input-wrapper': { borderRadius: '12px' } }}
+                        css={{ borderRadius: '12px' }}
                      />
 
                      <div className="login-options">

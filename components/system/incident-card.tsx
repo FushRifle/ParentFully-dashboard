@@ -1,7 +1,6 @@
 import React from 'react';
-import { Card, Text, Badge } from '@nextui-org/react';
-import { Flex } from '../styles/flex';
-import { Box } from '../styles/box';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Incident } from './data';
 import { AlertCircle, Clock, CheckCircle, Search, Eye } from 'lucide-react';
 
@@ -14,96 +13,75 @@ export const IncidentCard: React.FC<IncidentCardProps> = ({ incident, compact = 
      const getStatusConfig = () => {
           switch (incident.status) {
                case 'resolved':
-                    return { icon: <CheckCircle size={14} />, color: 'success' as const, text: 'Resolved' };
+                    return { icon: <CheckCircle size={14} />, text: 'Resolved' };
                case 'investigating':
-                    return { icon: <Search size={14} />, color: 'error' as const, text: 'Investigating' };
+                    return { icon: <Search size={14} />, text: 'Investigating' };
                case 'identified':
-                    return { icon: <AlertCircle size={14} />, color: 'warning' as const, text: 'Identified' };
+                    return { icon: <AlertCircle size={14} />, text: 'Identified' };
                case 'monitoring':
-                    return { icon: <Eye size={14} />, color: 'primary' as const, text: 'Monitoring' };
+                    return { icon: <Eye size={14} />, text: 'Monitoring' };
                default:
-                    return { icon: <Clock size={14} />, color: 'default' as const, text: 'Unknown' };
+                    return { icon: <Clock size={14} />, text: 'Unknown' };
           }
      };
 
-     const getSeverityColor = () => {
+     const getSeverityVariant = (): 'default' | 'secondary' | 'destructive' | 'outline' => {
           switch (incident.severity) {
-               case 'critical': return 'error';
-               case 'major': return 'warning';
-               case 'minor': return 'primary';
-               case 'maintenance': return 'secondary';
-               default: return 'default';
+               case 'critical':
+                    return 'destructive';
+               case 'major':
+                    return 'secondary';
+               case 'minor':
+                    return 'default';
+               default:
+                    return 'outline';
           }
      };
 
      const statusConfig = getStatusConfig();
 
      return (
-          <Card
-               css={{
-                    p: compact ? '$4' : '$6',
-                    height: '100%'
-               }}
-               variant="flat"
-          >
-               <Card.Body>
-                    <Flex direction="column" css={{ gap: compact ? '$2' : '$4' }}>
-                         <Flex justify="between" align="start">
-                              <Text b size={compact ? '$sm' : '$md'}>
-                                   {incident.title}
-                              </Text>
-                              <Badge
-                                   size="sm"
-                                   variant="flat"
-                                   color={getSeverityColor()}
-                              >
-                                   {incident.severity}
-                              </Badge>
-                         </Flex>
+          <Card className={`h-full ${compact ? 'p-4' : 'p-6'}`}>
+               <CardContent className="flex flex-col gap-4 p-0">
+                    <div className="flex items-start justify-between">
+                         <p className={`font-semibold ${compact ? 'text-sm' : 'text-base'}`}>{incident.title}</p>
+                         <Badge variant={getSeverityVariant()}>{incident.severity}</Badge>
+                    </div>
 
-                         <Flex direction="column" css={{ gap: compact ? '$1' : '$2' }}>
-                              <Flex align="center" css={{ gap: '$2' }}>
-                                   {statusConfig.icon}
-                                   <Text size="$sm" css={{ fontWeight: 500 }}>
-                                        {statusConfig.text}
-                                   </Text>
-                              </Flex>
+                    <div className="flex flex-col gap-2">
+                         <div className="flex items-center gap-2">
+                              {statusConfig.icon}
+                              <span className="text-sm font-medium">{statusConfig.text}</span>
+                         </div>
 
-                              <Flex justify="between">
-                                   <Text size="$xs" color="$accents7">Started</Text>
-                                   <Text size="$sm">{incident.startTime}</Text>
-                              </Flex>
+                         <div className="flex justify-between">
+                              <span className="text-xs text-muted-foreground">Started</span>
+                              <span className="text-sm">{incident.startTime}</span>
+                         </div>
 
-                              {incident.endTime && (
-                                   <Flex justify="between">
-                                        <Text size="$xs" color="$accents7">Resolved</Text>
-                                        <Text size="$sm">{incident.endTime}</Text>
-                                   </Flex>
-                              )}
-                         </Flex>
-
-                         {!compact && incident.affectedServices.length > 0 && (
-                              <Box>
-                                   <Text size="$xs" color="$accents7" css={{ mb: '$1' }}>
-                                        Affected Services
-                                   </Text>
-                                   <Flex wrap="wrap" css={{ gap: '$1' }}>
-                                        {incident.affectedServices.map((service, index) => (
-                                             <Badge key={index} size="xs" variant="flat" color="default">
-                                                  {service}
-                                             </Badge>
-                                        ))}
-                                   </Flex>
-                              </Box>
+                         {incident.endTime && (
+                              <div className="flex justify-between">
+                                   <span className="text-xs text-muted-foreground">Resolved</span>
+                                   <span className="text-sm">{incident.endTime}</span>
+                              </div>
                          )}
+                    </div>
 
-                         {!compact && incident.description && (
-                              <Text size="$sm" color="$accents7" css={{ mt: '$2' }}>
-                                   {incident.description}
-                              </Text>
-                         )}
-                    </Flex>
-               </Card.Body>
+                    {!compact && incident.affectedServices.length > 0 && (
+                         <div>
+                              <p className="mb-1 text-xs text-muted-foreground">Affected Services</p>
+                              <div className="flex flex-wrap gap-1">
+                                   {incident.affectedServices.map((service, index) => (
+                                        <Badge key={index} variant="secondary" className="text-xs">{service}</Badge>
+                                   ))}
+                              </div>
+                         </div>
+                    )}
+
+                    {!compact && incident.description && (
+                         <p className="mt-2 text-sm text-muted-foreground">{incident.description}</p>
+                    )}
+               </CardContent>
           </Card>
      );
 };

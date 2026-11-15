@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
-import { Badge, Button, Text } from '@nextui-org/react';
+import { Badge, Button, Text } from '@/components/ui/legacy';
 import { ArrowLeft, CalendarDays, CreditCard, Hash, RefreshCw, ShieldCheck, UserRound } from 'lucide-react';
 import { api } from '../../lib';
 import { Box } from '../../components/styles/box';

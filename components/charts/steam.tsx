@@ -23,7 +23,7 @@ const options: Props['options'] = {
          show: false,
       },
       fontFamily: 'var(--pf-font-family)',
-      foreColor: 'var(--nextui-colors-accents7)',
+      foreColor: 'var(--muted-foreground)',
       sparkline: {
          enabled: false,
       },
@@ -58,7 +58,7 @@ const options: Props['options'] = {
       categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
       labels: {
          style: {
-            colors: 'var(--nextui-colors-accents8)',
+            colors: 'var(--foreground)',
             fontSize: '12px',
          },
       },
@@ -72,7 +72,7 @@ const options: Props['options'] = {
    yaxis: {
       labels: {
          style: {
-            colors: 'var(--nextui-colors-accents8)',
+            colors: 'var(--foreground)',
             fontSize: '12px',
          },
       },
@@ -96,7 +96,7 @@ const options: Props['options'] = {
    },
    grid: {
       show: true,
-      borderColor: 'var(--nextui-colors-border)',
+      borderColor: 'var(--border)',
       strokeDashArray: 0,
       position: 'back',
       xaxis: {

@@ -1,18 +1,20 @@
-import { Dropdown, Text } from '@nextui-org/react';
 import React, { useEffect, useState } from 'react';
-import NextLink from 'next/link';
-import { Flex } from '../styles/flex';
-import { Box } from '../styles/box';
-import { useProfileData } from '@/hooks/auth/useProfileData';
-import ChatAvatarWrapper from '../Avatar/ChatAvatarWrapper';
-import { useAuth } from '@/lib/context/authContext';
 import { useRouter } from 'next/router';
-import { Settings, Users, BarChart3, LogOut } from 'lucide-react';
+import { Settings, Users, LogOut } from 'lucide-react';
+import ChatAvatarWrapper from '@/components/Avatar/ChatAvatarWrapper';
+import { useAuth } from '@/lib/context/authContext';
+import {
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuItem,
+   DropdownMenuLabel,
+   DropdownMenuSeparator,
+   DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export const UserDropdown = () => {
-   const { logout } = useAuth();
+   const { logout, user } = useAuth();
    const router = useRouter();
-   const { user, loading } = useProfileData();
    const [mounted, setMounted] = useState(false);
    const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -31,7 +33,7 @@ export const UserDropdown = () => {
       }
    };
 
-   if (!mounted || loading) return null;
+   if (!mounted || !user) return null;
 
    const profile = user?.user ? { ...user, ...user.user } : user;
    const displayEmail = profile?.email || 'admin@parentfully.com';
@@ -39,129 +41,55 @@ export const UserDropdown = () => {
    const avatar = profile?.profile_image;
 
    return (
-      <Dropdown placement="bottom-right">
-         <Dropdown.Trigger>
-            <div
-               style={{
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  padding: '2px',
-                  borderRadius: '50%',
-                  transition: 'transform 0.2s ease',
-               }}
-            >
-               <ChatAvatarWrapper
-                  profile_image={avatar as any}
-                  contactName={displayName}
-                  size={40}
-                  variant="secondary"
-                  borderWidth={2}
-                  borderColor="rgba(245, 166, 35, 0.8)"
-               />
-            </div>
-         </Dropdown.Trigger>
-
-         <Dropdown.Menu
-            aria-label="User menu actions"
-            onAction={(actionKey) => {
-               if (actionKey === 'logout') {
-                  handleLogout();
-               }
-            }}
-            disabledKeys={isLoggingOut ? ['logout'] : []}
-            css={{
-               '$$dropdownMenuWidth': '260px',
-               'bg': 'var(--pf-glass-strong) !important',
-               'backdropFilter': 'blur(20px)',
-               'border': '1px solid var(--pf-border)',
-               'borderRadius': '16px',
-               'p': '$2',
-               'boxShadow': '0 20px 40px -15px rgba(0,0,0,0.7)',
-               '& .nextui-dropdown-item': {
-                  'py': '$3',
-                  'px': '$3',
-                  'borderRadius': '10px',
-                  'color': 'var(--pf-text)',
-                  'transition': 'all 0.2s ease',
-                  '&:hover': {
-                     bg: 'var(--pf-hover) !important',
-                     color: 'var(--pf-text)',
-                  },
-               },
-            }}
+      <DropdownMenu>
+         <DropdownMenuTrigger
+            className="inline-flex cursor-pointer items-center rounded-full p-0.5 transition-transform hover:scale-105"
+            aria-label="User menu"
          >
-            {/* Profile Identity Card Header */}
-            <Dropdown.Item key="profile" textValue="Profile Header" css={{ height: 'auto', py: '$3', cursor: 'default' }}>
-               <Box css={{ pb: '$1' }}>
-                  <Flex align="center" justify="between" css={{ mb: '$1' }}>
-                     <Text weight="semibold" css={{ color: 'var(--pf-text)', m: 0, fontSize: '13px' }}>
-                        {displayName}
-                     </Text>
-                     <span
-                        style={{
-                           fontSize: '9px',
-                           padding: '2px 6px',
-                           borderRadius: '6px',
-                           background: 'rgba(16, 185, 129, 0.12)',
-                           border: '1px solid rgba(16, 185, 129, 0.25)',
-                           color: '#10b981',
-                           fontWeight: 600,
-                           letterSpacing: '0.04em',
-                        }}
-                     >
-                        PRO
-                     </span>
-                  </Flex>
-                  <Text size="11px" css={{ color: '$accents6', m: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                     {displayEmail}
-                  </Text>
-               </Box>
-            </Dropdown.Item>
+            <ChatAvatarWrapper
+               profile_image={avatar as any}
+               contactName={displayName}
+               size={40}
+               variant="secondary"
+               borderWidth={2}
+               borderColor="rgba(245, 166, 35, 0.8)"
+            />
+         </DropdownMenuTrigger>
 
-            <Dropdown.Item key="settings" withDivider textValue="My Settings">
-               <NextLink href="/settings" style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}>
-                  <Flex align="center" css={{ gap: '$3' }}>
-                     <Settings size={15} color="var(--pf-text-muted)" />
-                     <Text size="13px" css={{ color: 'inherit', m: 0 }}>
-                        My Settings
-                     </Text>
-                  </Flex>
-               </NextLink>
-            </Dropdown.Item>
+         <DropdownMenuContent align="end" className="w-[260px] rounded-2xl p-2 backdrop-blur-xl">
+            <DropdownMenuLabel className="font-normal">
+               <div className="flex items-center justify-between pb-1">
+                  <p className="m-0 text-[13px] font-semibold text-foreground">{displayName}</p>
+                  <span className="rounded-md border border-emerald-500/25 bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-semibold tracking-wider text-emerald-500">
+                     PRO
+                  </span>
+               </div>
+               <p className="m-0 truncate text-[11px] text-muted-foreground">{displayEmail}</p>
+            </DropdownMenuLabel>
 
-            <Dropdown.Item key="teams" textValue="Team Settings">
-               <NextLink href="/team" style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}>
-                  <Flex align="center" css={{ gap: '$3' }}>
-                     <Users size={15} color="var(--pf-text-muted)" />
-                     <Text size="13px" css={{ color: 'inherit', m: 0 }}>
-                        Team Settings
-                     </Text>
-                  </Flex>
-               </NextLink>
-            </Dropdown.Item>
+            <DropdownMenuSeparator />
 
-            <Dropdown.Item
-               key="logout"
-               withDivider
-               color="error"
-               textValue="Log Out"
-               css={{
-                  color: isLoggingOut ? '$accents5' : '#f87171 !important',
-                  cursor: isLoggingOut ? 'not-allowed' : 'pointer',
-                  '&:hover': {
-                     bg: 'rgba(239, 68, 68, 0.12) !important',
-                  },
-               }}
+            <DropdownMenuItem onClick={() => router.push('/settings')} className="flex cursor-pointer items-center gap-3">
+               <Settings size={15} className="text-muted-foreground" />
+               <span className="text-[13px]">My Settings</span>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem onClick={() => router.push('/team')} className="flex cursor-pointer items-center gap-3">
+               <Users size={15} className="text-muted-foreground" />
+               <span className="text-[13px]">Team Settings</span>
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
+
+            <DropdownMenuItem
+               onClick={handleLogout}
+               disabled={isLoggingOut}
+               className={`flex items-center gap-3 ${isLoggingOut ? 'cursor-not-allowed opacity-50' : 'cursor-pointer text-red-400 focus:bg-red-500/10 focus:text-red-400'}`}
             >
-               <Flex align="center" css={{ gap: '$3' }}>
-                  <LogOut size={15} color={isLoggingOut ? 'rgba(255,255,255,0.3)' : '#f87171'} />
-                  <Text size="13px" css={{ color: 'inherit', m: 0, weight: '$medium' }}>
-                     {isLoggingOut ? 'Logging out...' : 'Log Out'}
-                  </Text>
-               </Flex>
-            </Dropdown.Item>
-         </Dropdown.Menu>
-      </Dropdown>
+               <LogOut size={15} className={isLoggingOut ? 'text-muted-foreground' : 'text-red-400'} />
+               <span className="text-[13px] font-medium">{isLoggingOut ? 'Logging out...' : 'Log Out'}</span>
+            </DropdownMenuItem>
+         </DropdownMenuContent>
+      </DropdownMenu>
    );
 };

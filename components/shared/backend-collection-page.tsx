@@ -1,14 +1,40 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/router';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import {
-   Badge,
-   Button,
-   Input,
-   Modal,
+   Dialog,
+   DialogContent,
+   DialogFooter,
+   DialogHeader,
+   DialogTitle,
+} from '@/components/ui/dialog';
+import {
+   Select,
+   SelectContent,
+   SelectItem,
+   SelectTrigger,
+   SelectValue,
+} from '@/components/ui/select';
+import {
    Pagination,
+   PaginationContent,
+   PaginationItem,
+   PaginationLink,
+   PaginationNext,
+   PaginationPrevious,
+} from '@/components/ui/pagination';
+import {
    Table,
-   Text,
-   Textarea,
-} from '@nextui-org/react';
+   TableBody,
+   TableCell,
+   TableHead,
+   TableHeader,
+   TableRow,
+} from '@/components/ui/table';
 import {
    ArrowLeft,
    Edit2,
@@ -19,13 +45,12 @@ import {
    Trash2,
 } from 'lucide-react';
 import NextLink from 'next/link';
-import { api } from '../../lib';
-import { getPageMeta, PagePath } from '../../lib/pageMeta';
-import { Box } from '../styles/box';
-import { Flex } from '../styles/flex';
-import { usePageSearch } from '../../lib/context/searchContext';
-import { TableExport } from './table-export';
-import { AppLoadingState } from './app-loading-state';
+import { api } from '@/lib';
+import { getPageMeta, PagePath } from '@/lib/pageMeta';
+import { usePageSearch } from '@/lib/context/searchContext';
+import { TableExport } from '@/components/shared/table-export';
+import { AppLoadingState } from '@/components/shared/app-loading-state';
+import { cn } from '@/lib/utils';
 
 export interface BackendColumn {
    key: string;
@@ -123,9 +148,7 @@ const formatValue = (value: any, type?: BackendColumn['type']) => {
    if (type === 'number') return Number(value).toLocaleString();
    if (type === 'date') {
       const date = new Date(value);
-      return Number.isNaN(date.getTime())
-         ? String(value)
-         : date.toLocaleDateString();
+      return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleDateString();
    }
    if (typeof value === 'object') return value.name ?? value.email ?? '—';
    return String(value).replaceAll('_', ' ');
@@ -151,6 +174,7 @@ export const BackendCollectionPage = ({
    filters = [],
    compactTableHeaders = false,
 }: BackendCollectionPageProps) => {
+   const router = useRouter();
    const metaCopy = getPageMeta(path);
    const serializedListParams = JSON.stringify(listParams ?? {});
    const serializedFallbackEndpoints = JSON.stringify(readFallbackEndpoints);
@@ -168,11 +192,8 @@ export const BackendCollectionPage = ({
    const [editing, setEditing] = useState<Record<string, any> | null>(null);
    const [form, setForm] = useState<Record<string, any>>({});
    const [saving, setSaving] = useState(false);
-   const [filterValues, setFilterValues] = useState<Record<string, string>>(
-      () =>
-         Object.fromEntries(
-            filters.map((filter) => [filter.key, filter.defaultValue ?? '']),
-         ),
+   const [filterValues, setFilterValues] = useState<Record<string, string>>(() =>
+      Object.fromEntries(filters.map((filter) => [filter.key, filter.defaultValue ?? ''])),
    );
 
    const hasActiveFilters =
@@ -186,9 +207,7 @@ export const BackendCollectionPage = ({
             !searchable ||
             !query ||
             columns.some((column) =>
-               formatValue(getValue(row, column.key), column.type)
-                  .toLowerCase()
-                  .includes(query),
+               formatValue(getValue(row, column.key), column.type).toLowerCase().includes(query),
             );
          const matchesFilters = filters.every((filter) => {
             const selected = filterValues[filter.key];
@@ -263,9 +282,7 @@ export const BackendCollectionPage = ({
    const openEdit = (row: Record<string, any>) => {
       setEditing(row);
       setForm(
-         Object.fromEntries(
-            formFields.map((field) => [field.key, getValue(row, field.key) ?? '']),
-         ),
+         Object.fromEntries(formFields.map((field) => [field.key, getValue(row, field.key) ?? ''])),
       );
       setFormOpen(true);
    };
@@ -297,9 +314,7 @@ export const BackendCollectionPage = ({
          setError(
             validation
                ? Object.values(validation).flat().join(' ')
-               : err?.response?.data?.message ??
-               err?.message ??
-               'Unable to save record.',
+               : err?.response?.data?.message ?? err?.message ?? 'Unable to save record.',
          );
       } finally {
          setSaving(false);
@@ -312,19 +327,13 @@ export const BackendCollectionPage = ({
          await api.delete(`${mutationEndpoint}/${row.id}`);
          await load();
       } catch (err: any) {
-         setError(
-            err?.response?.data?.message ??
-            err?.message ??
-            'Unable to delete record.',
-         );
+         setError(err?.response?.data?.message ?? err?.message ?? 'Unable to delete record.');
       }
    };
 
    const clearFilters = () => {
       setSearch('');
-      setFilterValues(
-         Object.fromEntries(filters.map((filter) => [filter.key, ''])),
-      );
+      setFilterValues(Object.fromEntries(filters.map((filter) => [filter.key, ''])));
       setPage(1);
    };
 
@@ -334,74 +343,33 @@ export const BackendCollectionPage = ({
          : columns;
 
    return (
-      <Box
-         className={`admin-page${compactTableHeaders ? ' customers-compact-table' : ''}`}
-      >
+      <div className={cn('admin-page', compactTableHeaders && 'customers-compact-table')}>
          {backHref && (
-            <NextLink href={backHref} passHref legacyBehavior>
-               <a className="admin-back-link">
-                  <ArrowLeft size={15} />
-                  {backLabel}
-               </a>
+            <NextLink href={backHref} className="admin-back-link">
+               <ArrowLeft size={15} />
+               {backLabel}
             </NextLink>
          )}
 
-         {/* ---- Header + toolbar merged into one glass panel ---- */}
-         <Box className="glass-panel glass-hero">
-            <Flex
-               direction="column"
-               css={{ gap: '$5', position: 'relative', zIndex: 1 }}
-            >
-               {/* Top row: identity + actions */}
-               <Flex
-                  justify="between"
-                  align="center"
-                  css={{ gap: '$4', flexWrap: 'wrap' }}
-               >
-                  <Flex align="center" css={{ gap: '$4', minWidth: 0 }}>
-                     <Box
-                        css={{
-                           width: '44px',
-                           height: '44px',
-                           borderRadius: '14px',
-                           display: 'grid',
-                           placeItems: 'center',
-                           color: '#8b83ff',
-                           bg: 'rgba(99,91,255,.12)',
-                           border: '1px solid rgba(139,131,255,.25)',
-                           flexShrink: 0,
-                        }}
-                     >
+         <div className="glass-panel glass-hero">
+            <div className="relative z-10 flex flex-col gap-5">
+               <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex min-w-0 items-center gap-4">
+                     <div className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px] border border-indigo-300/25 bg-indigo-500/10 text-indigo-400">
                         <Layers3 size={20} />
-                     </Box>
-                     <Box css={{ minWidth: 0 }}>
-                        <Flex align="center" css={{ gap: '$3', flexWrap: 'wrap' }}>
-                           <Text h2 css={{ m: 0, fontSize: '1.35rem' }}>
-                              {metaCopy.title}
-                           </Text>
-                           <Box
-                              css={{
-                                 px: '$2',
-                                 py: '2px',
-                                 borderRadius: '$md',
-                                 fontSize: '0.7rem',
-                                 fontWeight: 600,
-                                 color: '#8b83ff',
-                                 bg: 'rgba(99,91,255,.12)',
-                                 border: '1px solid rgba(139,131,255,.25)',
-                                 whiteSpace: 'nowrap',
-                              }}
-                           >
+                     </div>
+                     <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-3">
+                           <h2 className="m-0 text-[1.35rem] font-semibold">{metaCopy.title}</h2>
+                           <span className="whitespace-nowrap rounded-md border border-indigo-300/25 bg-indigo-500/10 px-2 py-0.5 text-[0.7rem] font-semibold text-indigo-400">
                               {loading ? '—' : meta.total.toLocaleString()} total
-                           </Box>
-                        </Flex>
-                        <Text size="$sm" css={{ color: '$accents7', mt: '$1' }}>
-                           {metaCopy.subtitle}
-                        </Text>
-                     </Box>
-                  </Flex>
+                           </span>
+                        </div>
+                        <p className="mt-1 text-sm text-muted-foreground">{metaCopy.subtitle}</p>
+                     </div>
+                  </div>
 
-                  <Flex css={{ gap: '$3', flexWrap: 'wrap' }} align="center">
+                  <div className="flex flex-wrap items-center gap-3">
                      <TableExport
                         rows={visibleRows}
                         columns={columns.map((column) => ({ key: column.key, label: column.label }))}
@@ -409,335 +377,272 @@ export const BackendCollectionPage = ({
                         title={`${metaCopy.title} report`}
                      />
                      {formFields.length > 0 && allowCreate && (
-                        <Button
-                           auto
-                           color="primary"
-                           icon={<Plus size={15} />}
-                           onPress={openCreate}
-                        >
+                        <Button onClick={openCreate}>
+                           <Plus size={15} className="mr-2" />
                            {createLabel ?? `Add ${resourceName ?? 'record'}`}
                         </Button>
                      )}
-                  </Flex>
-               </Flex>
+                  </div>
+               </div>
 
-               {/* Divider between identity row and controls row */}
                {(filters.length > 0 || hasActiveFilters) && (
-                  <Box
-                     css={{
-                        height: '1px',
-                        width: '100%',
-                        background: '$border',
-                        opacity: 0.6,
-                     }}
-                  />
+                  <div className="h-px w-full bg-border opacity-60" />
                )}
 
-               {/* Bottom row: filters + reset */}
                {(filters.length > 0 || hasActiveFilters) && (
-                  <Flex
-                     justify="between"
-                     align="center"
-                     css={{ gap: '$4', flexWrap: 'wrap' }}
-                  >
-                     <Flex css={{ gap: '$3', flexWrap: 'wrap' }} align="center">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                     <div className="flex flex-wrap items-center gap-3">
                         {filters.map((filter) => (
-                           <label className="collection-filter" key={filter.key}>
-                              <span>{filter.label}</span>
-                              <select
-                                 aria-label={`Filter by ${filter.label}`}
-                                 value={filterValues[filter.key] ?? ''}
-                                 onChange={(event) => {
+                           <div key={filter.key} className="collection-filter flex items-center gap-2">
+                              <span className="text-xs text-muted-foreground">{filter.label}</span>
+                              <Select
+                                 value={filterValues[filter.key] || '__all__'}
+                                 onValueChange={(value: any) => {
                                     setFilterValues((current) => ({
                                        ...current,
-                                       [filter.key]: event.target.value,
+                                       [filter.key]: value === '__all__' ? '' : value,
                                     }));
                                     setPage(1);
                                  }}
                               >
-                                 {filter.options.map((option) => (
-                                    <option key={option.value} value={option.value}>
-                                       {option.label}
-                                    </option>
-                                 ))}
-                              </select>
-                           </label>
+                                 <SelectTrigger className="h-8 w-40">
+                                    <SelectValue placeholder={filter.label} />
+                                 </SelectTrigger>
+                                 <SelectContent>
+                                    {filter.options.map((option) => (
+                                       <SelectItem key={option.value} value={option.value || '__all__'}>
+                                          {option.label}
+                                       </SelectItem>
+                                    ))}
+                                 </SelectContent>
+                              </Select>
+                           </div>
                         ))}
-                     </Flex>
+                     </div>
 
                      {hasActiveFilters && (
-                        <Button auto flat size="sm" onPress={clearFilters}>
+                        <Button variant="secondary" size="sm" onClick={clearFilters}>
                            Clear filters
                         </Button>
                      )}
-                  </Flex>
+                  </div>
                )}
-            </Flex>
-         </Box>
+            </div>
+         </div>
 
-         {/* ---- Content: error / empty / table ---- */}
          {error ? (
-            <Box
-               className="glass-panel"
-               css={{
-                  p: '$10',
-                  border: '1px solid $red300 !important',
-                  bg: 'rgba(239,68,68,.08) !important',
-               }}
-            >
-               <Text color="error" size="$sm">
-                  {error}
-               </Text>
-            </Box>
+            <div className="glass-panel border border-red-300 bg-red-500/10 p-10">
+               <p className="text-sm text-red-500">{error}</p>
+            </div>
          ) : loading ? (
-            <Box className="glass-panel">
+            <div className="glass-panel">
                <AppLoadingState message={`Loading ${metaCopy.title.toLowerCase()}…`} />
-            </Box>
+            </div>
          ) : visibleRows.length === 0 ? (
-            <Box className="glass-panel admin-empty-state">
-               <span>
+            <div className="glass-panel admin-empty-state flex flex-col items-center gap-3 py-12 text-center">
+               <span className="grid h-12 w-12 place-items-center rounded-full bg-muted">
                   <Inbox size={22} />
                </span>
-               <Text b>No {metaCopy.title.toLowerCase()} found</Text>
-               <Text size="$sm" css={{ color: '$accents7' }}>
+               <p className="font-semibold">No {metaCopy.title.toLowerCase()} found</p>
+               <p className="text-sm text-muted-foreground">
                   {hasActiveFilters
                      ? 'Try another search or clear the current filters.'
                      : 'Records will appear here when they become available.'}
-               </Text>
+               </p>
                {hasActiveFilters && (
-                  <Button auto flat size="sm" onPress={clearFilters}>
+                  <Button variant="secondary" size="sm" onClick={clearFilters}>
                      Clear filters
                   </Button>
                )}
-            </Box>
+            </div>
          ) : (
-            <Box className="glass-panel glass-table">
-               <Table
-                  aria-label={`${metaCopy.title} data`}
-                  shadow={false}
-                  css={{ minWidth: '100%' }}
-               >
-                  <Table.Header>
-                     {tableColumns.map((column) => (
-                        <Table.Column key={column.key}>{column.label}</Table.Column>
-                     ))}
-                  </Table.Header>
-                  <Table.Body
-                     items={visibleRows}
-                     loadingState="idle"
-                  >
-                     {(row) => (
-                        <Table.Row
+            <div className="glass-panel glass-table">
+               <Table>
+                  <TableHeader>
+                     <TableRow>
+                        {tableColumns.map((column) => (
+                           <TableHead key={column.key}>{column.label}</TableHead>
+                        ))}
+                     </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                     {visibleRows.map((row) => (
+                        <TableRow
                            key={row.id ?? JSON.stringify(row)}
-                           css={
-                              rowHref ? { '&:hover td': { bg: '$accents1' } } : undefined
-                           }
+                           className={rowHref ? 'cursor-pointer hover:bg-muted/50' : undefined}
                         >
                            {tableColumns.map((column) => {
                               if (column.key === '__actions')
                                  return (
-                                    <Table.Cell key={column.key}>
-                                       <Flex css={{ gap: '$2' }}>
+                                    <TableCell key={column.key}>
+                                       <div className="flex gap-2">
                                           {rowHref && (
-                                             <NextLink
-                                                href={rowHref(row)}
-                                                passHref
-                                                legacyBehavior
+                                             <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8"
+                                                onClick={() => router.push(rowHref(row))}
+                                                aria-label="View details"
                                              >
-                                                <Button
-                                                   as="a"
-                                                   auto
-                                                   light
-                                                   icon={<Eye size={15} />}
-                                                   aria-label="View details"
-                                                />
-                                             </NextLink>
+                                                <Eye size={15} />
+                                             </Button>
                                           )}
                                           {formFields.length > 0 && (
                                              <Button
-                                                auto
-                                                light
-                                                icon={<Edit2 size={15} />}
-                                                onPress={() => openEdit(row)}
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8"
+                                                onClick={() => openEdit(row)}
                                                 aria-label="Edit"
-                                             />
+                                             >
+                                                <Edit2 size={15} />
+                                             </Button>
                                           )}
                                           {allowDelete && (
                                              <Button
-                                                auto
-                                                light
-                                                color="error"
-                                                icon={<Trash2 size={15} />}
-                                                onPress={() => remove(row)}
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 text-red-500 hover:text-red-500"
+                                                onClick={() => remove(row)}
                                                 aria-label="Delete"
-                                             />
+                                             >
+                                                <Trash2 size={15} />
+                                             </Button>
                                           )}
-                                       </Flex>
-                                    </Table.Cell>
+                                       </div>
+                                    </TableCell>
                                  );
                               const value = getValue(row, column.key);
                               const content =
                                  column.type === 'status' ? (
                                     <Badge
-                                       variant="flat"
-                                       color={
-                                          [
-                                             'active',
-                                             'paid',
-                                             'fulfilled',
-                                             'resolved',
-                                             'premium',
-                                          ].includes(String(value).toLowerCase())
-                                             ? 'success'
-                                             : 'default'
+                                       variant={
+                                          ['active', 'paid', 'fulfilled', 'resolved', 'premium'].includes(
+                                             String(value).toLowerCase(),
+                                          )
+                                             ? 'default'
+                                             : 'secondary'
                                        }
                                     >
                                        {formatValue(value)}
                                     </Badge>
                                  ) : (
-                                    <Text size="$sm">
-                                       {formatValue(value, column.type)}
-                                    </Text>
+                                    <span className="text-sm">{formatValue(value, column.type)}</span>
                                  );
                               return (
-                                 <Table.Cell key={column.key}>
-                                    {rowHref ? (
-                                       <NextLink href={rowHref(row)} passHref legacyBehavior>
-                                          <a
-                                             style={{
-                                                display: 'block',
-                                                color: 'inherit',
-                                                textDecoration: 'none',
-                                             }}
-                                          >
-                                             {content}
-                                          </a>
-                                       </NextLink>
-                                    ) : (
-                                       content
-                                    )}
-                                 </Table.Cell>
+                                 <TableCell
+                                    key={column.key}
+                                    onClick={() => rowHref && router.push(rowHref(row))}
+                                    className={rowHref ? 'cursor-pointer' : undefined}
+                                 >
+                                    {content}
+                                 </TableCell>
                               );
                            })}
-                        </Table.Row>
-                     )}
-                  </Table.Body>
+                        </TableRow>
+                     ))}
+                  </TableBody>
                </Table>
-            </Box>
+            </div>
          )}
 
-         {/* ---- Pagination ---- */}
          {!error && meta.last_page > 1 && (
-            <Flex justify="between" align="center" css={{ mt: '$5' }}>
-               <Text size="$xs" css={{ color: '$accents7' }}>
-                  Page {meta.current_page} of {meta.last_page} ·{' '}
-                  {meta.total.toLocaleString()} records
-               </Text>
-               <Pagination
-                  total={meta.last_page}
-                  page={meta.current_page}
-                  onChange={setPage}
-                  size="sm"
-               />
-            </Flex>
+            <div className="mt-5 flex items-center justify-between">
+               <p className="text-xs text-muted-foreground">
+                  Page {meta.current_page} of {meta.last_page} · {meta.total.toLocaleString()} records
+               </p>
+               <Pagination>
+                  <PaginationContent>
+                     <PaginationItem>
+                        <PaginationPrevious
+                           onClick={() => setPage((p) => Math.max(1, p - 1))}
+                           className={meta.current_page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                        />
+                     </PaginationItem>
+                     <PaginationItem>
+                        <PaginationLink isActive>{meta.current_page}</PaginationLink>
+                     </PaginationItem>
+                     <PaginationItem>
+                        <PaginationNext
+                           onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
+                           className={meta.current_page === meta.last_page ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                        />
+                     </PaginationItem>
+                  </PaginationContent>
+               </Pagination>
+            </div>
          )}
 
-         {/* ---- Modal (unchanged) ---- */}
-         <Modal
-            closeButton
-            open={formOpen}
-            onClose={() => setFormOpen(false)}
-            width="560px"
-         >
-            <Modal.Header>
-               <Text h4 css={{ m: 0 }}>
-                  {editing ? 'Edit' : 'Add'} {resourceName ?? 'record'}
-               </Text>
-            </Modal.Header>
-            <Modal.Body>
-               {formFields
-                  .filter((field) => !field.createOnly || !editing)
-                  .map((field) =>
-                     field.type === 'textarea' ? (
-                        <Textarea
-                           key={field.key}
-                           bordered
-                           fullWidth
-                           label={field.label}
-                           value={form[field.key] ?? ''}
-                           onChange={(event) =>
-                              setForm({ ...form, [field.key]: event.target.value })
-                           }
-                        />
-                     ) : field.type === 'select' ? (
-                        <label
-                           key={field.key}
-                           style={{ display: 'grid', gap: 6, fontSize: 12 }}
-                        >
-                           {field.label}
-                           <select
-                              value={form[field.key] ?? ''}
-                              onChange={(event) =>
-                                 setForm({ ...form, [field.key]: event.target.value })
-                              }
-                              required={field.required}
-                           >
-                              <option value="">Select…</option>
-                              {field.options?.map((option) => (
-                                 <option key={option.value} value={option.value}>
-                                    {option.label}
-                                 </option>
-                              ))}
-                           </select>
-                        </label>
-                     ) : field.type === 'password' ? (
-                        <Input.Password
-                           key={field.key}
-                           bordered
-                           fullWidth
-                           label={field.label}
-                           value={form[field.key] ?? ''}
-                           required={!editing && field.required}
-                           onChange={(event) =>
-                              setForm({ ...form, [field.key]: event.target.value })
-                           }
-                        />
-                     ) : (
-                        <Input
-                           key={field.key}
-                           bordered
-                           fullWidth
-                           label={field.label}
-                           type={field.type ?? 'text'}
-                           value={form[field.key] ?? ''}
-                           required={field.required}
-                           onChange={(event) =>
-                              setForm({
-                                 ...form,
-                                 [field.key]:
-                                    field.type === 'number'
-                                       ? Number(event.target.value)
-                                       : event.target.value,
-                              })
-                           }
-                        />
-                     ),
-                  )}
-               {error && (
-                  <Text color="error" size="$xs">
-                     {error}
-                  </Text>
-               )}
-            </Modal.Body>
-            <Modal.Footer>
-               <Button auto flat onPress={() => setFormOpen(false)}>
-                  Cancel
-               </Button>
-               <Button auto color="primary" onPress={save} disabled={saving}>
-                  {saving ? 'Saving…' : 'Save'}
-               </Button>
-            </Modal.Footer>
-         </Modal>
-      </Box>
+         <Dialog open={formOpen} onOpenChange={setFormOpen}>
+            <DialogContent className="max-w-[560px]">
+               <DialogHeader>
+                  <DialogTitle>
+                     {editing ? 'Edit' : 'Add'} {resourceName ?? 'record'}
+                  </DialogTitle>
+               </DialogHeader>
+
+               <div className="flex flex-col gap-4 py-4">
+                  {formFields
+                     .filter((field) => !field.createOnly || !editing)
+                     .map((field) => (
+                        <div key={field.key} className="flex flex-col gap-1.5">
+                           <Label htmlFor={field.key}>{field.label}</Label>
+                           {field.type === 'textarea' ? (
+                              <Textarea
+                                 id={field.key}
+                                 value={form[field.key] ?? ''}
+                                 onChange={(event) =>
+                                    setForm({ ...form, [field.key]: event.target.value })
+                                 }
+                              />
+                           ) : field.type === 'select' ? (
+                              <Select
+                                 value={form[field.key] ?? ''}
+                                 onValueChange={(value) => setForm({ ...form, [field.key]: value })}
+                              >
+                                 <SelectTrigger id={field.key}>
+                                    <SelectValue placeholder="Select…" />
+                                 </SelectTrigger>
+                                 <SelectContent>
+                                    {field.options?.map((option) => (
+                                       <SelectItem key={option.value} value={option.value}>
+                                          {option.label}
+                                       </SelectItem>
+                                    ))}
+                                 </SelectContent>
+                              </Select>
+                           ) : (
+                              <Input
+                                 id={field.key}
+                                 type={field.type ?? 'text'}
+                                 value={form[field.key] ?? ''}
+                                 required={field.required}
+                                 onChange={(event) =>
+                                    setForm({
+                                       ...form,
+                                       [field.key]:
+                                          field.type === 'number'
+                                             ? Number(event.target.value)
+                                             : event.target.value,
+                                    })
+                                 }
+                              />
+                           )}
+                        </div>
+                     ))}
+                  {error && <p className="text-xs text-red-500">{error}</p>}
+               </div>
+
+               <DialogFooter>
+                  <Button variant="secondary" onClick={() => setFormOpen(false)}>
+                     Cancel
+                  </Button>
+                  <Button onClick={save} disabled={saving}>
+                     {saving ? 'Saving…' : 'Save'}
+                  </Button>
+               </DialogFooter>
+            </DialogContent>
+         </Dialog>
+      </div>
    );
 };

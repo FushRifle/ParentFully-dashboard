@@ -1,136 +1,52 @@
-import React from 'react';
-import { Card, Text } from '@nextui-org/react';
-import { Flex } from '../styles/flex';
-import { Box } from '../styles/box';
+'use client';
+import { Pie, PieChart as RePieChart, Cell } from 'recharts';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
+import { PieChartData } from '../analytics/data';
 
-interface PieChartData {
-     label: string;
-     value: number;
-     color: string;
-}
-
-interface PieChartProps {
+interface Props {
      data: PieChartData[];
      size?: number;
-     showLegend?: boolean;
      title?: string;
 }
 
-export const PieChart: React.FC<PieChartProps> = ({
-     data,
-     size = 200,
-     showLegend = true,
-     title
-}) => {
+export const PieChartComponent: React.FC<Props> = ({ data, size = 250, title }) => {
      const total = data.reduce((sum, item) => sum + item.value, 0);
-     const radius = size / 2;
-     const strokeWidth = 30;
-     const innerRadius = radius - strokeWidth;
-     const circumference = 2 * Math.PI * innerRadius;
 
-     let accumulatedAngle = 0;
-
-     const segments = data.map((item, index) => {
-          const percentage = item.value / total;
-          const angle = percentage * 360;
-          const strokeDasharray = `${circumference * percentage} ${circumference * (1 - percentage)}`;
-          const rotation = accumulatedAngle;
-
-          accumulatedAngle += angle;
-
-          return {
-               ...item,
-               percentage,
-               angle,
-               strokeDasharray,
-               rotation
+     const chartConfig = data.reduce((acc, item, index) => {
+          acc[item.label] = {
+               label: item.label,
+               color: item.color || `var(--chart-${index + 1})`,
           };
-     });
+          return acc;
+     }, {} as ChartConfig);
 
      return (
-          <Card css={{ p: '$6' }} variant="flat">
+          <Card>
                {title && (
-                    <Card.Header>
-                         <Text h4>{title}</Text>
-                    </Card.Header>
+                    <CardHeader>
+                         <h4 className="text-lg font-semibold">{title}</h4>
+                    </CardHeader>
                )}
-
-               <Card.Body>
-                    <Flex direction="column" align="center" css={{ gap: '$6' }}>
-                         {/* Chart */}
-                         <Box css={{ position: 'relative', width: `${size}px`, height: `${size}px` }}>
-                              <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
-                                   {segments.map((segment, index) => (
-                                        <circle
-                                             key={index}
-                                             cx={radius}
-                                             cy={radius}
-                                             r={innerRadius}
-                                             fill="transparent"
-                                             stroke={segment.color}
-                                             strokeWidth={strokeWidth}
-                                             strokeDasharray={segment.strokeDasharray}
-                                             strokeDashoffset="0"
-                                             style={{
-                                                  transform: `rotate(${segment.rotation}deg)`,
-                                                  transformOrigin: 'center'
-                                             }}
-                                        />
-                                   ))}
-                              </svg>
-
-                              {/* Center text */}
-                              <Flex
-                                   direction="column"
-                                   align="center"
-                                   justify="center"
-                                   css={{
-                                        position: 'absolute',
-                                        top: '50%',
-                                        left: '50%',
-                                        transform: 'translate(-50%, -50%)',
-                                        textAlign: 'center'
-                                   }}
+               <CardContent className="flex justify-center">
+                    <ChartContainer config={chartConfig} className="mx-auto aspect-square" style={{ maxHeight: size }}>
+                         <RePieChart>
+                              <ChartTooltip content={<ChartTooltipContent nameKey="label" hideLabel />} />
+                              <Pie
+                                   data={data}
+                                   dataKey="value"
+                                   nameKey="label"
+                                   innerRadius={size * 0.3}
+                                   outerRadius={size * 0.4}
+                                   strokeWidth={2}
                               >
-                                   <Text b size="$lg">
-                                        {total.toLocaleString()}
-                                   </Text>
-                                   <Text size="$xs" color="$accents7">
-                                        Total
-                                   </Text>
-                              </Flex>
-                         </Box>
-
-                         {/* Legend */}
-                         {showLegend && (
-                              <Flex direction="column" css={{ gap: '$3', width: '100%' }}>
-                                   {segments.map((segment, index) => (
-                                        <Flex key={index} justify="between" align="center">
-                                             <Flex align="center" css={{ gap: '$3' }}>
-                                                  <Box
-                                                       css={{
-                                                            width: '12px',
-                                                            height: '12px',
-                                                            borderRadius: '50%',
-                                                            bg: segment.color
-                                                       }}
-                                                  />
-                                                  <Text size="$sm">{segment.label}</Text>
-                                             </Flex>
-                                             <Flex align="center" css={{ gap: '$2' }}>
-                                                  <Text b size="$sm">
-                                                       {segment.value}
-                                                  </Text>
-                                                  <Text size="$xs" color="$accents7">
-                                                       ({Math.round(segment.percentage * 100)}%)
-                                                  </Text>
-                                             </Flex>
-                                        </Flex>
+                                   {data.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.color} />
                                    ))}
-                              </Flex>
-                         )}
-                    </Flex>
-               </Card.Body>
+                              </Pie>
+                         </RePieChart>
+                    </ChartContainer>
+               </CardContent>
           </Card>
      );
 };

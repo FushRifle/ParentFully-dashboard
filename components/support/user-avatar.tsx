@@ -1,7 +1,5 @@
 import React from 'react';
-import { Avatar, Text } from '@nextui-org/react';
-import { Flex } from '../../components/styles/flex';
-import { Box } from '../styles/box';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface UserAvatarProps {
      name: string;
@@ -14,30 +12,23 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
      name,
      avatar,
      size = 'md',
-     showName = true
+     showName = true,
 }) => {
-     const getSize = () => {
-          switch (size) {
-               case 'sm': return 32;
-               case 'md': return 40;
-               case 'lg': return 48;
-          }
-     };
+     const sizeMap = { sm: 32, md: 40, lg: 48 };
+     const px = sizeMap[size];
 
      return (
-          <Flex align="center" css={{ gap: '$3' }}>
+          <div className="flex items-center gap-3">
                <Avatar
-                    size={size}
-                    src={avatar}
-                    text={name.charAt(0)}
-                    bordered
-                    color="primary"
-               />
-               {showName && (
-                    <Box>
-                         <Text b size="$sm">{name}</Text>
-                    </Box>
-               )}
-          </Flex>
+                    style={{ width: px, height: px, minWidth: px, minHeight: px }}
+                    className="border-2 border-primary"
+               >
+                    {avatar && <AvatarImage src={avatar} alt={name} className="object-cover" />}
+                    <AvatarFallback className="bg-primary text-primary-foreground">
+                         {name.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+               </Avatar>
+               {showName && <span className="text-sm font-semibold">{name}</span>}
+          </div>
      );
 };

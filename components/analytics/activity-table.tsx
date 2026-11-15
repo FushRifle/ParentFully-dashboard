@@ -1,10 +1,10 @@
 import React from 'react';
-import { Table, Text, Badge, Card } from '@nextui-org/react';
-import { Box } from '../styles/box';
-import { Flex } from '../styles/flex';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import { TopContent } from './data';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import { TableExport } from '../shared/table-export';
+import { TableExport } from '@/components/shared/table-export';
 
 interface ActivityTableProps {
      data: TopContent[];
@@ -12,11 +12,7 @@ interface ActivityTableProps {
      limit?: number;
 }
 
-export const ActivityTable: React.FC<ActivityTableProps> = ({
-     data,
-     title,
-     limit = 5
-}) => {
+export const ActivityTable: React.FC<ActivityTableProps> = ({ data, title, limit = 5 }) => {
      const displayedData = data.slice(0, limit);
 
      const getChangeIcon = (change: number) => {
@@ -25,87 +21,78 @@ export const ActivityTable: React.FC<ActivityTableProps> = ({
           return <Minus size={14} color="#6b7280" />;
      };
 
-     const getChangeColor = (change: number) => {
-          if (change > 0) return 'success';
-          if (change < 0) return 'error';
-          return 'default';
+     const getChangeVariant = (change: number): 'default' | 'secondary' | 'destructive' | 'outline' => {
+          if (change > 0) return 'default';
+          if (change < 0) return 'destructive';
+          return 'secondary';
      };
 
      return (
-          <Card css={{ p: '$6' }} variant="flat">
+          <Card className="p-6">
                {title && (
-                    <Card.Header><Flex justify="between" align="center" css={{ width: '100%' }}><Text h4>{title}</Text><TableExport rows={displayedData} filename={title || 'activity'} title={title || 'Activity report'} columns={[{ key: 'title', label: 'Content' }, { key: 'views', label: 'Views' }, { key: 'engagement', label: 'Engagement' }, { key: 'change', label: 'Change' }]} /></Flex></Card.Header>
+                    <CardHeader className="flex flex-row items-center justify-between p-0 pb-4">
+                         <h4 className="text-lg font-semibold">{title}</h4>
+                         <TableExport
+                              rows={displayedData}
+                              filename={title || 'activity'}
+                              title={title || 'Activity report'}
+                              columns={[
+                                   { key: 'title', label: 'Content' },
+                                   { key: 'views', label: 'Views' },
+                                   { key: 'engagement', label: 'Engagement' },
+                                   { key: 'change', label: 'Change' },
+                              ]}
+                         />
+                    </CardHeader>
                )}
-
-               <Card.Body>
-                    <Table
-                         aria-label="Top content table"
-                         css={{
-                              height: "auto",
-                              minWidth: "100%",
-                         }}
-                    >
-                         <Table.Header>
-                              <Table.Column>CONTENT</Table.Column>
-                              <Table.Column>VIEWS</Table.Column>
-                              <Table.Column>ENGAGEMENT</Table.Column>
-                              <Table.Column>CHANGE</Table.Column>
-                         </Table.Header>
-                         <Table.Body>
+               <CardContent className="p-0">
+                    <Table>
+                         <TableHeader>
+                              <TableRow>
+                                   <TableHead>CONTENT</TableHead>
+                                   <TableHead>VIEWS</TableHead>
+                                   <TableHead>ENGAGEMENT</TableHead>
+                                   <TableHead>CHANGE</TableHead>
+                              </TableRow>
+                         </TableHeader>
+                         <TableBody>
                               {displayedData.map((item) => (
-                                   <Table.Row key={item.id}>
-                                        <Table.Cell>
-                                             <Text b size="$sm">
-                                                  {item.title}
-                                             </Text>
-                                        </Table.Cell>
-                                        <Table.Cell>
-                                             <Text size="$sm">{item.views.toLocaleString()}</Text>
-                                        </Table.Cell>
-                                        <Table.Cell>
-                                             <Flex align="center" css={{ gap: '$2' }}>
-                                                  <Box
-                                                       css={{
-                                                            width: '60px',
-                                                            height: '4px',
-                                                            bg: '$accents2',
-                                                            borderRadius: '$pill',
-                                                            overflow: 'hidden'
-                                                       }}
-                                                  >
-                                                       <Box
-                                                            css={{
+                                   <TableRow key={item.id}>
+                                        <TableCell className="font-semibold text-sm">{item.title}</TableCell>
+                                        <TableCell className="text-sm">{item.views.toLocaleString()}</TableCell>
+                                        <TableCell>
+                                             <div className="flex items-center gap-2">
+                                                  <div className="h-1 w-[60px] overflow-hidden rounded-full bg-muted">
+                                                       <div
+                                                            className="h-full rounded-full"
+                                                            style={{
                                                                  width: `${item.engagement}%`,
-                                                                 height: '100%',
-                                                                 bg: item.engagement > 70 ? '$success' :
-                                                                      item.engagement > 50 ? '$warning' : '$error',
-                                                                 borderRadius: '$pill'
+                                                                 backgroundColor:
+                                                                      item.engagement > 70
+                                                                           ? '#10b981'
+                                                                           : item.engagement > 50
+                                                                                ? '#f59e0b'
+                                                                                : '#ef4444',
                                                             }}
                                                        />
-                                                  </Box>
-                                                  <Text size="$xs" color="$accents7">
-                                                       {item.engagement}%
-                                                  </Text>
-                                             </Flex>
-                                        </Table.Cell>
-                                        <Table.Cell>
-                                             <Badge
-                                                  size="sm"
-                                                  variant="flat"
-                                                  color={getChangeColor(item.change)}
-                                                  css={{ gap: '$1' }}
-                                             >
+                                                  </div>
+                                                  <span className="text-xs text-muted-foreground">{item.engagement}%</span>
+                                             </div>
+                                        </TableCell>
+                                        <TableCell>
+                                             <Badge variant={getChangeVariant(item.change)} className="gap-1">
                                                   {getChangeIcon(item.change)}
-                                                  <Text size="$xs">
-                                                       {item.change > 0 ? '+' : ''}{item.change}%
-                                                  </Text>
+                                                  <span className="text-xs">
+                                                       {item.change > 0 ? '+' : ''}
+                                                       {item.change}%
+                                                  </span>
                                              </Badge>
-                                        </Table.Cell>
-                                   </Table.Row>
+                                        </TableCell>
+                                   </TableRow>
                               ))}
-                         </Table.Body>
+                         </TableBody>
                     </Table>
-               </Card.Body>
+               </CardContent>
           </Card>
      );
 };

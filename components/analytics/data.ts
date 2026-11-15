@@ -219,3 +219,21 @@ export const dateFilters = [
      { id: '1y', label: 'Last year' },
      { id: 'custom', label: 'Custom range' }
 ];
+
+export interface PieChartData {
+     label: string;
+     value: number;
+     color: string;
+}
+
+export const devicePieData: PieChartData[] = deviceData.map((d) => ({
+     label: d.device,
+     value: d.users,
+     color: d.color,
+}));
+
+export const trafficSourcePieData: PieChartData[] = trafficSources.map((s) => ({
+     label: s.source,
+     value: s.visits,
+     color: s.color,
+}));
