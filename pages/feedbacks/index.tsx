@@ -5,7 +5,6 @@ import {
      Container,
      Card,
      Text,
-     Loading,
      Grid,
      Row,
      Col,
@@ -14,6 +13,7 @@ import {
      Pagination,
      Avatar
 } from '@nextui-org/react';
+import { AppLoadingState } from '@/components/shared/app-loading-state';
 import { formatDistanceToNow } from 'date-fns';
 import { useRouter } from 'next/router';
 import debounce from 'lodash/debounce';
@@ -99,7 +99,7 @@ const FeedbackPage: NextPage = () => {
      if (loading && feedbacks.length === 0) {
           return (
                <Container css={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-                    <Loading size="xl" />
+                    <AppLoadingState message="Loading feedback…" />
                </Container>
           );
      }

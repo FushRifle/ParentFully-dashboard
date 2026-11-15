@@ -4,7 +4,8 @@ import { Flex } from '../../components/styles/flex';
 import { Box } from '../../components/styles/box';
 import { SidebarContext } from '../../components/layout/layout-context';
 import { getUserByID } from '@/services/authService';
-import { Card, Text, Divider, Button, Badge, Grid, Spacer, Loading } from '@nextui-org/react';
+import { Card, Text, Divider, Button, Badge, Grid, Spacer } from '@nextui-org/react';
+import { AppLoadingState } from '@/components/shared/app-loading-state';
 
 type User = {
      id: number;
@@ -67,7 +68,7 @@ const PlanDetails = () => {
      if (loading) {
           return (
                <Box css={{ p: '$10', '@sm': { p: '$20' }, maxW: '800px', margin: '0 auto', textAlign: 'center' }}>
-                    <Loading size="xl" />
+                    <AppLoadingState message="Loading plan details…" />
                </Box>
           );
      }

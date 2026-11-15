@@ -7,6 +7,7 @@ import { useGoals } from '@/hooks/goals/useGoalsData';
 import { useAddGoal, SMART_FIELDS_CONFIG, FREQUENCY_UNITS } from '@/hooks/goals/useAddGoals';
 import { Card, Text, Loading, Button, Container, Modal, Input, Textarea } from '@nextui-org/react';
 import type { CoreValue, Goal } from '@/types/api';
+import { AppLoadingState } from '@/components/shared/app-loading-state';
 
 const CoreValueGoalsPage: NextPage = () => {
      const router = useRouter();
@@ -101,7 +102,7 @@ const CoreValueGoalsPage: NextPage = () => {
                     alignItems: 'center',
                     minHeight: '60vh'
                }}>
-                    <Loading size="xl" />
+                    <AppLoadingState message="Loading goal category…" />
                </Container>
           );
      }
@@ -160,7 +161,7 @@ const CoreValueGoalsPage: NextPage = () => {
                {/* Goals Table */}
                {goalsLoading ? (
                     <Container css={{ display: 'flex', justifyContent: 'center', py: '$10' }}>
-                         <Loading />
+                         <AppLoadingState message="Loading goals…" minHeight={140} />
                     </Container>
                ) : (
                     <GoalsTable goals={goals} onDelete={handleDeleteGoal} />

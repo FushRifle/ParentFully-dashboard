@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { getPlans, getTemplatePlans, createPlan, deletePlan } from '@/services/disciplineService';
 import { Card, Grid, Text, Loading, Button, Modal, Input, Textarea, Badge } from '@nextui-org/react';
 import type { DisciplinePlan } from '@/types/api';
+import { AppLoadingState } from '@/components/shared/app-loading-state';
 
 type FilterTab = 'all' | 'custom' | 'templates';
 
@@ -144,7 +145,7 @@ const DisciplinePlansPage: NextPage = () => {
                <Grid.Container gap={2}>
                     {loading && displayedPlans.length === 0 ? (
                          <Grid xs={12} css={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
-                              <Loading size="xl" />
+                              <AppLoadingState message="Loading discipline plans…" />
                          </Grid>
                     ) : displayedPlans.length === 0 ? (
                          <Grid xs={12} css={{ textAlign: 'center', padding: '2rem' }}>

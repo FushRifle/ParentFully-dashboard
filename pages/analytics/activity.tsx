@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Grid, Text, Button, Card, Table, Loading } from '@nextui-org/react';
+import { Grid, Text, Button, Card, Table } from '@nextui-org/react';
 
 import { Select } from '../../components/styles/select';
 import { Box } from '../../components/styles/box';

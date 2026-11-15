@@ -7,7 +7,6 @@ import {
      Container,
      Card,
      Text,
-     Loading,
      Grid,
      Row,
      Col,
@@ -16,6 +15,7 @@ import {
      Spacer,
      Avatar,
 } from '@nextui-org/react';
+import { AppLoadingState } from '@/components/shared/app-loading-state';
 import ChatAvatarWrapper from '@/components/Avatar/ChatAvatarWrapper';
 
 type FeedbackDetail = {
@@ -122,7 +122,7 @@ const FeedbackDetailPage: NextPage = () => {
      if (loading) {
           return (
                <Container css={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-                    <Loading size="xl" />
+                    <AppLoadingState message="Loading feedback details…" />
                </Container>
           );
      }

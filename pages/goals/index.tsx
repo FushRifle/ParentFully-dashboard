@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { useCorePlanHandlers } from '@/hooks/goals/useCorePlan';
 import { goalCategoryApi } from '@/services/goalService';
 import { Card, Grid, Text, Loading, Button, Modal, Input, Textarea } from '@nextui-org/react';
+import { AppLoadingState } from '@/components/shared/app-loading-state';
 
 const GoalsPage: NextPage = () => {
      const router = useRouter();
@@ -106,7 +107,7 @@ const GoalsPage: NextPage = () => {
                <Grid.Container gap={2}>
                     {loading && coreValues.length === 0 ? (
                          <Grid xs={12} css={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
-                              <Loading size="xl" />
+                              <AppLoadingState message="Loading goal library…" />
                          </Grid>
                     ) : coreValues.length === 0 ? (
                          <Grid xs={12} css={{ textAlign: 'center', padding: '2rem' }}>
@@ -177,7 +178,7 @@ const GoalsPage: NextPage = () => {
                {/* Loading indicator for goals fetch */}
                {loading && goals.length > 0 && (
                     <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
-                         <Loading size="md" />
+                         <AppLoadingState message="Loading goals…" minHeight={140} />
                     </div>
                )}
 

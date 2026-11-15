@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import type { GoalPayload } from '@/types/api';
 import { useGoalDetails } from '@/hooks/goals/useGoalsDetails';
 import { goalApi, certificateApi } from '@/services/goalService';
+import { AppLoadingState } from '@/components/shared/app-loading-state';
 import {
      Container,
      Card,
@@ -198,7 +199,7 @@ const GoalDetailsPage: NextPage = () => {
                     alignItems: 'center',
                     minHeight: '60vh'
                }}>
-                    <Loading size="xl" />
+                    <AppLoadingState message="Loading goal details…" />
                </Container>
           );
      }

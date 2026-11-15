@@ -12,6 +12,7 @@ import {
 } from '@/services/disciplineService';
 import { Card, Text, Loading, Button, Container, Modal, Input, Textarea, Badge } from '@nextui-org/react';
 import type { DisciplinePlan, Rule } from '@/types/api';
+import { AppLoadingState } from '@/components/shared/app-loading-state';
 
 const DisciplinePlanDetailPage: NextPage = () => {
      const router = useRouter();
@@ -183,7 +184,7 @@ const DisciplinePlanDetailPage: NextPage = () => {
                     alignItems: 'center',
                     minHeight: '60vh',
                }}>
-                    <Loading size="xl" />
+                    <AppLoadingState message="Loading discipline plan…" />
                </Container>
           );
      }

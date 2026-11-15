@@ -25,6 +25,7 @@ import { Box } from '../styles/box';
 import { Flex } from '../styles/flex';
 import { usePageSearch } from '../../lib/context/searchContext';
 import { TableExport } from './table-export';
+import { AppLoadingState } from './app-loading-state';
 
 export interface BackendColumn {
    key: string;
@@ -488,7 +489,11 @@ export const BackendCollectionPage = ({
                   {error}
                </Text>
             </Box>
-         ) : !loading && visibleRows.length === 0 ? (
+         ) : loading ? (
+            <Box className="glass-panel">
+               <AppLoadingState message={`Loading ${metaCopy.title.toLowerCase()}…`} />
+            </Box>
+         ) : visibleRows.length === 0 ? (
             <Box className="glass-panel admin-empty-state">
                <span>
                   <Inbox size={22} />
@@ -519,7 +524,7 @@ export const BackendCollectionPage = ({
                   </Table.Header>
                   <Table.Body
                      items={visibleRows}
-                     loadingState={loading ? 'loading' : 'idle'}
+                     loadingState="idle"
                   >
                      {(row) => (
                         <Table.Row

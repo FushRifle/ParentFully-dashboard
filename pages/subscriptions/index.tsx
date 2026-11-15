@@ -5,7 +5,6 @@ import {
    Badge,
    Button,
    Input,
-   Loading,
    Modal,
    Table,
    Text,
