@@ -65,8 +65,8 @@ const LoginPage = () => {
                      src="/icons/ParentFully.png"
                      alt="ParentFully"
                      width={132}
-                     height={56}
-                     style={{ width: '132px', height: 'auto', objectFit: 'contain', objectPosition: 'left center' }}
+                     height={88}
+                     style={{ objectFit: 'contain', objectPosition: 'left center' }}
                      priority
                   />
 

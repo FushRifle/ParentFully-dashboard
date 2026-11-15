@@ -12,15 +12,16 @@ export const ParentfullyIcon = ({
      className,
      priority = false,
 }: ParentfullyIconProps) => {
+     const width = Math.round(size * (2306 / 1536));
+
      return (
           <Image
                src="/icons/ParentFully.png"
                alt="Parentfully"
-               width={size}
+               width={width}
                height={size}
                priority={priority}
                className={className}
-               style={{ width: `${size}px`, height: 'auto' }}
           />
      )
 }
