@@ -122,20 +122,21 @@ export const SidebarWrapper = () => {
                         </span>
                         <span className="flex flex-col leading-tight">
                            <strong className="text-sm font-semibold">ParentFully</strong>
-                           <small className="text-xs text-muted-foreground">Admin workspace</small>
                         </span>
                      </>
                   )}
+
+                  <button
+                     type="button"
+                     aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                     title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                     onClick={setCollapsed}
+                     className={`flex items-center justify-center rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground ${collapsed ? 'mx-auto' : 'mr-9'}`}
+                  >
+                     <Menu size={18} />
+                  </button>
                </div>
-               <button
-                  type="button"
-                  aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-                  title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-                  onClick={setCollapsed}
-                  className={`flex items-center justify-center rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground ${collapsed ? 'mx-auto' : 'ml-auto'}`}
-               >
-                  <Menu size={18} />
-               </button>
+
             </Sidebar.Header>
 
             <div className="flex h-[calc(100%-73px)] min-h-0 flex-col justify-between">

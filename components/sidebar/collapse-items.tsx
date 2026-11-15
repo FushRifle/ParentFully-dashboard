@@ -17,7 +17,6 @@ interface Props {
 export const CollapseItems = ({ icon, items, title }: Props) => {
    const router = useRouter();
 
-   // Check if any child item matches current route to auto-expand
    const hasActiveChild = items.some(
       (item) => router.pathname === item.href || router.pathname.startsWith(`${item.href}/`)
    );
