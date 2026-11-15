@@ -48,3 +48,88 @@ next-env.d.ts
 /build_output.txt
 /build_output_2.txt
 /build_output_3.txt
+
+# === Dependencies ===
+node_modules/
+config/
+
+# === Expo ===
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# === Tamagui ===
+.tamagui/
+tamagui/
+
+# === Native (iOS) ===
+keys/
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.plist
+!ios/ParentFully/Info.plist
+!ios/ParentFully/PrivacyInfo.xcprivacy
+!ios/ParentFully/Supporting/Expo.plist
+*.key
+*.mobileprovision
+
+# === Metro ===
+.metro-health-check*
+
+# === Debug and Logs ===
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+logs/
+*.log
+*.idea/
+*.tamagui/
+*.vscode/
+*.codex/
+*.claude/
+*.doc/
+*.yarn/
+
+# === macOS ===
+.DS_Store
+*.pem
+*.tmp
+*.swp
+*.swo
+*.sublime-workspace
+*.xcode
+
+# === Local environment files ===
+.env.local*
+.env.example*
+.xcode.env.local*
+*.env
+config.ts
+!config.ts
+*.txt
+*.qodo
+
+# === Coverage ===
+coverage/
+ExpoGo/*
+!ExpoGo/mocks/
+ExpoGo/mocks/*
+!ExpoGo/mocks/expo-notifications.js
+
+# === Build Artifacts ===
+*.tsbuildinfo
+
+# === Misc ===
+app-example
+.txt*
+/env.local
+/env.example
+
+# iOS build artifacts
+ios/*.xcarchive/
+ios/ParentFully-export/
+.env.local
