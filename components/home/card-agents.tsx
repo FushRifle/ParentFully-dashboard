@@ -1,7 +1,7 @@
-import {Avatar, Card, Text} from '@nextui-org/react';
+import { Avatar, Card, Text } from '@nextui-org/react';
 import React from 'react';
-import {Box} from '../styles/box';
-import {Flex} from '../styles/flex';
+import { Box } from '../styles/box';
+import { Flex } from '../styles/flex';
 
 const pictureUsers = [
    'https://i.pravatar.cc/150?u=a042581f4e29026024d',
@@ -24,7 +24,7 @@ export const CardAgents = () => {
             px: '$6',
          }}
       >
-         <Card.Body css={{py: '$10', gap: '$4'}}>
+         <Card.Body css={{ py: '$10', gap: '$4' }}>
             <Flex
                css={{
                   width: '100%',
@@ -44,19 +44,19 @@ export const CardAgents = () => {
                   {'⭐'}
                   <Box>
                      <Flex direction={'column'}>
-                        <Text h3 css={{margin: 0}}>
+                        <Text h3 css={{ margin: 0 }}>
                            Agents
                         </Text>
                      </Flex>
                   </Box>
                </Flex>
             </Flex>
-            <Flex css={{gap: '$6', py: '$4'}} align={'center'}>
+            <Flex css={{ gap: '$6', py: '$4' }} align={'center'}>
                <Text span size={'$xs'}>
                   Meet your agenda and see their ranks to get the best results
                </Text>
             </Flex>
-            <Flex css={{pt: '$4'}} align={'center'} justify={'center'}>
+            <Flex css={{ pt: '$4' }} align={'center'} justify={'center'}>
                <Avatar.Group count={12}>
                   {pictureUsers.map((url, index) => (
                      <Avatar

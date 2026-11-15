@@ -1,12 +1,12 @@
-import {CSS} from '@nextui-org/react';
+import { CSS } from '@nextui-org/react';
 import React from 'react';
-import {Svg} from '../../styles/svg';
+import { Svg } from '../../styles/svg';
 
 interface Props extends React.SVGAttributes<SVGElement> {
    css?: CSS;
 }
 
-export const ChevronUpIcon = ({css, ...props}: Props) => {
+export const ChevronUpIcon = ({ css, ...props }: Props) => {
    return (
       <Svg
          xmlns="http://www.w3.org/2000/svg"

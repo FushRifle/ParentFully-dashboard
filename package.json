@@ -12,22 +12,25 @@
       "lint": "next lint"
    },
    "dependencies": {
-      "@nextui-org/react": "^1.0.0-beta.10",
+      "@nextui-org/react": "1.0.0-beta.10",
       "@react-native-async-storage/async-storage": "^2.2.0",
+      "@stitches/react": "^1.2.8",
       "@supabase/supabase-js": "^2.99.2",
       "@tanstack/react-query": "^5.90.21",
-      "apexcharts": "^3.35.5",
+      "apexcharts": "^4.0.0",
       "axios": "^1.13.2",
       "caniuse-lite": "^1.0.30001826",
       "date-fns": "^4.1.0",
       "dotenv": "^17.3.1",
+      "framer-motion": "^14.14.0",
       "lodash": "^4.17.23",
       "lucide-react": "^0.562.0",
       "next": "15.5.29",
       "next-themes": "^0.2.1",
       "react": "18.2.0",
       "react-apexcharts": "^1.4.0",
-      "react-dom": "18.2.0"
+      "react-dom": "18.2.0",
+      "tailwind-variants": "^4.0.2"
    },
    "devDependencies": {
       "@swc/helpers": "^0.5.21",
@@ -35,7 +38,7 @@
       "@types/node": "18.7.18",
       "@types/react": "18.0.20",
       "@types/react-dom": "18.0.6",
-      "eslint": "8.23.1",
+      "eslint": "9.7.0",
       "eslint-config-next": "15.5.29",
       "typescript": "4.8.3"
    },

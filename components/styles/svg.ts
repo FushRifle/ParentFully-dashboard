@@ -1,4 +1,4 @@
-import {styled} from '@nextui-org/react';
+import { styled } from '@nextui-org/react';
 
 const UnstyledSvg = styled('svg', {});
 const UnstyledPath = styled('path', {});

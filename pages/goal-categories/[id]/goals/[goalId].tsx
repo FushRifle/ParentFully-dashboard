@@ -184,7 +184,7 @@ export default function GoalFocusSkillsPage() {
                      value={form.smart_section}
                      onChange={(value) => setForm({ ...form, smart_section: value })}
                      aria-label="SMART section"
-                     options={['general','specific','measurable','achievable','relevant','time_bound'].map((value) => ({ value, label: value.replaceAll('_', ' ') }))}
+                     options={['general', 'specific', 'measurable', 'achievable', 'relevant', 'time_bound'].map((value) => ({ value, label: value.replaceAll('_', ' ') }))}
                      css={{ flex: '1 1 220px' }}
                   />
                   <Select

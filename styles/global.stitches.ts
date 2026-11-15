@@ -1,4 +1,4 @@
-import {globalCss} from '@nextui-org/react';
+import { globalCss } from '@nextui-org/react';
 
 export const globalStyles = globalCss({
    body: {

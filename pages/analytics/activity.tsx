@@ -102,52 +102,52 @@ const ActivityPage = () => {
 
     const dailyChartData = stats
         ? [
-              {
-                  label: 'Daily Opens',
-                  color: '#3f3bef',
-                  data: stats.daily_opens.map((d) => ({
-                      date: d.date.slice(5), // MM-DD
-                      value: d.count,
-                  })),
-              },
-          ]
+            {
+                label: 'Daily Opens',
+                color: '#3f3bef',
+                data: stats.daily_opens.map((d) => ({
+                    date: d.date.slice(5), // MM-DD
+                    value: d.count,
+                })),
+            },
+        ]
         : [];
 
     const statCards = stats
         ? [
-              {
-                  id: 'total_sessions',
-                  name: 'Total Sessions',
-                  value: stats.total_sessions.toLocaleString(),
-                  change: 0,
-                  changeType: 'neutral' as const,
-                  color: '#3f3bef',
-              },
-              {
-                  id: 'unique_users',
-                  name: 'Unique Users',
-                  value: stats.unique_users.toLocaleString(),
-                  change: 0,
-                  changeType: 'neutral' as const,
-                  color: '#10b981',
-              },
-              {
-                  id: 'avg_duration',
-                  name: 'Avg Session',
-                  value: formatDuration(stats.avg_duration_secs),
-                  change: 0,
-                  changeType: 'neutral' as const,
-                  color: '#f59e0b',
-              },
-              {
-                  id: 'top_platform',
-                  name: 'Top Platform',
-                  value: getTopPlatform(stats.platform_breakdown),
-                  change: 0,
-                  changeType: 'neutral' as const,
-                  color: '#6366f1',
-              },
-          ]
+            {
+                id: 'total_sessions',
+                name: 'Total Sessions',
+                value: stats.total_sessions.toLocaleString(),
+                change: 0,
+                changeType: 'neutral' as const,
+                color: '#3f3bef',
+            },
+            {
+                id: 'unique_users',
+                name: 'Unique Users',
+                value: stats.unique_users.toLocaleString(),
+                change: 0,
+                changeType: 'neutral' as const,
+                color: '#10b981',
+            },
+            {
+                id: 'avg_duration',
+                name: 'Avg Session',
+                value: formatDuration(stats.avg_duration_secs),
+                change: 0,
+                changeType: 'neutral' as const,
+                color: '#f59e0b',
+            },
+            {
+                id: 'top_platform',
+                name: 'Top Platform',
+                value: getTopPlatform(stats.platform_breakdown),
+                change: 0,
+                changeType: 'neutral' as const,
+                color: '#6366f1',
+            },
+        ]
         : [];
 
     return (

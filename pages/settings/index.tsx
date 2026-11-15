@@ -74,16 +74,16 @@ export default function SettingsPage() {
    return (
       <Box className="admin-page" css={{ maxW: '1000px' }}>
          <Box className="glass-panel glass-hero">
-         <Flex justify="between" align="center" css={{ gap: '$4', flexWrap: 'wrap', position: 'relative', zIndex: 1 }}>
-            <Box>
-               <Text className="section-kicker">System controls</Text>
-               <Text h2 css={{ m: 0, fontSize: '1.35rem' }}>Settings</Text>
-               <Text size="$sm" css={{ color: '$accents7', mt: '$1' }}>Platform configuration loaded from ParentFully.</Text>
-            </Box>
-            <Button auto color="primary" onPress={save} disabled={!settings || !policy || saving}>
-               {saving ? <Loading size="xs" color="currentColor" /> : 'Save changes'}
-            </Button>
-         </Flex>
+            <Flex justify="between" align="center" css={{ gap: '$4', flexWrap: 'wrap', position: 'relative', zIndex: 1 }}>
+               <Box>
+                  <Text className="section-kicker">System controls</Text>
+                  <Text h2 css={{ m: 0, fontSize: '1.35rem' }}>Settings</Text>
+                  <Text size="$sm" css={{ color: '$accents7', mt: '$1' }}>Platform configuration loaded from ParentFully.</Text>
+               </Box>
+               <Button auto color="primary" onPress={save} disabled={!settings || !policy || saving}>
+                  {saving ? <Loading size="xs" color="currentColor" /> : 'Save changes'}
+               </Button>
+            </Flex>
          </Box>
 
          {error && <Text color="error" size="$sm" css={{ mb: '$5' }}>{error}</Text>}

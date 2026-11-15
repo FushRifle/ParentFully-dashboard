@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import NextLink from 'next/link';
-import { Navbar, Text, Input } from '@nextui-org/react';
+import { Navbar, Input, Text } from '@nextui-org/react';
 import { useRouter } from 'next/router';
 import { MessageSquare, HelpCircle, Search } from 'lucide-react';
 
