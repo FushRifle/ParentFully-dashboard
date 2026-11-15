@@ -1,5 +1,6 @@
 import React from 'react';
 import NextLink from 'next/link';
+import { useRouter } from 'next/router';
 import { useSidebarContext } from '../layout/layout-context';
 
 interface Props {
@@ -11,11 +12,15 @@ interface Props {
 
 export const SidebarItem = React.memo(function SidebarItem({ icon, title, isActive, href = '#' }: Props) {
    const { setCollapsed, collapsed, mobileOpen } = useSidebarContext();
+   const router = useRouter();
 
-   const handleClick = () => {
-      if (typeof window !== 'undefined' && window.innerWidth < 960 && mobileOpen) {
-         setCollapsed();
-      }
+   const handleClick = async (event: React.MouseEvent<HTMLAnchorElement>) => {
+      if (!mobileOpen || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+      // Keep the link mounted until navigation has completed.
+      event.preventDefault();
+      const navigated = await router.push(href);
+      if (navigated) setCollapsed();
    };
 
    return (
