@@ -1,4 +1,5 @@
 import React from 'react';
+import ChatAvatarWrapper from '@/components/Avatar/ChatAvatarWrapper';
 import Image from 'next/image';
 import NextLink from 'next/link';
 import { useQuery } from '@tanstack/react-query';
@@ -19,6 +20,9 @@ import { OverviewStats } from './overview-stats';
 import { useUserStats } from '../../hooks/user/useUserStats';
 
 type OverviewSession = {
+   user?: { name?: string; profile_image?: string | null };
+   user_profile_image?: string | null;
+   profile_image?: string | null;
    id: number;
    user_name: string | null;
    user_email: string | null;
@@ -217,12 +221,16 @@ export const Content = () => {
                            {overview.data.sessions.map((session) => (
                               <tr key={session.id}>
                                  <td>
+                                    <div className="flex items-center gap-3">
+                                    <ChatAvatarWrapper profile_image={session.user?.profile_image ?? session.user_profile_image ?? session.profile_image} contactName={session.user_name ?? session.user?.name} size={36} />
+                                    <div>
                                     <strong>
                                        {session.user_name || 'Unknown user'}
                                     </strong>
                                     <small>
                                        {session.user_email || 'Email unavailable'}
                                     </small>
+                                    </div></div>
                                  </td>
                                  <td>
                                     <span>{session.platform || '—'}</span>

@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { FilterSelect } from "@/components/shared/filter-select";
 import NextLink from 'next/link';
+import ChatAvatarWrapper from '@/components/Avatar/ChatAvatarWrapper';
 import { useRouter } from 'next/router';
 import {
    Badge,
@@ -108,7 +110,7 @@ const CATEGORY_META: Record<
       color: '#3b82f6',
    },
    inactive: {
-      label: 'Inactive',
+      label: 'Free Users',
       description: 'Free, expired or cancelled',
       icon: UserX,
       color: '#ef4444',
@@ -440,8 +442,10 @@ export default function SubscriptionsPage() {
                         Subscription records
                      </Text>
                      <Text size="$sm" css={{ color: '$accents7', mt: '$1' }}>
+                        {/** 
                         {visibleRecords.length.toLocaleString()} shown ·{' '}
                         {filteredRecords.length.toLocaleString()} matching ·{' '}
+                        */}
                         {records.length.toLocaleString()} total
                      </Text>
                   </Box>
@@ -482,7 +486,7 @@ export default function SubscriptionsPage() {
             <div className="subscriptions-filters">
                <label>
                   Category
-                  <select
+                  <FilterSelect
                      value={category}
                      onChange={(event) =>
                         selectCategory(event.target.value as 'all' | CategoryKey)
@@ -493,11 +497,11 @@ export default function SubscriptionsPage() {
                      <option value="manual">Manual premium</option>
                      <option value="trial">Free trials</option>
                      <option value="inactive">Inactive</option>
-                  </select>
+                  </FilterSelect>
                </label>
                <label>
                   Status
-                  <select
+                  <FilterSelect
                      value={status}
                      onChange={(event) => selectStatus(event.target.value as 'all' | StatusKey)}
                   >
@@ -508,11 +512,11 @@ export default function SubscriptionsPage() {
                      <option value="cancelled">Cancelled</option>
                      <option value="expired">Expired</option>
                      <option value="billing_issue">Billing issue</option>
-                  </select>
+                  </FilterSelect>
                </label>
                <label>
                   Renewal
-                  <select
+                  <FilterSelect
                      value={renewal}
                      onChange={(event) =>
                         setRenewal(event.target.value as 'all' | 'on' | 'off')
@@ -521,7 +525,7 @@ export default function SubscriptionsPage() {
                      <option value="all">All renewal states</option>
                      <option value="on">Auto-renew on</option>
                      <option value="off">Auto-renew off</option>
-                  </select>
+                  </FilterSelect>
                </label>
                {hasFilters && (
                   <button type="button" className="subscriptions-clear" onClick={clearFilters}>
@@ -584,7 +588,7 @@ export default function SubscriptionsPage() {
                      <Table.Column hideHeader>ACTIONS</Table.Column>
                   </Table.Header>
                   <Table.Body items={visibleRecords}>
-                     {(record) => {
+                     {(record: any) => {
                         const recordCategory = getCategory(record);
                         const recordStatus = getStatus(record);
                         const actionAvailable =
@@ -595,115 +599,92 @@ export default function SubscriptionsPage() {
                         return (
                            <Table.Row key={record.id}>
                               <Table.Cell>
-                                 <NextLink href={`/subscriptions/${detailId}`}>
-                                    <a className="subscription-cell-link">
-                                       <div className="subscription-person">
-                                          <span>
-                                             {(owner?.name || owner?.email || '?')
-                                                .slice(0, 1)
-                                                .toUpperCase()}
-                                          </span>
-                                          <div>
-                                             <strong>{owner?.name || 'Unnamed account'}</strong>
-                                             <small>{owner?.email || 'Account unavailable'}</small>
-                                          </div>
+                                 <NextLink href={`/subscriptions/${detailId}`} className="subscription-cell-link">
+                                    <div className="subscription-person">
+                                       <ChatAvatarWrapper profile_image={(owner as any)?.profile_image} contactName={owner?.name || owner?.email} size={36} />
+                                       <div>
+                                          <strong>{owner?.name || 'Unnamed account'}</strong>
+                                          <small>{owner?.email || 'Account unavailable'}</small>
                                        </div>
-                                    </a>
+                                    </div>
                                  </NextLink>
                               </Table.Cell>
                               <Table.Cell>
-                                 <NextLink href={`/subscriptions/${detailId}`}>
-                                    <a className="subscription-cell-link">
-                                       <div className={`subscription-access ${recordCategory}`}>
-                                          <strong>{CATEGORY_META[recordCategory].label}</strong>
-                                          <small>{recordStatus.replace('_', ' ')}</small>
-                                       </div>
-                                    </a>
+                                 <NextLink href={`/subscriptions/${detailId}`} className="subscription-cell-link">
+                                    <div className={`subscription-access ${recordCategory}`}>
+                                       <strong>{CATEGORY_META[recordCategory].label}</strong>
+                                       <small>{recordStatus.replace('_', ' ')}</small>
+                                    </div>
                                  </NextLink>
                               </Table.Cell>
                               <Table.Cell>
-                                 <NextLink href={`/subscriptions/${detailId}`}>
-                                    <a className="subscription-cell-link">
-                                       <span className="subscription-plan">
-                                          {effective?.plan_type ||
-                                             record.plan_type ||
-                                             'Not specified'}
+                                 <NextLink href={`/subscriptions/${detailId}`} className="subscription-cell-link">
+                                    <span className="subscription-plan">
+                                       {effective?.plan_type ||
+                                          record.plan_type ||
+                                          'Not specified'}
+                                    </span>
+                                 </NextLink>
+                              </Table.Cell>
+                              <Table.Cell>
+                                 <NextLink href={`/subscriptions/${detailId}`} className="subscription-cell-link">
+                                    <strong className="subscription-amount">
+                                       {formatAmount(record.amount)}
+                                    </strong>
+                                 </NextLink>
+                              </Table.Cell>
+                              <Table.Cell>
+                                 <NextLink href={`/subscriptions/${detailId}`} className="subscription-cell-link">
+                                    <div className="subscription-period">
+                                       <strong>{formatDate(record.start_date)}</strong>
+                                       <small>
+                                          to{' '}
+                                          {formatDate(
+                                             effective?.expires_at ?? record.end_date,
+                                          )}
+                                       </small>
+                                    </div>
+                                 </NextLink>
+                              </Table.Cell>
+                              <Table.Cell>
+                                 <NextLink href={`/subscriptions/${detailId}`} className="subscription-cell-link">
+                                    <span className="subscription-payment">
+                                       {formatPaymentMethod(record.payment_method)}
+                                    </span>
+                                 </NextLink>
+                              </Table.Cell>
+                              <Table.Cell>
+                                 <NextLink href={`/subscriptions/${detailId}`} className="subscription-cell-link">
+                                    <span
+                                       className={`subscription-renewal ${record.auto_renewal ? 'on' : 'off'
+                                          }`}
+                                    >
+                                       <span>
+                                          {record.auto_renewal ? (
+                                             <RefreshCw size={13} />
+                                          ) : (
+                                             <CalendarClock size={13} />
+                                          )}
                                        </span>
-                                    </a>
-                                 </NextLink>
-                              </Table.Cell>
-                              <Table.Cell>
-                                 <NextLink href={`/subscriptions/${detailId}`}>
-                                    <a className="subscription-cell-link">
-                                       <strong className="subscription-amount">
-                                          {formatAmount(record.amount)}
-                                       </strong>
-                                    </a>
-                                 </NextLink>
-                              </Table.Cell>
-                              <Table.Cell>
-                                 <NextLink href={`/subscriptions/${detailId}`}>
-                                    <a className="subscription-cell-link">
-                                       <div className="subscription-period">
-                                          <strong>{formatDate(record.start_date)}</strong>
+                                       <span>
+                                          <strong>
+                                             {record.auto_renewal
+                                                ? 'Auto renew'
+                                                : 'Renewal off'}
+                                          </strong>
                                           <small>
-                                             to{' '}
-                                             {formatDate(
-                                                effective?.expires_at ?? record.end_date,
-                                             )}
+                                             {record.auto_renewal
+                                                ? 'Enabled'
+                                                : 'Ends at expiry'}
                                           </small>
-                                       </div>
-                                    </a>
-                                 </NextLink>
-                              </Table.Cell>
-                              <Table.Cell>
-                                 <NextLink href={`/subscriptions/${detailId}`}>
-                                    <a className="subscription-cell-link">
-                                       <span className="subscription-payment">
-                                          {formatPaymentMethod(record.payment_method)}
                                        </span>
-                                    </a>
-                                 </NextLink>
-                              </Table.Cell>
-                              <Table.Cell>
-                                 <NextLink href={`/subscriptions/${detailId}`}>
-                                    <a className="subscription-cell-link">
-                                       <span
-                                          className={`subscription-renewal ${record.auto_renewal ? 'on' : 'off'
-                                             }`}
-                                       >
-                                          <span>
-                                             {record.auto_renewal ? (
-                                                <RefreshCw size={13} />
-                                             ) : (
-                                                <CalendarClock size={13} />
-                                             )}
-                                          </span>
-                                          <span>
-                                             <strong>
-                                                {record.auto_renewal
-                                                   ? 'Auto renew'
-                                                   : 'Renewal off'}
-                                             </strong>
-                                             <small>
-                                                {record.auto_renewal
-                                                   ? 'Enabled'
-                                                   : 'Ends at expiry'}
-                                             </small>
-                                          </span>
-                                       </span>
-                                    </a>
+                                    </span>
                                  </NextLink>
                               </Table.Cell>
                               <Table.Cell>
                                  <div className="subscription-actions">
-                                    <NextLink href={`/subscriptions/${detailId}`}>
-                                       <a
-                                          className="subscription-view-action"
-                                          aria-label={`View subscription ${detailId}`}
-                                       >
-                                          <Eye size={14} />
-                                       </a>
+                                    <NextLink href={`/subscriptions/${detailId}`} className="subscription-view-action" aria-label={`View subscription ${detailId}`}>
+                                       <Eye size={14} />
                                     </NextLink>
                                     {actionAvailable ? (
                                        <button
@@ -739,7 +720,7 @@ export default function SubscriptionsPage() {
                <Button
                   auto
                   flat
-                  size="sm"
+                  size="m"
                   disabled={page <= 1 || loading}
                   onPress={() => setPage((value) => value - 1)}
                >
@@ -751,7 +732,7 @@ export default function SubscriptionsPage() {
                <Button
                   auto
                   flat
-                  size="sm"
+                  size="m"
                   disabled={page >= meta.last_page || loading}
                   onPress={() => setPage((value) => value + 1)}
                >
@@ -781,7 +762,7 @@ export default function SubscriptionsPage() {
                   label="Account email"
                   type="email"
                   value={manualEmail}
-                  onChange={(event) => setManualEmail(event.target.value)}
+                  onChange={(event: any) => setManualEmail(event.target.value)}
                />
                <Input
                   bordered
@@ -791,14 +772,14 @@ export default function SubscriptionsPage() {
                   min="1"
                   max="120"
                   value={manualMonths}
-                  onChange={(event) => setManualMonths(event.target.value)}
+                  onChange={(event: any) => setManualMonths(event.target.value)}
                />
                <Textarea
                   bordered
                   fullWidth
                   label="Reason (optional)"
                   value={manualReason}
-                  onChange={(event) => setManualReason(event.target.value)}
+                  onChange={(event: any) => setManualReason(event.target.value)}
                />
             </Modal.Body>
             <Modal.Footer>

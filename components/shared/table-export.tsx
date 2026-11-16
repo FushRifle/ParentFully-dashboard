@@ -1,7 +1,9 @@
 // components/shared/table-export.tsx
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { ChevronDown, Download, FileText, Sheet } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export type ExportColumn<Row> = {
    key: string;
@@ -124,17 +126,17 @@ export function TableExport<Row>({ rows, columns, filename, title = filename }: 
    };
 
    return (
-      <div className="relative inline-block">
-         <Button variant="secondary" size="sm" onClick={() => setOpen((value) => !value)} disabled={!rows.length}>
+      <div className="table-export">
+      <DropdownMenu open={open} onOpenChange={setOpen}>
+         <DropdownMenuTrigger type="button" className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'table-export-trigger')}>
             <Download size={14} className="mr-2" />
             Export
             <ChevronDown size={13} className="ml-1" />
-         </Button>
+         </DropdownMenuTrigger>
 
-         {open && (
-            <div className="absolute right-0 z-50 mt-2 w-56 rounded-lg border bg-popover p-1 shadow-md">
-               <button
-                  type="button"
+            <DropdownMenuContent align="end" sideOffset={8} className="w-56">
+               <DropdownMenuItem
+                  disabled={!rows.length}
                   onClick={exportCsv}
                   className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm hover:bg-muted"
                >
@@ -143,9 +145,9 @@ export function TableExport<Row>({ rows, columns, filename, title = filename }: 
                      Export CSV
                      <small className="text-xs text-muted-foreground">Spreadsheet data</small>
                   </span>
-               </button>
-               <button
-                  type="button"
+               </DropdownMenuItem>
+               <DropdownMenuItem
+                  disabled={!rows.length}
                   onClick={exportPdf}
                   className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm hover:bg-muted"
                >
@@ -154,9 +156,9 @@ export function TableExport<Row>({ rows, columns, filename, title = filename }: 
                      Export PDF
                      <small className="text-xs text-muted-foreground">Printable report</small>
                   </span>
-               </button>
-            </div>
-         )}
+               </DropdownMenuItem>
+            </DropdownMenuContent>
+      </DropdownMenu>
       </div>
    );
 }

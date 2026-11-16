@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import ChatAvatarWrapper from '@/components/Avatar/ChatAvatarWrapper';
 import { Activity, BarChart3, Clock3, Globe2, MonitorSmartphone, Route, Users } from 'lucide-react';
 import {
    Table,
@@ -325,8 +326,11 @@ export default function AnalyticsPage() {
                            {visibleSessions.map((session) => (
                               <TableRow key={session.id}>
                                  <TableCell>
-                                    <span className="block text-sm font-semibold">{session.user_name ?? 'Unknown'}</span>
+                                    <div className="flex items-center gap-3">
+                                    <ChatAvatarWrapper profile_image={session.user?.profile_image ?? session.user_profile_image ?? session.profile_image} contactName={session.user_name ?? session.user?.name} size={36} />
+                                    <div><span className="block text-sm font-semibold">{session.user_name ?? 'Unknown'}</span>
                                     <span className="block text-xs text-muted-foreground">{session.user_email ?? '—'}</span>
+                                    </div></div>
                                  </TableCell>
                                  <TableCell>
                                     <span className="analytics-platform-pill">{session.platform ?? '—'}</span>

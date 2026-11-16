@@ -123,7 +123,7 @@ const TableColumn = ({ children, ...props }: any) => <th className="h-10 px-3 te
 const TableCell = ({ children, ...props }: any) => <td className="p-3 align-middle" {...props}>{children}</td>;
 export const Table = Object.assign(TableRoot, { Header: TableHeader, Body: TableBody, Row: TableRow, Column: TableColumn, Cell: TableCell, Pagination: () => null });
 
-export const Pagination = ({ page = 1, total = 1, onChange }: any) => <nav className="flex items-center gap-2"><Button size="sm" bordered disabled={page <= 1} onClick={() => onChange?.(page - 1)}>Previous</Button><span className="text-sm text-muted-foreground">{page} / {total}</span><Button size="sm" bordered disabled={page >= total} onClick={() => onChange?.(page + 1)}>Next</Button></nav>;
+export const Pagination = ({ page = 1, total = 1, onChange }: any) => <nav className="flex items-center gap-2"><Button size="md" bordered disabled={page <= 1} onClick={() => onChange?.(page - 1)}>Previous</Button><span className="text-sm text-muted-foreground">{page} / {total}</span><Button size="md" bordered disabled={page >= total} onClick={() => onChange?.(page + 1)}>Next</Button></nav>;
 
 export function styled(Tag: any, base: CSS = {}) {
   return React.forwardRef<any, any>(({ css, ...props }, ref) => <Tag ref={ref} style={{ ...cssToStyle(base), ...cssToStyle(css), ...props.style }} {...props} />);

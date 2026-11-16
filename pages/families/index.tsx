@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import NextLink from 'next/link';
+import ChatAvatarWrapper from '@/components/Avatar/ChatAvatarWrapper';
 import { Baby, Home, UsersRound } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,8 @@ import { AppLoadingState } from '@/components/shared/app-loading-state';
 type FamilyRow = {
    id: number;
    name: string;
+   photo?: string | null;
+   profile_image?: string | null;
    members_count: number;
    pending_invitations_count: number;
    children_count: number;
@@ -160,8 +163,8 @@ export default function FamiliesPage() {
                      <TableHeader>
                         <TableRow>
                            <TableHead>FAMILY</TableHead>
-                           <TableHead>MEMBER RECORDS</TableHead>
-                           <TableHead>PENDING</TableHead>
+                           <TableHead>MEMBERS</TableHead>
+                           <TableHead>PENDING INVITES</TableHead>
                            <TableHead>CHILDREN</TableHead>
                            <TableHead>CREATED</TableHead>
                            <TableHead>ACTION</TableHead>
@@ -172,9 +175,7 @@ export default function FamiliesPage() {
                            <TableRow key={family.id}>
                               <TableCell>
                                  <NextLink href={`/families/${family.id}`} className="family-name-link flex items-center gap-3">
-                                    <span className="grid h-9 w-9 place-items-center rounded-full bg-muted text-xs font-semibold">
-                                       {initials(family.name)}
-                                    </span>
+                                    <ChatAvatarWrapper photo={family.photo} profile_image={family.profile_image} contactName={family.name} size={36} />
                                     <div>
                                        <strong className="block text-sm">{family.name || `Family #${family.id}`}</strong>
                                        <small className="text-xs text-muted-foreground">Family ID · {family.id}</small>

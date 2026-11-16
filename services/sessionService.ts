@@ -15,7 +15,7 @@ export interface UserSession {
     last_screen: string | null;
     screens_visited: number;
     duration_seconds: number | null;
-    user?: { id: number; name: string; email: string };
+    user?: { id: number; name: string; email: string; profile_image?: string | null };
 }
 
 export interface SessionStats {
@@ -44,7 +44,19 @@ export const getSessions = async (params?: {
     date_to?: string;
     page?: number;
     per_page?: number;
-}): Promise<{ data: UserSession[]; meta: any }> => {
-    const res = await api.get('/v1/admin/sessions', { params });
-    return { data: res.data.data, meta: res.data.meta };
+}, signal?: AbortSignal): Promise<{ data: UserSession[]; meta: any }> => {
+    const res = await api.get('/v1/admin/analytics/sessions', { params, signal });
+    const payload = res.data.data;
+    const data = Array.isArray(payload) ? payload : payload?.data;
+    if (!Array.isArray(data)) throw new Error('The sessions API returned an unexpected response.');
+    return { data: data.map((session: any) => ({
+        ...session,
+        user_id: session.user_id ?? session.user?.id,
+        user: session.user ?? {
+            id: session.user_id,
+            name: session.user_name,
+            email: session.user_email,
+            profile_image: session.user_profile_image ?? session.profile_image,
+        },
+    })), meta: res.data.meta ?? { current_page: payload?.current_page, last_page: payload?.last_page, total: payload?.total } };
 };

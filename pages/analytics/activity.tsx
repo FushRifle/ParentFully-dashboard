@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import ChatAvatarWrapper from '@/components/Avatar/ChatAvatarWrapper';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
@@ -250,9 +251,12 @@ const ActivityPage = () => {
                                         {sessions.map((session) => (
                                             <TableRow key={session.id}>
                                                 <TableCell>
+                                                    <div className="flex items-center gap-3">
+                                                    <ChatAvatarWrapper profile_image={session.user?.profile_image} contactName={session.user?.name} size={32} />
                                                     <div className="flex flex-col">
                                                         <span className="text-sm font-semibold">{session.user?.name ?? `User #${session.user_id}`}</span>
                                                         <span className="text-xs text-muted-foreground">{session.user?.email ?? ''}</span>
+                                                    </div>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell><span className="text-sm capitalize">{session.platform ?? '—'}</span></TableCell>

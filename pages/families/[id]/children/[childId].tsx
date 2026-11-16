@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
+import ChatAvatarWrapper from '@/components/Avatar/ChatAvatarWrapper';
 import { ArrowLeft, Baby, CalendarDays, Heart, Home, UserRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -85,7 +86,7 @@ export default function ChildDetailPage() {
          <div className="glass-panel glass-hero child-profile-hero">
             <div className="flex flex-wrap items-center gap-4">
                <span className="child-profile-avatar">
-                  {child.photo ? <img src={child.photo} alt="" /> : <Baby size={25} />}
+                  <ChatAvatarWrapper photo={child.photo} profile_image={child.profile_image} contactName={child.name} size={64} />
                </span>
                <div>
                   <p className="section-kicker">Child profile · #{child.id}</p>

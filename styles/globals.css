@@ -154,10 +154,16 @@ select:not([multiple]) {
 }
 
 .admin-pagination button {
-   border: 1px solid rgba(127, 127, 148, 0.2);
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   height: 36px;
+   min-width: 36px;
+   border: 1px solid var(--border);
    border-radius: 0.65rem;
-   background: rgba(255, 255, 255, 0.06);
-   padding: 0.45rem 0.8rem;
+   background: transparent;
+   padding: 0 0.85rem;
+   font-size: 0.875rem;
    color: inherit;
    cursor: pointer;
 }
@@ -165,6 +171,29 @@ select:not([multiple]) {
 .admin-pagination button:disabled {
    cursor: not-allowed;
    opacity: 0.45;
+}
+
+.admin-pagination button,
+[data-slot='pagination'] [data-slot='pagination-link'] {
+   border: 1px solid color-mix(in srgb, var(--primary) 38%, var(--border));
+   background: color-mix(in srgb, var(--primary) 8%, var(--background));
+   color: var(--foreground);
+   font-weight: 600;
+   box-shadow: 0 2px 4px rgb(0 0 0 / 5%);
+   transition: background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.admin-pagination button:not(:disabled):hover,
+[data-slot='pagination'] [data-slot='pagination-link']:not([aria-disabled='true']):hover {
+   border-color: var(--primary);
+   background: color-mix(in srgb, var(--primary) 18%, var(--background));
+   box-shadow: 0 2px 8px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+[data-slot='pagination'] [data-slot='pagination-link'][data-active='true'] {
+   border-color: var(--primary);
+   background: var(--primary);
+   color: var(--primary-foreground);
 }
 
 .login-page {
@@ -1086,6 +1115,7 @@ select:not([multiple]) {
 }
 
 .subscriptions-filters {
+   --subscription-control-height: 38px;
    display: flex;
    width: 100%;
    align-items: flex-end;
@@ -1108,7 +1138,7 @@ select:not([multiple]) {
 .subscriptions-filters select {
    width: 100%;
    min-width: 145px;
-   height: 36px;
+   height: var(--subscription-control-height);
    padding-left: 0.75rem;
    color: var(--pf-text);
    font: inherit;
@@ -1126,7 +1156,10 @@ select:not([multiple]) {
 }
 
 .subscriptions-clear {
-   height: 36px;
+   height: var(--subscription-control-height);
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
    flex: 0 0 auto;
    padding: 0 0.85rem;
    color: #f28c18;
@@ -1139,10 +1172,26 @@ select:not([multiple]) {
 }
 
 .subscriptions-filter-action {
-   height: 36px !important;
+   height: var(--subscription-control-height) !important;
    flex: 0 0 auto !important;
    align-self: flex-end !important;
    white-space: nowrap !important;
+}
+
+.subscriptions-filters > .table-export {
+   display: flex;
+   align-self: flex-end;
+   flex-shrink: 0;
+}
+
+.subscriptions-filters [data-slot='select-trigger'],
+.subscriptions-filters .table-export-trigger {
+   height: var(--subscription-control-height);
+   min-height: var(--subscription-control-height);
+   max-height: var(--subscription-control-height);
+   border-radius: 9px;
+   font-size: 0.72rem;
+   padding-block: 0;
 }
 
 .subscriptions-table-shell {
@@ -3612,6 +3661,24 @@ select:not([multiple]) {
 .overview-card>p {
    position: relative;
    z-index: 1;
+}
+
+@media (max-width: 640px) {
+   .overview-card-grid {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      gap: 0.75rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+      scroll-snap-type: x proximity;
+   }
+
+   .overview-card-grid > * {
+      flex: 0 0 220px;
+      min-width: 0;
+      scroll-snap-align: start;
+   }
 }
 
 @theme inline {

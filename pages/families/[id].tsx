@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { api } from '@/lib';
 import { AppLoadingState } from '@/components/shared/app-loading-state';
+import ChatAvatarWrapper from '@/components/Avatar/ChatAvatarWrapper';
 
 export default function FamilyDetailPage() {
    const router = useRouter();
@@ -123,12 +124,15 @@ export default function FamilyDetailPage() {
                   </div>
                </div>
 
-               <div className="flex flex-wrap items-center gap-3">
+               <div className="ml-auto shrink-0">
+                  <NextLink href={`/family-activity?familyId=${family.id}`} className="inline-flex h-9 items-center rounded-xl border border-primary/40 bg-primary/10 px-4 text-sm font-semibold">View activity</NextLink>
+               </div>
+            </div>
+               <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-border/60 pt-4">
                   <StatChip label="Members" value={peopleCount} hint="Owner + accepted members" />
                   <StatChip label="Invitations" value={invitations.length} hint="Pending or declined" />
                   <StatChip label="Children" value={childrenCount} hint="Linked children" />
                </div>
-            </div>
          </div>
 
          {error && (
@@ -148,7 +152,7 @@ export default function FamilyDetailPage() {
                   {family.owner ? (
                      <article className="family-person-row">
                         <span className="family-person-avatar">
-                           <UserRound size={17} />
+                           <ChatAvatarWrapper profile_image={family.owner.profile_image} contactName={family.owner.name} size={36} />
                         </span>
                         <div className="family-person-identity">
                            <strong>{family.owner.name || 'Unnamed owner'}</strong>
@@ -165,7 +169,7 @@ export default function FamilyDetailPage() {
                   {acceptedMembers.map((member: any) => (
                      <article className="family-person-row" key={member.id}>
                         <span className="family-person-avatar">
-                           <UsersRound size={17} />
+                           <ChatAvatarWrapper profile_image={member.user?.profile_image} contactName={member.user?.name} size={36} />
                         </span>
                         <div className="family-person-identity">
                            <strong>{member.user?.name ?? 'Unnamed member'}</strong>
@@ -220,7 +224,7 @@ export default function FamilyDetailPage() {
                         className="family-person-row family-child-link"
                      >
                         <span className="family-person-avatar child">
-                           <Baby size={17} />
+                           <ChatAvatarWrapper photo={child.photo} profile_image={child.profile_image} contactName={child.name} size={36} />
                         </span>
                         <div className="family-person-identity">
                            <strong>{child.name || 'Unnamed child'}</strong>

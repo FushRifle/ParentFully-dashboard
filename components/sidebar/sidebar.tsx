@@ -49,7 +49,7 @@ const navSections = [
       title: 'Revenue & Growth',
       items: [
          { title: 'Subscriptions', href: '/subscriptions', icon: CircleDollarSign },
-         { title: 'Rewards', href: '/rewards', icon: Gift },
+         // { title: 'Rewards', href: '/rewards', icon: Gift },
          { title: 'Referrals', href: '/referrals', icon: UsersRound },
          { title: 'Affiliates', href: '/affiliates', icon: Handshake },
       ],
