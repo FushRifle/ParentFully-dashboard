@@ -110,7 +110,7 @@ export const SidebarWrapper = () => {
 
          <div
             className={`z-[202] flex h-full flex-col bg-background transition-[width,transform] duration-100 ease-out ${mobileOpen ? 'fixed inset-y-0 left-0 w-60 translate-x-0 border-r shadow-md' : 'hidden md:relative md:flex md:translate-x-0'
-               } ${collapsed ? 'md:w-[4.75rem]' : 'md:w-60'}`}
+               } ${collapsed ? 'md:w-[4.75rem]' : 'md:w-[212px]'}`}
          >
             {/* Header */}
             <Sidebar.Header className={`border-b px-3 ${collapsed ? 'py-3.5' : 'py-3.5 pl-[18px]'}`}>
@@ -131,7 +131,7 @@ export const SidebarWrapper = () => {
                      aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                      title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                      onClick={setCollapsed}
-                     className={`flex items-center justify-center rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground ${collapsed ? 'mx-auto' : 'mr-9'}`}
+                     className={`flex items-center justify-center rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground ${collapsed ? 'mx-auto' : 'ml-auto'}`}
                   >
                      <Menu size={18} />
                   </button>

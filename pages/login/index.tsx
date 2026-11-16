@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -136,7 +137,7 @@ const LoginPage = () => {
                            />
                            <span>Remember email</span>
                         </label>
-                        <span className="login-access-note">Admin access only</span>
+                        <Link href="/login/forgot-password" className="text-sm font-medium text-primary hover:underline">Forgot password?</Link>
                      </div>
 
                      <FieldError className="mt-4 justify-center text-center">{error}</FieldError>

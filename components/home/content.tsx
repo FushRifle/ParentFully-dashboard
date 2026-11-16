@@ -20,6 +20,8 @@ import { OverviewStats } from './overview-stats';
 import { useUserStats } from '../../hooks/user/useUserStats';
 
 type OverviewSession = {
+   device_model?: string | null;
+   app_version?: string | null;
    user?: { name?: string; profile_image?: string | null };
    user_profile_image?: string | null;
    profile_image?: string | null;
@@ -212,6 +214,8 @@ export const Content = () => {
                            <tr>
                               <th>User</th>
                               <th>Platform</th>
+                              <th>Device</th>
+                              <th>Version</th>
                               <th>Last screen</th>
                               <th>Duration</th>
                               <th>Opened</th>
@@ -235,6 +239,8 @@ export const Content = () => {
                                  <td>
                                     <span>{session.platform || '—'}</span>
                                  </td>
+                                 <td>{session.device_model || '—'}</td>
+                                 <td>{session.app_version || '—'}</td>
                                  <td>{formatScreenName(session.last_screen)}</td>
                                  <td>{formatDuration(session.duration_seconds)}</td>
                                  <td>{formatSessionDate(session.opened_at)}</td>

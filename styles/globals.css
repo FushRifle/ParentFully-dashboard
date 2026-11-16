@@ -2313,7 +2313,7 @@ select:not([multiple]) {
 }
 
 .overview-operations-grid {
-   grid-template-columns: minmax(330px, 0.78fr) minmax(0, 1.22fr);
+   grid-template-columns: minmax(190px, 0.28fr) minmax(0, 1fr);
 }
 
 .overview-quick-grid {
@@ -2325,12 +2325,12 @@ select:not([multiple]) {
 .overview-quick-card {
    position: relative;
    display: block;
-   min-height: 128px;
+   min-height: 110px;
    overflow: hidden;
    border: 1px solid rgba(127, 127, 148, 0.14);
    border-radius: 1rem;
    background: rgba(255, 255, 255, 0.035);
-   padding: 1rem 7.5rem 1rem 1rem;
+   padding: 0.8rem 3.5rem 0.8rem 0.8rem;
    color: inherit;
    text-decoration: none;
    transition: border-color 0.16s ease, transform 0.16s ease,
@@ -2385,8 +2385,8 @@ select:not([multiple]) {
    position: absolute;
    right: 0.5rem;
    bottom: -0.65rem;
-   width: 108px;
-   height: 108px;
+   width: 65px;
+   height: 65px;
    opacity: 0.72;
    pointer-events: none;
 }
@@ -2400,19 +2400,20 @@ select:not([multiple]) {
 }
 
 .overview-session-table-wrap {
-   overflow-x: auto;
-   padding: 0.25rem 0.8rem 0.85rem;
+   padding: 0.25rem 0.5rem 0.85rem;
 }
 
 .overview-session-table {
    width: 100%;
-   min-width: 610px;
+   min-width: 0;
+   table-layout: fixed;
    border-collapse: collapse;
    text-align: left;
 }
 
 .overview-session-table th {
-   padding: 0.7rem 0.65rem;
+   padding: 0.65rem 0.35rem;
+   overflow-wrap: anywhere;
    color: var(--pf-text-muted);
    font-size: 0.62rem;
    font-weight: 650;
@@ -2420,10 +2421,34 @@ select:not([multiple]) {
    text-transform: uppercase;
 }
 
+.overview-session-table th:first-child {
+   width: 25%;
+}
+
+.overview-session-table td:first-child > div {
+   gap: 0.4rem;
+}
+
+.overview-session-table td:first-child > div > div {
+   min-width: 0;
+}
+
+@media (max-width: 600px) {
+   .overview-session-table td:first-child > div {
+      flex-wrap: wrap;
+   }
+   .overview-session-table th,
+   .overview-session-table td {
+      padding-inline: 0.2rem;
+      font-size: 10px;
+   }
+}
+
 .overview-session-table td {
    border-top: 1px solid rgba(127, 127, 148, 0.12);
-   padding: 0.78rem 0.65rem;
-   font-size: 0.72rem;
+   padding: 0.7rem 0.35rem;
+   font-size: 0.68rem;
+   overflow-wrap: anywhere;
    vertical-align: middle;
 }
 
@@ -2433,21 +2458,21 @@ select:not([multiple]) {
 }
 
 .overview-session-table td strong {
-   max-width: 150px;
+   max-width: 100%;
    overflow: hidden;
    font-size: 0.75rem;
    text-overflow: ellipsis;
-   white-space: nowrap;
+   white-space: normal;
 }
 
 .overview-session-table td small {
-   max-width: 165px;
+   max-width: 100%;
    overflow: hidden;
    margin-top: 0.12rem;
    color: var(--pf-text-muted);
    font-size: 0.63rem;
    text-overflow: ellipsis;
-   white-space: nowrap;
+   white-space: normal;
 }
 
 .overview-session-table td>span {
@@ -2765,6 +2790,32 @@ select:not([multiple]) {
    margin-bottom: 1rem;
 }
 
+.analytics-combined-charts {
+   grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
+   align-items: stretch;
+   gap: 1rem;
+}
+
+.analytics-combined-charts > .analytics-panel {
+   display: flex;
+   flex-direction: column;
+}
+
+.analytics-platform-chart {
+   min-width: 0;
+}
+
+.analytics-platform-chart .analytics-breakdown {
+   margin-top: auto;
+   gap: 0.4rem;
+}
+
+@media (max-width: 900px) {
+   .analytics-combined-charts {
+      grid-template-columns: minmax(0, 1fr);
+   }
+}
+
 .analytics-panel {
    min-width: 0;
    padding: 1rem;
@@ -2801,20 +2852,20 @@ select:not([multiple]) {
 
 .analytics-chart {
    display: flex;
-   height: 230px;
-   min-width: 420px;
-   padding-top: 1.3rem;
-   gap: clamp(4px, 0.8vw, 10px);
+   height: 180px;
+   width: 100%;
+   min-width: 0;
+   padding-top: 0.5rem;
+   gap: clamp(1px, 0.35vw, 6px);
    align-items: flex-end;
-   overflow-x: auto;
 }
 
 .analytics-bar-column {
    display: grid;
-   min-width: 14px;
+   min-width: 0;
    height: 100%;
-   flex: 1;
-   grid-template-rows: 18px 1fr 22px;
+   flex: 1 1 0;
+   grid-template-rows: 16px minmax(0, 1fr) 18px;
    gap: 0.35rem;
    align-items: end;
    text-align: center;
@@ -2849,6 +2900,20 @@ select:not([multiple]) {
    color: rgba(255, 255, 255, 0.52);
    font-size: 0.56rem;
    white-space: nowrap;
+}
+
+.analytics-bar-column > span {
+   overflow: hidden;
+}
+
+@media (max-width: 640px) {
+   .analytics-chart {
+      height: 150px;
+   }
+
+   .analytics-bar-column > small {
+      font-size: 8px;
+   }
 }
 
 .analytics-breakdown {
@@ -3667,17 +3732,75 @@ select:not([multiple]) {
    .overview-card-grid {
       display: flex;
       flex-direction: row;
-      flex-wrap: nowrap;
-      gap: 0.75rem;
-      overflow-x: auto;
-      padding-bottom: 0.5rem;
-      scroll-snap-type: x proximity;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      margin-bottom: 0.85rem;
    }
 
    .overview-card-grid > * {
-      flex: 0 0 220px;
+      flex: 0 0 calc((100% - 0.65rem) / 2);
       min-width: 0;
-      scroll-snap-align: start;
+      max-width: calc((100% - 0.65rem) / 2);
+   }
+
+   .overview-card {
+      min-height: 106px;
+      padding: 0.75rem;
+      gap: 0.25rem;
+      border-radius: 14px;
+   }
+
+   .overview-card-top {
+      gap: 0.4rem;
+      min-width: 0;
+   }
+
+   .overview-card-icon {
+      width: 25px;
+      height: 25px;
+      flex-basis: 25px;
+      border-radius: 8px;
+   }
+
+   .overview-card-icon svg {
+      width: 14px;
+      height: 14px;
+   }
+
+   .overview-card-top small {
+      font-size: 11px;
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+   }
+
+   .overview-card > strong {
+      font-size: 1.4rem;
+      margin: 0.4rem 0 0.2rem;
+      overflow-wrap: anywhere;
+   }
+
+   .overview-card p {
+      font-size: 10px;
+      line-height: 1.4;
+   }
+
+   .overview-card .overview-card-illustration {
+      min-width: 0;
+      width: 40%;
+      max-width: 75px;
+      height: 70px;
+      opacity: 0.28;
+   }
+}
+
+.device-mockup {
+   transition: translate 220ms ease, box-shadow 220ms ease;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+   .device-showcase-card:hover .device-mockup {
+      translate: 0 -8px;
+      box-shadow: 0 20px 35px rgb(0 0 0 / 18%);
    }
 }
 

@@ -1,6 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import ChatAvatarWrapper from '@/components/Avatar/ChatAvatarWrapper';
-import { Activity, BarChart3, Clock3, Globe2, MonitorSmartphone, Route, Users } from 'lucide-react';
+import {
+   Activity,
+   BarChart3,
+   Clock3,
+   Globe2,
+   MonitorSmartphone,
+   Route,
+   Users,
+} from 'lucide-react';
 import {
    Table,
    TableBody,
@@ -14,6 +22,22 @@ import { usePageSearch } from '@/lib/context/searchContext';
 import { OverviewCard, OverviewCardGrid } from '@/components/shared/overview-card';
 import { TableExport } from '@/components/shared/table-export';
 import { AppLoadingState } from '@/components/shared/app-loading-state';
+import dynamic from 'next/dynamic';
+import { DeviceShowcase } from '@/components/analytics/device-showcase';
+import { CountryMap } from '@/components/analytics/country-map';
+
+const BarChartComponent = dynamic(
+   () => import('@/components/charts/bar-chart').then((module) => module.BarChartComponent),
+   { ssr: false },
+);
+const LineChartComponent = dynamic(
+   () => import('@/components/charts/line-chart').then((module) => module.LineChartComponent),
+   { ssr: false },
+);
+const PieChartComponent = dynamic(
+   () => import('@/components/charts/pie-chart').then((module) => module.PieChartComponent),
+   { ssr: false },
+);
 
 type ActivityData = {
    total_sessions: number;
@@ -61,16 +85,31 @@ export default function AnalyticsPage() {
    const [loading, setLoading] = useState(true);
    const [error, setError] = useState<string | null>(null);
    const [sessionPage, setSessionPage] = useState(1);
-   const [sessionMeta, setSessionMeta] = useState({ current_page: 1, last_page: 1, total: 0 });
+   const [sessionMeta, setSessionMeta] = useState({
+      current_page: 1,
+      last_page: 1,
+      total: 0,
+   });
 
    const load = useCallback(async () => {
       setLoading(true);
       setError(null);
       try {
          const [activityResponse, demographicsResponse, sessionsResponse] = await Promise.all([
-            api.get('/v1/admin/analytics/activity', { params: { period, ...(platform !== 'all' ? { platform } : {}) } }),
-            api.get('/v1/admin/analytics/demographics', { params: { period, ...(platform !== 'all' ? { platform } : {}) } }),
-            api.get('/v1/admin/analytics/sessions', { params: { period, page: sessionPage, per_page: 20, ...(platform !== 'all' ? { platform } : {}) } }),
+            api.get('/v1/admin/analytics/activity', {
+               params: { period, ...(platform !== 'all' ? { platform } : {}) },
+            }),
+            api.get('/v1/admin/analytics/demographics', {
+               params: { period, ...(platform !== 'all' ? { platform } : {}) },
+            }),
+            api.get('/v1/admin/analytics/sessions', {
+               params: {
+                  period,
+                  page: sessionPage,
+                  per_page: 20,
+                  ...(platform !== 'all' ? { platform } : {}),
+               },
+            }),
          ]);
          setActivity(activityResponse.data.data);
          setDemographics(demographicsResponse.data.data);
@@ -81,7 +120,9 @@ export default function AnalyticsPage() {
             total: sessionsResponse.data.data?.total ?? 0,
          });
       } catch (err: any) {
-         setError(err?.response?.data?.message ?? err?.message ?? 'Unable to load analytics.');
+         setError(
+            err?.response?.data?.message ?? err?.message ?? 'Unable to load analytics.',
+         );
       } finally {
          setLoading(false);
       }
@@ -95,18 +136,63 @@ export default function AnalyticsPage() {
       setSessionPage(1);
    }, [period, platform]);
 
-   const maxDailyOpens = Math.max(...(activity?.daily_app_opens ?? []).map((item) => item.count), 1);
-   const maxScreenViews = Math.max(...(activity?.top_screens ?? []).map((item) => item.count), 1);
-   const maxCountryUsers = Math.max(...(demographics?.top_countries ?? []).map((item) => item.count), 1);
+   const maxDailyOpens = Math.max(
+      ...(activity?.daily_app_opens ?? []).map((item) => item.count),
+      1,
+   );
+   const maxScreenViews = Math.max(
+      ...(activity?.top_screens ?? []).map((item) => item.count),
+      1,
+   );
+   const maxCountryUsers = Math.max(
+      ...(demographics?.top_countries ?? []).map((item) => item.count),
+      1,
+   );
 
    const metrics = useMemo(
       () => [
-         { label: 'Total sessions', value: activity?.total_sessions, detail: 'Recorded app visits', icon: Activity, color: '#8b83ff' },
-         { label: 'Unique users', value: activity?.unique_users, detail: 'People using the app', icon: Users, color: '#10b981' },
-         { label: 'Average session', value: formatDuration(activity?.avg_duration_seconds), detail: 'Time spent per visit', icon: Clock3, color: '#f97316' },
-         { label: 'Onboarding', value: demographics ? `${demographics.onboarding_rate}%` : undefined, detail: 'Completion rate', icon: Route, color: '#3b82f6' },
-         { label: 'Countries', value: demographics?.country_count, detail: 'Customer locations', icon: Globe2, color: '#ec4899' },
-         { label: 'Top platform', value: activity?.top_platform ?? '—', detail: 'Most-used platform', icon: MonitorSmartphone, color: '#14b8a6' },
+         {
+            label: 'Total sessions',
+            value: activity?.total_sessions,
+            detail: 'Recorded app visits',
+            icon: Activity,
+            color: '#8b83ff',
+         },
+         {
+            label: 'Unique users',
+            value: activity?.unique_users,
+            detail: 'People using the app',
+            icon: Users,
+            color: '#10b981',
+         },
+         {
+            label: 'Average session',
+            value: formatDuration(activity?.avg_duration_seconds),
+            detail: 'Time spent per visit',
+            icon: Clock3,
+            color: '#f97316',
+         },
+         {
+            label: 'Onboarding',
+            value: demographics ? `${demographics.onboarding_rate}%` : undefined,
+            detail: 'Completion rate',
+            icon: Route,
+            color: '#3b82f6',
+         },
+         {
+            label: 'Countries',
+            value: demographics?.country_count,
+            detail: 'Customer locations',
+            icon: Globe2,
+            color: '#ec4899',
+         },
+         {
+            label: 'Top platform',
+            value: activity?.top_platform ?? '—',
+            detail: 'Most-used platform',
+            icon: MonitorSmartphone,
+            color: '#14b8a6',
+         },
       ],
       [activity, demographics],
    );
@@ -116,9 +202,14 @@ export default function AnalyticsPage() {
       return sessions.filter(
          (session) =>
             !query ||
-            [session.user_name, session.user_email, session.platform, session.device_model, session.app_version, formatScreenName(session.last_screen)].some(
-               (value) => String(value ?? '').toLowerCase().includes(query),
-            ),
+            [
+               session.user_name,
+               session.user_email,
+               session.platform,
+               session.device_model,
+               session.app_version,
+               formatScreenName(session.last_screen),
+            ].some((value) => String(value ?? '').toLowerCase().includes(query)),
       );
    }, [search, sessions]);
 
@@ -127,7 +218,9 @@ export default function AnalyticsPage() {
          <div className="glass-panel glass-hero">
             <div className="flex flex-wrap items-center justify-between gap-5">
                <div className="flex items-center gap-4">
-                  <span className="analytics-hero-icon"><BarChart3 size={20} /></span>
+                  <span className="analytics-hero-icon">
+                     <BarChart3 size={20} />
+                  </span>
                   <div>
                      <p className="section-kicker">Product intelligence</p>
                      <h2 className="m-0 mt-1 text-[1.4rem] font-semibold">Analytics</h2>
@@ -170,7 +263,11 @@ export default function AnalyticsPage() {
                <OverviewCard
                   key={metric.label}
                   label={metric.label}
-                  value={typeof metric.value === 'number' ? metric.value.toLocaleString() : metric.value ?? '—'}
+                  value={
+                     typeof metric.value === 'number'
+                        ? metric.value.toLocaleString()
+                        : metric.value ?? '—'
+                  }
                   description={metric.detail}
                   icon={metric.icon}
                   color={metric.color}
@@ -179,68 +276,68 @@ export default function AnalyticsPage() {
             ))}
          </OverviewCardGrid>
 
-         <div className="analytics-primary-grid">
-            <section className="analytics-panel analytics-trend glass-panel">
+         <section aria-label="App opens" className="mb-5 w-full">
+            <div className="analytics-panel analytics-trend glass-panel">
                <PanelTitle
                   icon={<Activity size={17} />}
                   title="App opens"
-                  subtitle={`Daily activity · ${periods.find((item) => item.value === period)?.label}`}
+                  subtitle={`Daily activity · ${periods.find((item) => item.value === period)?.label
+                     }`}
                />
                {loading ? (
                   <PanelLoading />
                ) : activity?.daily_app_opens?.length ? (
-                  <div className="analytics-chart" aria-label="Daily app opens chart">
-                     {activity.daily_app_opens.map((item) => (
-                        <div
-                           className="analytics-bar-column"
-                           key={item.date}
-                           title={`${new Date(item.date).toLocaleDateString()}: ${item.count} opens`}
-                        >
-                           <span>{item.count}</span>
-                           <i style={{ height: `${Math.max((item.count / maxDailyOpens) * 100, 4)}%` }} />
-                           <small>{new Date(item.date).toLocaleDateString([], { month: 'short', day: 'numeric' })}</small>
-                        </div>
-                     ))}
-                  </div>
+                  <BarChartComponent embedded height={300} data={activity.daily_app_opens.map((item) => ({ label: new Date(item.date).toLocaleDateString([], { month: 'short', day: 'numeric' }), value: item.count, color: '#8b83ff' }))} />
                ) : (
                   <Empty text="No app-open activity recorded for this period." />
                )}
-            </section>
+            </div>
 
-            <section className="analytics-panel glass-panel">
-               <PanelTitle
-                  icon={<MonitorSmartphone size={17} />}
-                  title="Platform mix"
-                  subtitle="Sessions by operating system"
-               />
-               {loading ? (
-                  <PanelLoading />
-               ) : activity?.platform_breakdown?.length ? (
-                  <div className="analytics-breakdown">
-                     {activity.platform_breakdown.map((item) => (
-                        <div key={item.platform}>
-                           <div>
-                              <strong>{item.platform || 'Unknown'}</strong>
-                              <span>{item.count.toLocaleString()} · {item.percentage}%</span>
-                           </div>
-                           <i><b style={{ width: `${item.percentage}%` }} /></i>
-                        </div>
-                     ))}
-                  </div>
-               ) : (
-                  <Empty text="No platform data recorded." />
-               )}
-            </section>
-         </div>
+         </section>
+
+         {!loading && activity?.platform_breakdown?.length ? <DeviceShowcase platforms={activity.platform_breakdown} /> : null}
+
+         {/**
+         <section aria-label="Activity charts" className="mb-5 min-w-0">
+            {loading ? (
+               <AppLoadingState message="Loading charts…" />
+            ) : (
+               <div className="min-w-0">
+                  {activity?.top_screens?.length ? (
+                     <BarChartComponent
+                        title="Screen usage"
+                        height={240}
+                        data={activity.top_screens.slice(0, 7).map((item, index) => ({
+                           label: formatScreenName(item.screen),
+                           value: item.count,
+                           color: ['#f28c18', '#10b981', '#3b82f6', '#8b5cf6'][index % 4],
+                        }))}
+                     />
+                  ) : (
+                     <div className="glass-panel p-6 text-sm text-muted-foreground">
+                        No screen usage to chart.
+                     </div>
+                  )}
+               </div>
+            )}
+         </section>
+          */}
 
          <div className="analytics-secondary-grid">
             <section className="analytics-panel glass-panel">
-               <PanelTitle icon={<Route size={17} />} title="Top screens" subtitle="Most visited areas" />
+               <PanelTitle
+                  icon={<Route size={17} />}
+                  title="Top screens"
+                  subtitle="Most visited areas"
+               />
                {loading ? (
                   <PanelLoading />
                ) : activity?.top_screens?.length ? (
                   <RankedList
-                     items={activity.top_screens.map((item) => ({ label: formatScreenName(item.screen), value: item.count }))}
+                     items={activity.top_screens.map((item) => ({
+                        label: formatScreenName(item.screen),
+                        value: item.count,
+                     }))}
                      maximum={maxScreenViews}
                      suffix="views"
                   />
@@ -258,11 +355,7 @@ export default function AnalyticsPage() {
                {loading ? (
                   <PanelLoading />
                ) : demographics?.top_countries?.length ? (
-                  <RankedList
-                     items={demographics.top_countries.map((item) => ({ label: item.country || 'Unknown', value: item.count }))}
-                     maximum={maxCountryUsers}
-                     suffix="users"
-                  />
+                  <CountryMap countries={demographics.top_countries} />
                ) : (
                   <Empty text="No country data recorded." />
                )}
@@ -297,8 +390,16 @@ export default function AnalyticsPage() {
                         { key: 'platform', label: 'Platform' },
                         { key: 'device_model', label: 'Device' },
                         { key: 'app_version', label: 'Version' },
-                        { key: 'last_screen', label: 'Last screen', value: (session) => formatScreenName(session.last_screen) },
-                        { key: 'duration_seconds', label: 'Duration', value: (session) => formatDuration(session.duration_seconds) },
+                        {
+                           key: 'last_screen',
+                           label: 'Last screen',
+                           value: (session) => formatScreenName(session.last_screen),
+                        },
+                        {
+                           key: 'duration_seconds',
+                           label: 'Duration',
+                           value: (session) => formatDuration(session.duration_seconds),
+                        },
                         { key: 'opened_at', label: 'Opened' },
                      ]}
                   />
@@ -327,20 +428,38 @@ export default function AnalyticsPage() {
                               <TableRow key={session.id}>
                                  <TableCell>
                                     <div className="flex items-center gap-3">
-                                    <ChatAvatarWrapper profile_image={session.user?.profile_image ?? session.user_profile_image ?? session.profile_image} contactName={session.user_name ?? session.user?.name} size={36} />
-                                    <div><span className="block text-sm font-semibold">{session.user_name ?? 'Unknown'}</span>
-                                    <span className="block text-xs text-muted-foreground">{session.user_email ?? '—'}</span>
-                                    </div></div>
+                                       <ChatAvatarWrapper
+                                          profile_image={
+                                             session.user?.profile_image ??
+                                             session.user_profile_image ??
+                                             session.profile_image
+                                          }
+                                          contactName={session.user_name ?? session.user?.name}
+                                          size={36}
+                                       />
+                                       <div>
+                                          <span className="block text-sm font-semibold">
+                                             {session.user_name ?? 'Unknown'}
+                                          </span>
+                                          <span className="block text-xs text-muted-foreground">
+                                             {session.user_email ?? '—'}
+                                          </span>
+                                       </div>
+                                    </div>
                                  </TableCell>
                                  <TableCell>
-                                    <span className="analytics-platform-pill">{session.platform ?? '—'}</span>
+                                    <span className="analytics-platform-pill">
+                                       {session.platform ?? '—'}
+                                    </span>
                                  </TableCell>
                                  <TableCell>{session.device_model ?? '—'}</TableCell>
                                  <TableCell>{session.app_version ?? '—'}</TableCell>
                                  <TableCell>{formatScreenName(session.last_screen)}</TableCell>
                                  <TableCell>{formatDuration(session.duration_seconds)}</TableCell>
                                  <TableCell>
-                                    {session.opened_at ? new Date(session.opened_at).toLocaleString() : '—'}
+                                    {session.opened_at
+                                       ? new Date(session.opened_at).toLocaleString()
+                                       : '—'}
                                  </TableCell>
                               </TableRow>
                            ))}
@@ -357,7 +476,9 @@ export default function AnalyticsPage() {
                         >
                            Previous
                         </button>
-                        <span>Page {sessionMeta.current_page} of {sessionMeta.last_page}</span>
+                        <span>
+                           Page {sessionMeta.current_page} of {sessionMeta.last_page}
+                        </span>
                         <button
                            disabled={sessionPage >= sessionMeta.last_page || loading}
                            onClick={() => setSessionPage((value) => value + 1)}
@@ -369,14 +490,28 @@ export default function AnalyticsPage() {
                   )}
                </>
             ) : (
-               <Empty text={search ? 'No sessions match this search.' : 'No sessions recorded for these filters.'} />
+               <Empty
+                  text={
+                     search
+                        ? 'No sessions match this search.'
+                        : 'No sessions recorded for these filters.'
+                  }
+               />
             )}
          </section>
       </div>
    );
 }
 
-const PanelTitle = ({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle: string }) => (
+const PanelTitle = ({
+   icon,
+   title,
+   subtitle,
+}: {
+   icon: React.ReactNode;
+   title: string;
+   subtitle: string;
+}) => (
    <header className="analytics-panel-title">
       <span>{icon}</span>
       <div>
@@ -386,7 +521,9 @@ const PanelTitle = ({ icon, title, subtitle }: { icon: React.ReactNode; title: s
    </header>
 );
 
-const PanelLoading = () => <AppLoadingState message="Loading analytics…" minHeight={150} />;
+const PanelLoading = () => (
+   <AppLoadingState message="Loading analytics…" minHeight={150} />
+);
 
 const Empty = ({ text }: { text: string }) => (
    <div className="analytics-empty">
@@ -411,9 +548,17 @@ const RankedList = ({
             <section>
                <div>
                   <strong>{item.label}</strong>
-                  <small>{item.value.toLocaleString()} {suffix}</small>
+                  <small>
+                     {item.value.toLocaleString()} {suffix}
+                  </small>
                </div>
-               <i><b style={{ width: `${Math.max((item.value / maximum) * 100, 4)}%` }} /></i>
+               <i>
+                  <b
+                     style={{
+                        width: `${Math.max((item.value / maximum) * 100, 4)}%`,
+                     }}
+                  />
+               </i>
             </section>
          </div>
       ))}

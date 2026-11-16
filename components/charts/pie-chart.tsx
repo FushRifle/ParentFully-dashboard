@@ -8,10 +8,11 @@ interface Props {
      data: PieChartData[];
      size?: number;
      title?: string;
+     embedded?: boolean;
 }
 
-export const PieChartComponent: React.FC<Props> = ({ data, size = 250, title }) => {
-     const total = data.reduce((sum, item) => sum + item.value, 0);
+export const PieChartComponent: React.FC<Props> = ({ data, size = 250, title, embedded = false }) => {
+     const chartData = data.map((item, index) => ({ ...item, value: Number(item.value) || 0, color: item.color || ['#f28c18', '#10b981', '#3b82f6'][index % 3] }));
 
      const chartConfig = data.reduce((acc, item, index) => {
           acc[item.label] = {
@@ -21,32 +22,35 @@ export const PieChartComponent: React.FC<Props> = ({ data, size = 250, title }) 
           return acc;
      }, {} as ChartConfig);
 
+     const Wrapper = embedded ? 'div' : Card;
      return (
-          <Card>
+          <Wrapper className="w-full min-w-0">
                {title && (
                     <CardHeader>
                          <h4 className="text-lg font-semibold">{title}</h4>
                     </CardHeader>
                )}
-               <CardContent className="flex justify-center">
-                    <ChartContainer config={chartConfig} className="mx-auto aspect-square" style={{ maxHeight: size }}>
+               <div className={embedded ? 'min-w-0' : 'min-w-0 px-6 pb-6'}>
+                    <ChartContainer config={chartConfig} className="mx-auto w-full aspect-auto" style={{ height: size, minHeight: size }}>
                          <RePieChart>
                               <ChartTooltip content={<ChartTooltipContent nameKey="label" hideLabel />} />
                               <Pie
-                                   data={data}
+                                   data={chartData}
                                    dataKey="value"
                                    nameKey="label"
-                                   innerRadius={size * 0.3}
-                                   outerRadius={size * 0.4}
+                                   cx="50%"
+                                   cy="50%"
+                                   innerRadius="55%"
+                                   outerRadius="80%"
                                    strokeWidth={2}
                               >
-                                   {data.map((entry, index) => (
+                                   {chartData.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={entry.color} />
                                    ))}
                               </Pie>
                          </RePieChart>
                     </ChartContainer>
-               </CardContent>
-          </Card>
+               </div>
+          </Wrapper>
      );
 };
