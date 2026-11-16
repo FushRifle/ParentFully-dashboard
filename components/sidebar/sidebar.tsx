@@ -109,7 +109,7 @@ export const SidebarWrapper = () => {
          )}
 
          <div
-            className={`flex h-full flex-col bg-background transition-[width,transform] duration-100 ease-out ${mobileOpen ? 'fixed inset-y-0 left-0 w-60 translate-x-0 border-r shadow-md' : 'hidden md:flex md:translate-x-0'
+            className={`z-[202] flex h-full flex-col bg-background transition-[width,transform] duration-100 ease-out ${mobileOpen ? 'fixed inset-y-0 left-0 w-60 translate-x-0 border-r shadow-md' : 'hidden md:relative md:flex md:translate-x-0'
                } ${collapsed ? 'md:w-[4.75rem]' : 'md:w-60'}`}
          >
             {/* Header */}
