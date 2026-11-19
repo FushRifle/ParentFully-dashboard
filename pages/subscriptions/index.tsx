@@ -110,8 +110,8 @@ const CATEGORY_META: Record<
       color: '#3b82f6',
    },
    inactive: {
-      label: 'Free Users',
-      description: 'Free, expired or cancelled',
+      label: 'Inactive',
+      description: 'Expired or cancelled without Premium access',
       icon: UserX,
       color: '#ef4444',
    },
@@ -304,7 +304,7 @@ export default function SubscriptionsPage() {
    }, [load]);
 
    const counts: Record<CategoryKey, number> = {
-      paid: (statistics.data?.paid ?? 0) + (statistics.data?.unverified ?? 0),
+      paid: statistics.data?.paid ?? 0,
       manual: statistics.data?.manual_premium ?? 0,
       trial: statistics.data?.free_trials ?? 0,
       inactive: statistics.data?.inactive ?? 0,
@@ -468,7 +468,7 @@ export default function SubscriptionsPage() {
                   <OverviewCard
                      key={key}
                      label={cardMeta.label}
-                     value={counts[key].toLocaleString()}
+                     value={statistics.isError ? '—' : counts[key].toLocaleString()}
                      description={cardMeta.description}
                      icon={Icon}
                      color={cardMeta.color}
@@ -478,6 +478,8 @@ export default function SubscriptionsPage() {
                   />
                );
             })}
+            <OverviewCard label="Free plan" value={statistics.data?.free_plan?.toLocaleString() ?? '—'} description="Limited free access" icon={CATEGORY_META.inactive.icon} color={CATEGORY_META.inactive.color} loading={statistics.isLoading} />
+            <OverviewCard label="Unverified" value={statistics.data?.unverified?.toLocaleString() ?? '—'} description="Premium source/payment not confirmed" icon={CATEGORY_META.paid.icon} color={CATEGORY_META.paid.color} loading={statistics.isLoading} />
          </OverviewCardGrid>
 
          {error && <div className="feedback-error">{error}</div>}

@@ -140,6 +140,7 @@ export interface AdminFamilyStatistics {
 }
 
 export interface AdminSubscriptionStatistics {
+     free_plan: number;
      paid: number;
      manual_premium: number;
      free_trials: number;

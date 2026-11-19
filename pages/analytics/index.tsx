@@ -1,3 +1,4 @@
+import { ProviderAnalytics } from '@/components/analytics/provider-analytics';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import ChatAvatarWrapper from '@/components/Avatar/ChatAvatarWrapper';
 import {
@@ -215,6 +216,7 @@ export default function AnalyticsPage() {
 
    return (
       <div className="admin-page analytics-page">
+         <ProviderAnalytics />
          <div className="glass-panel glass-hero">
             <div className="flex flex-wrap items-center justify-between gap-5">
                <div className="flex items-center gap-4">
