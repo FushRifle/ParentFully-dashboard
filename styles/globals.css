@@ -3804,6 +3804,62 @@ select:not([multiple]) {
    }
 }
 
+.platform-analytics-hero {
+   padding: 1.5rem;
+}
+
+.platform-provider-toolbar {
+   padding: 1.25rem;
+}
+
+.platform-provider-results table {
+   border-collapse: collapse;
+   min-width: 560px;
+}
+
+.platform-provider-results thead {
+   background: var(--pf-glass-soft);
+}
+
+.platform-provider-results th {
+   padding: 0.85rem 1rem;
+   color: var(--pf-text-subtle);
+   font-size: 10px;
+   font-weight: 700;
+   letter-spacing: 0.06em;
+   text-transform: uppercase;
+}
+
+.platform-provider-results td {
+   padding: 1rem;
+   border-color: var(--pf-border);
+   font-size: 12px;
+   color: var(--pf-text-muted);
+}
+
+.platform-provider-results td:first-child {
+   color: var(--pf-text);
+   font-weight: 600;
+}
+
+.platform-provider-results tbody tr:hover {
+   background: var(--pf-hover);
+}
+
+.platform-provider-results summary {
+   cursor: pointer;
+   color: var(--primary);
+   font-size: 11px;
+}
+
+.platform-provider-results pre {
+   margin-top: 0.75rem;
+   padding: 0.75rem;
+   border: 1px solid var(--pf-border);
+   border-radius: 10px;
+   background: var(--pf-glass-soft);
+}
+
 @theme inline {
    --font-heading: var(--pf-font-family);
    --font-sans: var(--pf-font-family);

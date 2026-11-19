@@ -95,7 +95,7 @@ export default function FamiliesPage() {
                      <p className="section-kicker">Family directory</p>
                      <h2 className="m-0 mt-1 text-[1.4rem] font-semibold">Families</h2>
                      <p className="mt-1 text-sm text-muted-foreground">
-                        Households and children from the live Parentfully API.
+                        Households and Children Records.
                      </p>
                   </div>
                </div>
@@ -105,7 +105,7 @@ export default function FamiliesPage() {
                      label="Families"
                      value={(statistics.data?.families_count ?? meta.total).toLocaleString()}
                      loading={statistics.isLoading && families.isLoading}
-                     description="Family records"
+                     description="Total Family records"
                      icon={Home}
                      color="#10b981"
                   />

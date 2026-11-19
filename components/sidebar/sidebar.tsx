@@ -31,7 +31,7 @@ const navSections = [
       items: [{ title: 'Overview', href: '/overview', icon: Home }],
    },
    {
-      title: 'People',
+      title: 'Users',
       items: [
          { title: 'Admin Users', href: '/admin-users', icon: ShieldCheck },
          { title: 'Families', href: '/families', icon: House },
@@ -57,9 +57,9 @@ const navSections = [
    {
       title: 'Insights',
       items: [
-         { title: 'Feedback', href: '/feedback', icon: MessageSquareText },
+         { title: 'Analytics', href: '/platformanalytics', icon: BarChart3 },
+         { title: 'Feedbacks', href: '/feedback', icon: MessageSquareText },
          { title: 'Support', href: '/support', icon: Headphones },
-         { title: 'Analytics', href: '/analytics', icon: BarChart3 },
          { title: 'FAQs', href: '/faqs', icon: BadgeHelp },
       ],
    },

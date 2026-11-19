@@ -11,6 +11,7 @@ export const pageMeta = {
    '/affiliates': { title: 'Affiliates', subtitle: 'Applications, partners, commissions and payouts' },
    '/feedback': { title: 'Feedback', subtitle: 'User feedback submissions' },
    '/analytics': { title: 'Analytics', subtitle: 'App usage insights' },
+   '/platformanalytics': { title: 'Platform Analytics', subtitle: 'PostHog activity & RevenueCat billing insights' },
    '/faqs': { title: 'FAQs', subtitle: 'Manage frequently asked questions' },
    '/settings': { title: 'Settings', subtitle: 'Platform configuration' },
    '/profile': { title: 'Profile', subtitle: 'Your admin account' },
