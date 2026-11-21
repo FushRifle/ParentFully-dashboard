@@ -5,6 +5,11 @@ export function eventProperties(value: unknown): Record<string, any> {
    return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {};
 }
 
+export function formatEventName(value?: string | null): string {
+   const text = (value || '').replace(/^\$+/, '').replace(/([a-z\d])([A-Z])/g, '$1 $2').replace(/[_\-.:/]+/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+   return text ? text.charAt(0).toUpperCase() + text.slice(1) : 'Unnamed event';
+}
+
 export function accountIdForEvent(event: any): number | null {
    const props = eventProperties(event.properties);
    const person = eventProperties(event.person?.properties);
