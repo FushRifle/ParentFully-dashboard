@@ -93,7 +93,7 @@ const CATEGORY_META: Record<
 > = {
    paid: {
       label: 'Paid',
-      description: 'Active billed subscriptions',
+      description: 'Active premium accounts in the Paid list',
       icon: CreditCard,
       color: '#10b981',
    },
@@ -153,6 +153,12 @@ const isManualGrant = (record: SubscriptionRecord) => {
 
 const getCategory = (record: SubscriptionRecord): CategoryKey => {
    const status = getStatus(record);
+   // Billing status can change while the backend still grants premium access.
+   if (record.effective_subscription?.has_premium_access === true) {
+      if (isManualGrant(record)) return 'manual';
+      if (status === 'trial') return 'trial';
+      return 'paid';
+   }
    if (
       status === 'free' ||
       status === 'cancelled' ||
@@ -162,7 +168,6 @@ const getCategory = (record: SubscriptionRecord): CategoryKey => {
       return 'inactive';
    if (status === 'trial') return 'trial';
    if (isManualGrant(record)) return 'manual';
-   if (record.effective_subscription?.has_premium_access) return 'paid';
    return 'inactive';
 };
 
@@ -263,7 +268,7 @@ export default function SubscriptionsPage() {
       const requestedCategory =
          typeof router.query.category === 'string' ? router.query.category : 'all';
       setCategory(
-         ['paid', 'manual', 'trial', 'inactive'].includes(requestedCategory)
+         ['paid', 'manual', 'trial'].includes(requestedCategory)
             ? (requestedCategory as CategoryKey)
             : 'all',
       );
@@ -277,7 +282,7 @@ export default function SubscriptionsPage() {
             params: { page: 1, per_page: 100 },
          });
          let rows = extractRows(first.data);
-         const lastPage = Number(first.data?.meta?.last_page ?? 1);
+         const lastPage = Number(first.data?.meta?.last_page ?? first.data?.data?.last_page ?? first.data?.last_page ?? 1);
          if (lastPage > 1) {
             const remaining = await Promise.all(
                Array.from({ length: lastPage - 1 }, (_, index) =>
@@ -304,7 +309,7 @@ export default function SubscriptionsPage() {
    }, [load]);
 
    const counts: Record<CategoryKey, number> = {
-      paid: statistics.data?.paid ?? 0,
+      paid: records.filter((record) => getCategory(record) === 'paid').length,
       manual: statistics.data?.manual_premium ?? 0,
       trial: statistics.data?.free_trials ?? 0,
       inactive: statistics.data?.inactive ?? 0,
@@ -461,25 +466,24 @@ export default function SubscriptionsPage() {
          </Box>
 
          <OverviewCardGrid>
-            {(Object.keys(CATEGORY_META) as CategoryKey[]).map((key) => {
+            {(['paid', 'manual', 'trial'] as const).map((key) => {
                const cardMeta = CATEGORY_META[key];
                const Icon = cardMeta.icon;
                return (
                   <OverviewCard
                      key={key}
                      label={cardMeta.label}
-                     value={statistics.isError ? '—' : counts[key].toLocaleString()}
+                     value={(key === 'paid' ? error : statistics.isError) ? '—' : counts[key].toLocaleString()}
                      description={cardMeta.description}
                      icon={Icon}
                      color={cardMeta.color}
                      active={category === key}
-                     loading={statistics.isLoading}
+                     loading={key === 'paid' ? loading : statistics.isLoading}
                      onClick={() => selectCategory(category === key ? 'all' : key)}
                   />
                );
             })}
             <OverviewCard label="Free plan" value={statistics.data?.free_plan?.toLocaleString() ?? '—'} description="Limited free access" icon={CATEGORY_META.inactive.icon} color={CATEGORY_META.inactive.color} loading={statistics.isLoading} />
-            <OverviewCard label="Unverified" value={statistics.data?.unverified?.toLocaleString() ?? '—'} description="Premium source/payment not confirmed" icon={CATEGORY_META.paid.icon} color={CATEGORY_META.paid.color} loading={statistics.isLoading} />
          </OverviewCardGrid>
 
          {error && <div className="feedback-error">{error}</div>}
@@ -498,7 +502,6 @@ export default function SubscriptionsPage() {
                      <option value="paid">Paid</option>
                      <option value="manual">Manual premium</option>
                      <option value="trial">Free trials</option>
-                     <option value="inactive">Inactive</option>
                   </FilterSelect>
                </label>
                <label>
@@ -614,7 +617,7 @@ export default function SubscriptionsPage() {
                               <Table.Cell>
                                  <NextLink href={`/subscriptions/${detailId}`} className="subscription-cell-link">
                                     <div className={`subscription-access ${recordCategory}`}>
-                                       <strong>{CATEGORY_META[recordCategory].label}</strong>
+                                       <strong>{recordCategory === 'inactive' ? 'No premium access' : CATEGORY_META[recordCategory].label}</strong>
                                        <small>{recordStatus.replace('_', ' ')}</small>
                                     </div>
                                  </NextLink>

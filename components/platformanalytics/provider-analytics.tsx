@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { isAxiosError } from 'axios';
 import { api } from '@/lib';
 import { useAuth } from '@/lib/context/authContext';
 import { SegmentedTabs } from '@/components/shared/segmented-tabs';
@@ -60,6 +61,7 @@ export function ProviderAnalytics({ source }: { source: Provider }) {
   const [event, setEvent] = useState('');
   const [chart, setChart] = useState('actives');
   const [environment, setEnvironment] = useState('');
+  const [lastPostHog, setLastPostHog] = useState<{ data: Data; period: string; page: number; event: string; adminId: NonNullable<typeof user>['id'] } | null>(null);
   useEffect(() => {
     const timer = window.setTimeout(() => {
       setPage(1);
@@ -69,7 +71,12 @@ export function ProviderAnalytics({ source }: { source: Provider }) {
   const query = useQuery({
     queryKey: ['admin', user?.id, 'provider-analytics', source, period, page, event, chart, environment],
     enabled: !!user,
-    retry: false,
+    retry: (attempt, error) => {
+      if (source !== 'posthog' || attempt >= 1 || !isAxiosError(error)) return false;
+      const status = error.response?.status;
+      return !status || status >= 500;
+    },
+    retryDelay: 1500,
     staleTime: 60_000,
     queryFn: async ({ signal }): Promise<Data> => {
       const params = {
@@ -90,7 +97,16 @@ export function ProviderAnalytics({ source }: { source: Provider }) {
       };
     },
   });
-  const data = query.data;
+  useEffect(() => {
+    if (source === 'posthog' && user && query.data?.status === 'available') {
+      setLastPostHog({ data: query.data, period, page, event, adminId: user.id });
+    }
+  }, [source, user, query.data, period, page, event]);
+  const httpStatus = isAxiosError(query.error) ? query.error.response?.status : undefined;
+  const canShowPrevious = !query.isError || httpStatus === undefined || httpStatus === 429 || httpStatus >= 500;
+  const previous = source === 'posthog' && canShowPrevious && user && lastPostHog?.adminId === user.id &&
+    (!query.data || query.data.status === 'unavailable' || query.isError) ? lastPostHog : null;
+  const data = previous?.data ?? query.data;
   const rows = source === 'posthog' ? data?.events ?? [] : data?.webhook_events ?? [];
   const hasNext =
     source === 'posthog' ? data?.pagination?.has_more === true : page < (data?.pagination?.last_page ?? 1);
@@ -230,12 +246,12 @@ export function ProviderAnalytics({ source }: { source: Provider }) {
           </span>
         </header>
         <div className="space-y-5 p-4 sm:p-5">
-          {query.isPending ? (
+          {query.isPending && !previous ? (
             <AppLoadingState
               message={`Loading ${source === 'posthog' ? 'PostHog' : 'RevenueCat'} insights…`}
               minHeight={120}
             />
-          ) : query.isError ? (
+          ) : query.isError && !previous ? (
             <div
               role="alert"
               className="flex flex-wrap items-center gap-3 rounded-xl border border-amber-500/25 bg-amber-500/5 p-4"
@@ -262,6 +278,12 @@ export function ProviderAnalytics({ source }: { source: Provider }) {
             </div>
           ) : (
             <>
+              {previous && (
+                <div role="status" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
+                  <span>{query.isFetching ? 'Updating filters.' : httpStatus === 429 ? 'Request limit reached. Wait a minute before retrying.' : 'Couldn’t load the selected filters.'} Showing previous results for {previous.period.slice(0, -1)} days, page {previous.page}{previous.event ? `, ${formatEventName(previous.event)}` : ', all events'}.</span>
+                  {!query.isFetching && <Button variant="outline" size="sm" onClick={() => void query.refetch()}>Try again</Button>}
+                </div>
+              )}
               {status && (
                 <p
                   role="status"
@@ -317,9 +339,9 @@ export function ProviderAnalytics({ source }: { source: Provider }) {
                                   pathname: '/platformanalytics/event',
                                   query: {
                                     source,
-                                    period,
-                                    page,
-                                    event,
+                                    period: previous?.period ?? period,
+                                    page: previous?.page ?? page,
+                                    event: previous?.event ?? event,
                                     chart,
                                     environment,
                                     index,
@@ -359,14 +381,14 @@ export function ProviderAnalytics({ source }: { source: Provider }) {
                     )}
                   </div>
                   <nav aria-label="Provider event pages" className="admin-pagination">
-                    <button disabled={page === 1 || query.isFetching} onClick={() => setPage((p) => p - 1)}>
+                    <button disabled={!!previous || page === 1 || query.isFetching} onClick={() => setPage((p) => p - 1)}>
                       Previous
                     </button>
                     <span className="text-xs">
-                      Page {page}
+                      Page {previous?.page ?? page}
                       {source === 'revenuecat' && ` · ${data?.pagination?.total ?? 0} events`}
                     </span>
-                    <button disabled={!hasNext || query.isFetching} onClick={() => setPage((p) => p + 1)}>
+                    <button disabled={!!previous || !hasNext || query.isFetching} onClick={() => setPage((p) => p + 1)}>
                       Next
                     </button>
                   </nav>
