@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FilterSelect } from "@/components/shared/filter-select";
 import NextLink from 'next/link';
 import ChatAvatarWrapper from '@/components/Avatar/ChatAvatarWrapper';
@@ -244,6 +244,9 @@ const formatPaymentMethod = (value: string | null) => {
 export default function SubscriptionsPage() {
    const router = useRouter();
    const [records, setRecords] = useState<SubscriptionRecord[]>([]);
+   const [listStatistics, setListStatistics] = useState<{
+      paid_subscribers: number; manual_premium: number; free_trial: number; inactive: number; free_plan: number;
+   }>();
    const [loading, setLoading] = useState(true);
    const [error, setError] = useState<string | null>(null);
    const { search: query, clearSearch } = usePageSearch();
@@ -274,12 +277,14 @@ export default function SubscriptionsPage() {
       );
    }, [router.isReady, router.query.category]);
 
+   const loadSequence = useRef(0);
    const load = useCallback(async () => {
+      const sequence = ++loadSequence.current;
       setLoading(true);
       setError(null);
       try {
          const first = await api.get('/v1/admin/subscriptions', {
-            params: { page: 1, per_page: 100 },
+            params: { page: 1, per_page: 100, plan_type: category === 'all' ? undefined : category },
          });
          let rows = extractRows(first.data);
          const lastPage = Number(first.data?.meta?.last_page ?? first.data?.data?.last_page ?? first.data?.last_page ?? 1);
@@ -287,7 +292,7 @@ export default function SubscriptionsPage() {
             const remaining = await Promise.all(
                Array.from({ length: lastPage - 1 }, (_, index) =>
                   api.get('/v1/admin/subscriptions', {
-                     params: { page: index + 2, per_page: 100 },
+                     params: { page: index + 2, per_page: 100, plan_type: category === 'all' ? undefined : category },
                   }),
                ),
             );
@@ -296,23 +301,25 @@ export default function SubscriptionsPage() {
          const uniqueRows = Array.from(
             new Map(rows.map((record) => [String(record.id), record])).values(),
          );
-         setRecords(canonicalizeByBillingOwner(uniqueRows));
+         if (sequence !== loadSequence.current) return;
+         setRecords(first.data?.statistics ? uniqueRows : canonicalizeByBillingOwner(uniqueRows));
+         setListStatistics(first.data?.statistics ?? first.data?.meta?.statistics);
       } catch (err: any) {
-         setError(err?.response?.data?.message ?? 'Unable to load subscriptions.');
+         if (sequence === loadSequence.current) setError(err?.response?.data?.message ?? 'Unable to load subscriptions.');
       } finally {
-         setLoading(false);
+         if (sequence === loadSequence.current) setLoading(false);
       }
-   }, []);
+   }, [category]);
 
    useEffect(() => {
       load();
    }, [load]);
 
    const counts: Record<CategoryKey, number> = {
-      paid: records.filter((record) => getCategory(record) === 'paid').length,
-      manual: statistics.data?.manual_premium ?? 0,
-      trial: statistics.data?.free_trials ?? 0,
-      inactive: statistics.data?.inactive ?? 0,
+      paid: listStatistics?.paid_subscribers ?? statistics.data?.paid ?? 0,
+      manual: listStatistics?.manual_premium ?? statistics.data?.manual_premium ?? 0,
+      trial: listStatistics?.free_trial ?? statistics.data?.free_trials ?? 0,
+      inactive: listStatistics?.inactive ?? statistics.data?.inactive ?? 0,
    };
 
    const filteredRecords = useMemo(() => {
@@ -331,12 +338,12 @@ export default function SubscriptionsPage() {
             .toLowerCase();
          return (
             (!search || searchable.includes(search)) &&
-            (category === 'all' || getCategory(record) === category) &&
+            (category === 'all' || Boolean(listStatistics) || getCategory(record) === category) &&
             (status === 'all' || getStatus(record) === status) &&
             (renewal === 'all' || record.auto_renewal === (renewal === 'on'))
          );
       });
-   }, [records, query, category, status, renewal]);
+   }, [records, query, category, status, renewal, listStatistics]);
 
    const perPage = 20;
    const lastPage = Math.max(1, Math.ceil(filteredRecords.length / perPage));
@@ -473,17 +480,17 @@ export default function SubscriptionsPage() {
                   <OverviewCard
                      key={key}
                      label={cardMeta.label}
-                     value={(key === 'paid' ? error : statistics.isError) ? '—' : counts[key].toLocaleString()}
+                     value={!listStatistics && statistics.isError ? '—' : counts[key].toLocaleString()}
                      description={cardMeta.description}
                      icon={Icon}
                      color={cardMeta.color}
                      active={category === key}
-                     loading={key === 'paid' ? loading : statistics.isLoading}
+                     loading={!listStatistics && statistics.isLoading}
                      onClick={() => selectCategory(category === key ? 'all' : key)}
                   />
                );
             })}
-            <OverviewCard label="Free plan" value={statistics.data?.free_plan?.toLocaleString() ?? '—'} description="Limited free access" icon={CATEGORY_META.inactive.icon} color={CATEGORY_META.inactive.color} loading={statistics.isLoading} />
+            <OverviewCard label="Free plan" value={(listStatistics?.free_plan ?? statistics.data?.free_plan)?.toLocaleString() ?? '—'} description="Limited free access" icon={CATEGORY_META.inactive.icon} color={CATEGORY_META.inactive.color} loading={statistics.isLoading} />
          </OverviewCardGrid>
 
          {error && <div className="feedback-error">{error}</div>}
