@@ -38,7 +38,7 @@ export default function PlatformAnalyticsPage() {
                      href="/analytics"
                      className="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-xs font-semibold hover:bg-muted"
                   >
-                     Internal analytics <ArrowUpRight size={14} />
+                     Internal Analytics <ArrowUpRight size={14} />
                   </Link>
                </div>
             </div>

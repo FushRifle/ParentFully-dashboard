@@ -115,7 +115,7 @@ export const Modal = Object.assign(ModalRoot, {
 });
 
 const TableItemsContext = createContext<any[]>([]);
-const TableRoot = ({ children, css, ...props }: any) => <div className="w-full overflow-x-auto"><table className="w-full caption-bottom text-sm" style={cssToStyle(css)} {...props}>{children}</table></div>;
+const TableRoot = ({ children, css, shadow: _shadow, ...props }: any) => <div className="w-full overflow-x-auto"><table className="w-full caption-bottom text-sm" style={cssToStyle(css)} {...props}>{children}</table></div>;
 const TableHeader = ({ children }: any) => <thead className="border-b">{children}</thead>;
 const TableBody = ({ children, items = [] }: any) => <TableItemsContext.Provider value={items}><tbody>{typeof children === 'function' ? items.map((item: any) => children(item)) : children}</tbody></TableItemsContext.Provider>;
 const TableRow = ({ children, ...props }: any) => <tr className="border-b transition-colors hover:bg-muted/50" {...props}>{children}</tr>;

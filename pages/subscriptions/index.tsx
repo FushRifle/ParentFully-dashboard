@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { formatSubscriptionStatus } from '@/utils/subscriptionStatus';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FilterSelect } from "@/components/shared/filter-select";
 import NextLink from 'next/link';
 import ChatAvatarWrapper from '@/components/Avatar/ChatAvatarWrapper';
@@ -24,7 +25,7 @@ import {
    UserX,
 } from 'lucide-react';
 import { api } from '@/lib';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getSubscriptionStatistics } from '@/services/adminService';
 import type { AdminSubscriptionStatistics, PaginationMeta } from '@/types/api';
 import { Box } from '@/components/styles/box';
@@ -45,6 +46,10 @@ interface SubscriptionRecord {
    id: number | string;
    user: SubscriptionUser | null;
    plan_type: string | null;
+   plan_code?: string | null;
+   gateway?: string | null;
+   expires_at?: string | null;
+   trial_ends_at?: string | null;
    status: string | null;
    amount: number | string | null;
    start_date: string | null;
@@ -64,7 +69,7 @@ interface SubscriptionRecord {
    };
 }
 
-type CategoryKey = 'paid' | 'manual' | 'trial' | 'inactive';
+type CategoryKey = 'paid' | 'manual' | 'trial' | 'free_plan' | 'inactive';
 type StatusKey =
    | 'active'
    | 'trial'
@@ -104,14 +109,20 @@ const CATEGORY_META: Record<
       color: '#8b5cf6',
    },
    trial: {
-      label: 'Free Trials',
-      description: 'Trial access in progress',
+      label: 'Free Trial',
+      description: 'Free Trial access accounts',
       icon: Sparkles,
       color: '#3b82f6',
    },
+   free_plan: {
+      label: 'Free Plan',
+      description: 'Accounts on the standard free plan',
+      icon: UserX,
+      color: '#64748b',
+   },
    inactive: {
       label: 'Inactive',
-      description: 'Expired or cancelled without Premium access',
+      description: 'Cancelled or expired subscriptions',
       icon: UserX,
       color: '#ef4444',
    },
@@ -134,7 +145,7 @@ const getStatus = (record: SubscriptionRecord): StatusKey => {
    if (status.includes('billing') || status.includes('past_due') || status.includes('grace'))
       return 'billing_issue';
    if (status === 'free') return 'free';
-   if (status.includes('cancel') || (!record.effective_subscription && record.cancelled_at))
+   if (status.includes('cancel') || (!status && record.cancelled_at))
       return 'cancelled';
    if (
       status.includes('expire') ||
@@ -145,30 +156,22 @@ const getStatus = (record: SubscriptionRecord): StatusKey => {
    return 'active';
 };
 
-const isManualGrant = (record: SubscriptionRecord) => {
-   const paymentMethod = normalize(record.payment_method);
-   const plan = normalize(record.effective_subscription?.plan_code ?? record.plan_type);
-   return paymentMethod === 'manual_premium_grant' || plan === 'premium_manual_grant';
-};
+const getRecordStatus = (record: SubscriptionRecord): StatusKey => getStatus({
+   ...record,
+   effective_subscription: undefined,
+   end_date: record.expires_at ?? record.end_date ?? record.trial_ends_at ?? null,
+});
 
 const getCategory = (record: SubscriptionRecord): CategoryKey => {
-   const status = getStatus(record);
-   // Billing status can change while the backend still grants premium access.
-   if (record.effective_subscription?.has_premium_access === true) {
-      if (isManualGrant(record)) return 'manual';
-      if (status === 'trial') return 'trial';
-      return 'paid';
-   }
-   if (
-      status === 'free' ||
-      status === 'cancelled' ||
-      status === 'expired' ||
-      status === 'billing_issue'
-   )
-      return 'inactive';
+   const status = getRecordStatus(record);
+   if (status === 'free') return 'free_plan';
    if (status === 'trial') return 'trial';
-   if (isManualGrant(record)) return 'manual';
-   return 'inactive';
+   if (status !== 'active') return 'inactive';
+   const isManual =
+      normalize(record.payment_method) === 'manual_premium_grant' ||
+      normalize(record.gateway) === 'system' ||
+      normalize(record.plan_code ?? record.plan_type) === 'premium_manual_grant';
+   return isManual ? 'manual' : 'paid';
 };
 
 const canonicalizeByBillingOwner = (rows: SubscriptionRecord[]) => {
@@ -243,11 +246,6 @@ const formatPaymentMethod = (value: string | null) => {
 
 export default function SubscriptionsPage() {
    const router = useRouter();
-   const [records, setRecords] = useState<SubscriptionRecord[]>([]);
-   const [listStatistics, setListStatistics] = useState<{
-      paid_subscribers: number; manual_premium: number; free_trial: number; inactive: number; free_plan: number;
-   }>();
-   const [loading, setLoading] = useState(true);
    const [error, setError] = useState<string | null>(null);
    const { search: query, clearSearch } = usePageSearch();
    const [category, setCategory] = useState<'all' | CategoryKey>('all');
@@ -259,7 +257,7 @@ export default function SubscriptionsPage() {
    const [manualEmail, setManualEmail] = useState('');
    const [manualMonths, setManualMonths] = useState('12');
    const [manualReason, setManualReason] = useState('');
-   const [manualSaving, setManualSaving] = useState(false);
+
    const queryClient = useQueryClient();
    const statistics = useQuery<AdminSubscriptionStatistics>({
       queryKey: ['subscription-statistics'],
@@ -271,60 +269,56 @@ export default function SubscriptionsPage() {
       const requestedCategory =
          typeof router.query.category === 'string' ? router.query.category : 'all';
       setCategory(
-         ['paid', 'manual', 'trial'].includes(requestedCategory)
+         Object.prototype.hasOwnProperty.call(CATEGORY_META, requestedCategory)
             ? (requestedCategory as CategoryKey)
             : 'all',
       );
    }, [router.isReady, router.query.category]);
 
-   const loadSequence = useRef(0);
-   const load = useCallback(async () => {
-      const sequence = ++loadSequence.current;
-      setLoading(true);
-      setError(null);
-      try {
-         const first = await api.get('/v1/admin/subscriptions', {
-            params: { page: 1, per_page: 100, plan_type: category === 'all' ? undefined : category },
+   const subscriptions = useQuery({
+      queryKey: ['admin-subscriptions', category],
+      enabled: router.isReady,
+      queryFn: async ({ signal }) => {
+         const fetchPage = (page: number) => api.get('/v1/admin/subscriptions', {
+            params: { page, per_page: 100, plan_type: category === 'all' ? undefined : category },
+            signal,
          });
-         let rows = extractRows(first.data);
+         const first = await fetchPage(1);
          const lastPage = Number(first.data?.meta?.last_page ?? first.data?.data?.last_page ?? first.data?.last_page ?? 1);
-         if (lastPage > 1) {
-            const remaining = await Promise.all(
-               Array.from({ length: lastPage - 1 }, (_, index) =>
-                  api.get('/v1/admin/subscriptions', {
-                     params: { page: index + 2, per_page: 100, plan_type: category === 'all' ? undefined : category },
-                  }),
-               ),
-            );
-            rows = rows.concat(...remaining.map((response) => extractRows(response.data)));
-         }
-         const uniqueRows = Array.from(
-            new Map(rows.map((record) => [String(record.id), record])).values(),
+         const remaining = await Promise.all(
+            Array.from({ length: lastPage - 1 }, (_, index) => fetchPage(index + 2)),
          );
-         if (sequence !== loadSequence.current) return;
-         setRecords(first.data?.statistics ? uniqueRows : canonicalizeByBillingOwner(uniqueRows));
-         setListStatistics(first.data?.statistics ?? first.data?.meta?.statistics);
-      } catch (err: any) {
-         if (sequence === loadSequence.current) setError(err?.response?.data?.message ?? 'Unable to load subscriptions.');
-      } finally {
-         if (sequence === loadSequence.current) setLoading(false);
-      }
-   }, [category]);
-
-   useEffect(() => {
-      load();
-   }, [load]);
+         const rows = [first, ...remaining].flatMap(response => extractRows(response.data));
+         const uniqueRows = Array.from(new Map(rows.map(record => [String(record.id), record])).values());
+         const statistics = first.data?.statistics ?? first.data?.meta?.statistics;
+         return {
+            records: statistics ? uniqueRows : canonicalizeByBillingOwner(uniqueRows),
+            statistics: statistics as {
+               paid_subscribers: number;
+               manual_premium: number;
+               free_trial: number;
+               free_plan: number;
+               inactive: number;
+            } | undefined,
+         };
+      },
+   });
+   const records = subscriptions.data?.records;
+   const listStatistics = subscriptions.data?.statistics;
+   const loading = subscriptions.isPending;
+   const loadError = subscriptions.isError ? 'Unable to load subscriptions.' : null;
 
    const counts: Record<CategoryKey, number> = {
       paid: listStatistics?.paid_subscribers ?? statistics.data?.paid ?? 0,
       manual: listStatistics?.manual_premium ?? statistics.data?.manual_premium ?? 0,
       trial: listStatistics?.free_trial ?? statistics.data?.free_trials ?? 0,
+      free_plan: listStatistics?.free_plan ?? statistics.data?.free_plan ?? 0,
       inactive: listStatistics?.inactive ?? statistics.data?.inactive ?? 0,
    };
 
    const filteredRecords = useMemo(() => {
       const search = query.trim().toLowerCase();
-      return records.filter((record) => {
+      return (records ?? []).filter((record) => {
          const owner = record.subscription_owner ?? record.user;
          const searchable = [
             owner?.name,
@@ -339,7 +333,7 @@ export default function SubscriptionsPage() {
          return (
             (!search || searchable.includes(search)) &&
             (category === 'all' || Boolean(listStatistics) || getCategory(record) === category) &&
-            (status === 'all' || getStatus(record) === status) &&
+            (status === 'all' || getRecordStatus(record) === status) &&
             (renewal === 'all' || record.auto_renewal === (renewal === 'on'))
          );
       });
@@ -347,9 +341,10 @@ export default function SubscriptionsPage() {
 
    const perPage = 20;
    const lastPage = Math.max(1, Math.ceil(filteredRecords.length / perPage));
-   const visibleRecords = filteredRecords.slice((page - 1) * perPage, page * perPage);
+   const currentPage = Math.min(page, lastPage);
+   const visibleRecords = filteredRecords.slice((currentPage - 1) * perPage, currentPage * perPage);
    const meta: PaginationMeta = {
-      current_page: Math.min(page, lastPage),
+      current_page: currentPage,
       per_page: perPage,
       total: filteredRecords.length,
       last_page: lastPage,
@@ -395,6 +390,14 @@ export default function SubscriptionsPage() {
       router.replace({ pathname: '/subscriptions', query: {} }, undefined, { shallow: true });
    };
 
+   const updateSubscriptionMutation = useMutation({
+      mutationFn: ({ id, action }: { id: string | number; action: 'cancel' | 'reactivate' }) =>
+         api.post(`/v1/admin/subscriptions/${id}/${action}`),
+   });
+   const grantManualPremiumMutation = useMutation({
+      mutationFn: (input: { email: string; months: number; reason: string | null }) =>
+         api.post('/v2/admin/subscription-overrides/grant-premium', input),
+   });
    const updateSubscription = async (record: SubscriptionRecord) => {
       const currentStatus = getStatus(record);
       const action = currentStatus === 'cancelled' ? 'reactivate' : 'cancel';
@@ -406,8 +409,11 @@ export default function SubscriptionsPage() {
       setUpdatingId(record.id);
       setError(null);
       try {
-         await api.post(`/v1/admin/subscriptions/${effectiveId}/${action}`);
-         await load();
+         await updateSubscriptionMutation.mutateAsync({ id: effectiveId, action });
+         await Promise.all([
+            queryClient.invalidateQueries({ queryKey: ['admin-subscriptions'] }),
+            queryClient.invalidateQueries({ queryKey: ['subscription-statistics'] }),
+         ]);
       } catch (err: any) {
          setError(err?.response?.data?.message ?? `Unable to ${action} this subscription.`);
       } finally {
@@ -416,10 +422,9 @@ export default function SubscriptionsPage() {
    };
 
    const grantManualPremium = async () => {
-      setManualSaving(true);
       setError(null);
       try {
-         await api.post('/v2/admin/subscription-overrides/grant-premium', {
+         await grantManualPremiumMutation.mutateAsync({
             email: manualEmail.trim(),
             months: Number(manualMonths),
             reason: manualReason.trim() || null,
@@ -429,14 +434,12 @@ export default function SubscriptionsPage() {
          setManualReason('');
          setManualMonths('12');
          await Promise.all([
-            load(),
+            queryClient.invalidateQueries({ queryKey: ['admin-subscriptions'] }),
             queryClient.invalidateQueries({ queryKey: ['subscription-statistics'] }),
             queryClient.invalidateQueries({ queryKey: ['dashboard'] }),
          ]);
       } catch (err: any) {
          setError(err?.response?.data?.message ?? 'Unable to grant manual premium access.');
-      } finally {
-         setManualSaving(false);
       }
    };
 
@@ -454,26 +457,36 @@ export default function SubscriptionsPage() {
                         Subscription records
                      </Text>
                      <Text size="$sm" css={{ color: '$accents7', mt: '$1' }}>
-                        {/** 
-                        {visibleRecords.length.toLocaleString()} shown ·{' '}
-                        {filteredRecords.length.toLocaleString()} matching ·{' '}
-                        */}
-                        {records.length.toLocaleString()} total
+                        {loading ? 'Loading subscriptions…' : `${filteredRecords.length.toLocaleString()} Records`}
                      </Text>
                   </Box>
                </Flex>
-               <SegmentedTabs
-                  tabs={VIEW_TABS}
-                  value={view}
-                  onChange={(next) => selectCategory(next === 'manual' ? 'manual' : 'all')}
-                  ariaLabel="Subscription views"
-                  className="subscriptions-view-tabs"
-               />
+               <Flex direction="column" align="end" css={{ gap: '$2' }}>
+                  <SegmentedTabs
+                     tabs={VIEW_TABS}
+                     value={view}
+                     onChange={(next) => selectCategory(next === 'manual' ? 'manual' : 'all')}
+                     ariaLabel="Subscription views"
+                     className="subscriptions-view-tabs"
+                  />
+                  {category === 'manual' && (
+                     <Button
+                        type="button"
+                        bordered
+                        size="sm"
+                        className="h-9 gap-2 whitespace-nowrap rounded-[10px] border-[var(--pf-border)] bg-[var(--pf-glass)] px-3 text-xs font-semibold text-[var(--pf-text)] hover:border-[#f28c18] hover:bg-[#f28c18]/10"
+                        icon={<Plus size={15} strokeWidth={2.4} className="text-[#f28c18]" aria-hidden="true" />}
+                        onPress={() => setManualOpen(true)}
+                     >
+                        Add manual subscription
+                     </Button>
+                  )}
+               </Flex>
             </Flex>
          </Box>
 
          <OverviewCardGrid>
-            {(['paid', 'manual', 'trial'] as const).map((key) => {
+            {(['paid', 'manual', 'trial', 'free_plan', 'inactive'] as const).map((key) => {
                const cardMeta = CATEGORY_META[key];
                const Icon = cardMeta.icon;
                return (
@@ -490,10 +503,9 @@ export default function SubscriptionsPage() {
                   />
                );
             })}
-            <OverviewCard label="Free plan" value={(listStatistics?.free_plan ?? statistics.data?.free_plan)?.toLocaleString() ?? '—'} description="Limited free access" icon={CATEGORY_META.inactive.icon} color={CATEGORY_META.inactive.color} loading={statistics.isLoading} />
          </OverviewCardGrid>
 
-         {error && <div className="feedback-error">{error}</div>}
+         {(error || loadError) && <div className="feedback-error">{error || loadError}</div>}
 
          <Box className="glass-panel subscriptions-toolbar">
             <div className="subscriptions-filters">
@@ -508,7 +520,9 @@ export default function SubscriptionsPage() {
                      <option value="all">All categories</option>
                      <option value="paid">Paid</option>
                      <option value="manual">Manual premium</option>
-                     <option value="trial">Free trials</option>
+                     <option value="trial">Free Trial</option>
+                     <option value="free_plan">Free Plan</option>
+                     <option value="inactive">Inactive</option>
                   </FilterSelect>
                </label>
                <label>
@@ -519,10 +533,10 @@ export default function SubscriptionsPage() {
                   >
                      <option value="all">All statuses</option>
                      <option value="active">Active premium</option>
-                     <option value="trial">Trial</option>
-                     <option value="free">Free</option>
+                     <option value="trial">On trial</option>
+                     <option value="free">Free access</option>
                      <option value="cancelled">Cancelled</option>
-                     <option value="expired">Expired</option>
+                     <option value="expired">All expired</option>
                      <option value="billing_issue">Billing issue</option>
                   </FilterSelect>
                </label>
@@ -544,19 +558,7 @@ export default function SubscriptionsPage() {
                      Clear
                   </button>
                )}
-               <TableExport rows={filteredRecords} filename="subscriptions" title="Subscriptions report" columns={[{ key: 'subscription_owner.name', label: 'Subscriber' }, { key: 'subscription_owner.email', label: 'Email' }, { key: 'effective_subscription.plan_type', label: 'Plan' }, { key: 'effective_subscription.status', label: 'Status' }, { key: 'amount', label: 'Amount' }, { key: 'payment_method', label: 'Payment method', value: (record) => formatPaymentMethod(record.payment_method) }, { key: 'auto_renewal', label: 'Auto renewal', value: (record) => record.auto_renewal ? 'On' : 'Off' }, { key: 'start_date', label: 'Started' }, { key: 'end_date', label: 'Ends' }]} />
-               {category === 'manual' && (
-                  <Button
-                     className="subscriptions-filter-action"
-                     auto
-                     color="secondary"
-                     size="sm"
-                     icon={<Plus size={14} />}
-                     onPress={() => setManualOpen(true)}
-                  >
-                     Add manual subscription
-                  </Button>
-               )}
+               <TableExport rows={filteredRecords} filename="subscriptions" title="Subscriptions report" columns={[{ key: 'subscription_owner.name', label: 'Subscriber' }, { key: 'subscription_owner.email', label: 'Email' }, { key: 'plan_type', label: 'Plan' }, { key: 'status', label: 'Status', value: (record) => formatSubscriptionStatus(getRecordStatus(record), record) }, { key: 'amount', label: 'Amount' }, { key: 'payment_method', label: 'Payment method', value: (record) => formatPaymentMethod(record.payment_method) }, { key: 'auto_renewal', label: 'Auto renewal', value: (record) => record.auto_renewal ? 'On' : 'Off' }, { key: 'start_date', label: 'Started' }, { key: 'end_date', label: 'Ends' }]} />
             </div>
          </Box>
 
@@ -601,10 +603,11 @@ export default function SubscriptionsPage() {
                   </Table.Header>
                   <Table.Body items={visibleRecords}>
                      {(record: any) => {
-                        const recordCategory = getCategory(record);
-                        const recordStatus = getStatus(record);
+                        const recordCategory = category !== 'all' && listStatistics ? category : getCategory(record);
+                        const recordStatus = getRecordStatus(record);
+                        const effectiveStatus = getStatus(record);
                         const actionAvailable =
-                           recordStatus === 'active' || recordStatus === 'cancelled';
+                           effectiveStatus === 'active' || effectiveStatus === 'cancelled';
                         const owner = record.subscription_owner ?? record.user;
                         const effective = record.effective_subscription;
                         const detailId = effective?.id ?? record.id;
@@ -624,16 +627,15 @@ export default function SubscriptionsPage() {
                               <Table.Cell>
                                  <NextLink href={`/subscriptions/${detailId}`} className="subscription-cell-link">
                                     <div className={`subscription-access ${recordCategory}`}>
-                                       <strong>{recordCategory === 'inactive' ? 'No premium access' : CATEGORY_META[recordCategory].label}</strong>
-                                       <small>{recordStatus.replace('_', ' ')}</small>
+                                       <strong>{CATEGORY_META[recordCategory].label}</strong>
+                                       <small>{formatSubscriptionStatus(recordStatus, record)}</small>
                                     </div>
                                  </NextLink>
                               </Table.Cell>
                               <Table.Cell>
                                  <NextLink href={`/subscriptions/${detailId}`} className="subscription-cell-link">
                                     <span className="subscription-plan">
-                                       {effective?.plan_type ||
-                                          record.plan_type ||
+                                       {record.plan_type ||
                                           'Not specified'}
                                     </span>
                                  </NextLink>
@@ -701,14 +703,14 @@ export default function SubscriptionsPage() {
                                     {actionAvailable ? (
                                        <button
                                           type="button"
-                                          className={`subscription-row-action ${recordStatus === 'cancelled' ? 'reactivate' : ''
+                                          className={`subscription-row-action ${effectiveStatus === 'cancelled' ? 'reactivate' : ''
                                              }`}
                                           disabled={updatingId === record.id}
                                           onClick={() => updateSubscription(record)}
                                        >
                                           {updatingId === record.id ? (
                                              <RefreshCw size={14} className="spin" />
-                                          ) : recordStatus === 'cancelled' ? (
+                                          ) : effectiveStatus === 'cancelled' ? (
                                              'Reactivate'
                                           ) : (
                                              'Cancel'
@@ -756,7 +758,7 @@ export default function SubscriptionsPage() {
          <Modal
             closeButton
             open={manualOpen}
-            onClose={() => !manualSaving && setManualOpen(false)}
+            onClose={() => !grantManualPremiumMutation.isPending && setManualOpen(false)}
             aria-labelledby="manual-premium-title"
          >
             <Modal.Header>
@@ -795,16 +797,16 @@ export default function SubscriptionsPage() {
                />
             </Modal.Body>
             <Modal.Footer>
-               <Button auto flat disabled={manualSaving} onPress={() => setManualOpen(false)}>
+               <Button auto flat disabled={grantManualPremiumMutation.isPending} onPress={() => setManualOpen(false)}>
                   Cancel
                </Button>
                <Button
                   auto
                   color="secondary"
-                  disabled={!manualEmail.trim() || Number(manualMonths) < 1 || manualSaving}
+                  disabled={!manualEmail.trim() || Number(manualMonths) < 1 || grantManualPremiumMutation.isPending}
                   onPress={grantManualPremium}
                >
-                  {manualSaving ? 'Granting…' : 'Grant premium'}
+                  {grantManualPremiumMutation.isPending ? 'Granting…' : 'Grant premium'}
                </Button>
             </Modal.Footer>
          </Modal>

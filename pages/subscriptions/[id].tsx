@@ -1,3 +1,4 @@
+import { formatSubscriptionStatus } from '@/utils/subscriptionStatus';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { Badge, Button, Text } from '@/components/ui/legacy';
@@ -11,6 +12,7 @@ interface SubscriptionDetail {
    id: number | string;
    user: { id: number | string; name: string | null; email: string | null } | null;
    plan_type: string | null;
+   plan_code?: string | null;
    status: string | null;
    amount: number | string | null;
    start_date: string | null;
@@ -86,7 +88,7 @@ export default function SubscriptionDetailPage() {
       <button className="admin-back-link" type="button" onClick={() => router.push('/subscriptions')}><ArrowLeft size={15} />Back to subscriptions</button>
       <Box className="glass-panel glass-hero subscription-detail-hero"><Flex justify="between" align="center" css={{ gap: '$5', flexWrap: 'wrap' }}>
          <Flex align="center" css={{ gap: '$4' }}><span className="subscriptions-hero-mark"><CreditCard size={21} /></span><Box><Text className="section-kicker">Subscription #{subscription.id}</Text><Text h2 css={{ m: 0, mt: '$1', fontSize: '1.4rem' }}>{subscription.user?.name || 'Unnamed account'}</Text><Text size="$sm" css={{ color: '$accents7', mt: '$1' }}>{subscription.user?.email || 'Email unavailable'}</Text></Box></Flex>
-         <Flex align="center" css={{ gap: '$3', flexWrap: 'wrap' }}><Badge color={hasPremiumAccess ? 'success' : 'error'} variant="flat">{label(subscription.status)}</Badge>{(canCancel || canReactivate) && <Button auto flat color={canReactivate ? 'success' : 'error'} disabled={saving || downgrading} icon={saving ? <RefreshCw className="spin" size={14} /> : undefined} onPress={changeStatus}>{saving ? 'Updating…' : canReactivate ? 'Reactivate' : 'Cancel subscription'}</Button>}{hasPremiumAccess && subscription.user?.email && <Button auto flat disabled={saving || downgrading} onPress={downgradeToFree}>{downgrading ? 'Downgrading…' : 'Downgrade to free'}</Button>}</Flex>
+         <Flex align="center" css={{ gap: '$3', flexWrap: 'wrap' }}><Badge color={hasPremiumAccess ? 'success' : 'error'} variant="flat">{formatSubscriptionStatus(subscription.status, subscription)}</Badge>{(canCancel || canReactivate) && <Button auto flat color={canReactivate ? 'success' : 'error'} disabled={saving || downgrading} icon={saving ? <RefreshCw className="spin" size={14} /> : undefined} onPress={changeStatus}>{saving ? 'Updating…' : canReactivate ? 'Reactivate' : 'Cancel subscription'}</Button>}{hasPremiumAccess && subscription.user?.email && <Button auto flat disabled={saving || downgrading} onPress={downgradeToFree}>{downgrading ? 'Downgrading…' : 'Downgrade to free'}</Button>}</Flex>
       </Flex></Box>
       {error && <div className="feedback-error">{error}</div>}
 
